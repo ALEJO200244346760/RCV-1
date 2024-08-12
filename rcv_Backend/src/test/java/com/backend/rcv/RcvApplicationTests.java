@@ -1,13 +1,13 @@
-package com.example.estadistica;
+package com.backend.rcv;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class EstadisticaApplicationTests {
+class RcvApplicationTests {
 
-    @Test
-    void contextLoads() {
-    }
+	@Test
+	void contextLoads() {
+	}
 
 }

@@ -1,4 +1,16 @@
 // Definir las tablas de riesgo para todas las combinaciones
+const riesgoMap = {
+    "verde": "<10% Poco",
+    "amarillo": ">10% <20% Moderado",
+    "naranja": ">20% <30% Alto",
+    "rojo": ">30% <40% Muy Alto",
+    "rojo oscuro": ">40% Crítico"
+};
+
+function obtenerRiesgoTexto(color) {
+    return riesgoMap[color] || "desconocido";
+}
+
 function riesgoTablaDiabetesMascFumador40(presion, colRango) {
     const tabla = {
         "120,4": "verde", "120,5": "verde", "120,6": "verde", "120,7": "verde", "120,8": "naranja",
@@ -643,6 +655,8 @@ function riesgoTablaSinColesterolMascNoDiabetesNoFumador70(presion) {
 // Calculadora.jsx
 export function calcularRiesgoCardiovascular(edad, genero, diabetes, fuma, presion, colesterol = null) {
     let colRango = null;
+    let color = "desconocido"; // Inicializar color con un valor por defecto
+
     if (colesterol !== null) {
         if (colesterol < 154) {
             colRango = 4;
@@ -664,45 +678,45 @@ export function calcularRiesgoCardiovascular(edad, genero, diabetes, fuma, presi
             if (diabetes === "si") {
                 if (fuma === "si") {
                     if (edad >= 40 && edad <= 49) {
-                        return riesgoTablaDiabetesFemFumador40(presion, colRango);
+                        color = riesgoTablaDiabetesFemFumador40(presion, colRango);
                     } else if (edad >= 50 && edad <= 59) {
-                        return riesgoTablaDiabetesFemFumador50(presion, colRango);
+                        color = riesgoTablaDiabetesFemFumador50(presion, colRango);
                     } else if (edad >= 60 && edad <= 69) {
-                        return riesgoTablaDiabetesFemFumador60(presion, colRango);
+                        color = riesgoTablaDiabetesFemFumador60(presion, colRango);
                     } else if (edad >= 70) {
-                        return riesgoTablaDiabetesFemFumador70(presion, colRango);
+                        color = riesgoTablaDiabetesFemFumador70(presion, colRango);
                     }
                 } else {
                     if (edad >= 40 && edad <= 49) {
-                        return riesgoTablaDiabetesFemNoFumador40(presion, colRango);
+                        color = riesgoTablaDiabetesFemNoFumador40(presion, colRango);
                     } else if (edad >= 50 && edad <= 59) {
-                        return riesgoTablaDiabetesFemNoFumador50(presion, colRango);
+                        color = riesgoTablaDiabetesFemNoFumador50(presion, colRango);
                     } else if (edad >= 60 && edad <= 69) {
-                        return riesgoTablaDiabetesFemNoFumador60(presion, colRango);
+                        color = riesgoTablaDiabetesFemNoFumador60(presion, colRango);
                     } else if (edad >= 70) {
-                        return riesgoTablaDiabetesFemNoFumador70(presion, colRango);
+                        color = riesgoTablaDiabetesFemNoFumador70(presion, colRango);
                     }
                 }
             } else {
                 if (fuma === "si") {
                     if (edad >= 40 && edad <= 49) {
-                        return riesgoTablaNoDiabetesFemFumador40(presion, colRango);
+                        color = riesgoTablaNoDiabetesFemFumador40(presion, colRango);
                     } else if (edad >= 50 && edad <= 59) {
-                        return riesgoTablaNoDiabetesFemFumador50(presion, colRango);
+                        color = riesgoTablaNoDiabetesFemFumador50(presion, colRango);
                     } else if (edad >= 60 && edad <= 69) {
-                        return riesgoTablaNoDiabetesFemFumador60(presion, colRango);
+                        color = riesgoTablaNoDiabetesFemFumador60(presion, colRango);
                     } else if (edad >= 70) {
-                        return riesgoTablaNoDiabetesFemFumador70(presion, colRango);
+                        color = riesgoTablaNoDiabetesFemFumador70(presion, colRango);
                     }
                 } else {
                     if (edad >= 40 && edad <= 49) {
-                        return riesgoTablaNoDiabetesFemNoFumador40(presion, colRango);
+                        color = riesgoTablaNoDiabetesFemNoFumador40(presion, colRango);
                     } else if (edad >= 50 && edad <= 59) {
-                        return riesgoTablaNoDiabetesFemNoFumador50(presion, colRango);
+                        color = riesgoTablaNoDiabetesFemNoFumador50(presion, colRango);
                     } else if (edad >= 60 && edad <= 69) {
-                        return riesgoTablaNoDiabetesFemNoFumador60(presion, colRango);
+                        color = riesgoTablaNoDiabetesFemNoFumador60(presion, colRango);
                     } else if (edad >= 70) {
-                        return riesgoTablaNoDiabetesFemNoFumador70(presion, colRango);
+                        color = riesgoTablaNoDiabetesFemNoFumador70(presion, colRango);
                     }
                 }
             }
@@ -710,45 +724,45 @@ export function calcularRiesgoCardiovascular(edad, genero, diabetes, fuma, presi
             if (diabetes === "si") {
                 if (fuma === "si") {
                     if (edad >= 40 && edad <= 49) {
-                        return riesgoTablaDiabetesMascFumador40(presion, colRango);
+                        color = riesgoTablaDiabetesMascFumador40(presion, colRango);
                     } else if (edad >= 50 && edad <= 59) {
-                        return riesgoTablaDiabetesMascFumador50(presion, colRango);
+                        color = riesgoTablaDiabetesMascFumador50(presion, colRango);
                     } else if (edad >= 60 && edad <= 69) {
-                        return riesgoTablaDiabetesMascFumador60(presion, colRango);
+                        color = riesgoTablaDiabetesMascFumador60(presion, colRango);
                     } else if (edad >= 70) {
-                        return riesgoTablaDiabetesMascFumador70(presion, colRango);
+                        color = riesgoTablaDiabetesMascFumador70(presion, colRango);
                     }
                 } else {
                     if (edad >= 40 && edad <= 49) {
-                        return riesgoTablaDiabetesMascNoFumador40(presion, colRango);
+                        color = riesgoTablaDiabetesMascNoFumador40(presion, colRango);
                     } else if (edad >= 50 && edad <= 59) {
-                        return riesgoTablaDiabetesMascNoFumador50(presion, colRango);
+                        color = riesgoTablaDiabetesMascNoFumador50(presion, colRango);
                     } else if (edad >= 60 && edad <= 69) {
-                        return riesgoTablaDiabetesMascNoFumador60(presion, colRango);
+                        color = riesgoTablaDiabetesMascNoFumador60(presion, colRango);
                     } else if (edad >= 70) {
-                        return riesgoTablaDiabetesMascNoFumador70(presion, colRango);
+                        color = riesgoTablaDiabetesMascNoFumador70(presion, colRango);
                     }
                 }
             } else {
                 if (fuma === "si") {
                     if (edad >= 40 && edad <= 49) {
-                        return riesgoTablaNoDiabetesMascFumador40(presion, colRango);
+                        color = riesgoTablaNoDiabetesMascFumador40(presion, colRango);
                     } else if (edad >= 50 && edad <= 59) {
-                        return riesgoTablaNoDiabetesMascFumador50(presion, colRango);
+                        color = riesgoTablaNoDiabetesMascFumador50(presion, colRango);
                     } else if (edad >= 60 && edad <= 69) {
-                        return riesgoTablaNoDiabetesMascFumador60(presion, colRango);
+                        color = riesgoTablaNoDiabetesMascFumador60(presion, colRango);
                     } else if (edad >= 70) {
-                        return riesgoTablaNoDiabetesMascFumador70(presion, colRango);
+                        color = riesgoTablaNoDiabetesMascFumador70(presion, colRango);
                     }
                 } else {
                     if (edad >= 40 && edad <= 49) {
-                        return riesgoTablaNoDiabetesMascNoFumador40(presion, colRango);
+                        color = riesgoTablaNoDiabetesMascNoFumador40(presion, colRango);
                     } else if (edad >= 50 && edad <= 59) {
-                        return riesgoTablaNoDiabetesMascNoFumador50(presion, colRango);
+                        color = riesgoTablaNoDiabetesMascNoFumador50(presion, colRango);
                     } else if (edad >= 60 && edad <= 69) {
-                        return riesgoTablaNoDiabetesMascNoFumador60(presion, colRango);
+                        color = riesgoTablaNoDiabetesMascNoFumador60(presion, colRango);
                     } else if (edad >= 70) {
-                        return riesgoTablaNoDiabetesMascNoFumador70(presion, colRango);
+                        color = riesgoTablaNoDiabetesMascNoFumador70(presion, colRango);
                     }
                 }
             }
@@ -759,45 +773,45 @@ export function calcularRiesgoCardiovascular(edad, genero, diabetes, fuma, presi
             if (diabetes === "si") {
                 if (fuma === "si") {
                     if (edad >= 40 && edad <= 49) {
-                        return riesgoTablaSinColesterolFemDiabetesFumador40(presion);
+                        color = riesgoTablaSinColesterolFemDiabetesFumador40(presion);
                     } else if (edad >= 50 && edad <= 59) {
-                        return riesgoTablaSinColesterolFemDiabetesFumador50(presion);
+                        color = riesgoTablaSinColesterolFemDiabetesFumador50(presion);
                     } else if (edad >= 60 && edad <= 69) {
-                        return riesgoTablaSinColesterolFemDiabetesFumador60(presion);
+                        color = riesgoTablaSinColesterolFemDiabetesFumador60(presion);
                     } else if (edad >= 70) {
-                        return riesgoTablaSinColesterolFemDiabetesFumador70(presion);
+                        color = riesgoTablaSinColesterolFemDiabetesFumador70(presion);
                     }
                 } else {
                     if (edad >= 40 && edad <= 49) {
-                        return riesgoTablaSinColesterolFemDiabetesNoFumador40(presion);
+                        color = riesgoTablaSinColesterolFemDiabetesNoFumador40(presion);
                     } else if (edad >= 50 && edad <= 59) {
-                        return riesgoTablaSinColesterolFemDiabetesNoFumador50(presion);
+                        color = riesgoTablaSinColesterolFemDiabetesNoFumador50(presion);
                     } else if (edad >= 60 && edad <= 69) {
-                        return riesgoTablaSinColesterolFemDiabetesNoFumador60(presion);
+                        color = riesgoTablaSinColesterolFemDiabetesNoFumador60(presion);
                     } else if (edad >= 70) {
-                        return riesgoTablaSinColesterolFemDiabetesNoFumador70(presion);
+                        color = riesgoTablaSinColesterolFemDiabetesNoFumador70(presion);
                     }
                 }
             } else {
                 if (fuma === "si") {
                     if (edad >= 40 && edad <= 49) {
-                        return riesgoTablaSinColesterolFemNoDiabetesFumador40(presion);
+                        color = riesgoTablaSinColesterolFemNoDiabetesFumador40(presion);
                     } else if (edad >= 50 && edad <= 59) {
-                        return riesgoTablaSinColesterolFemNoDiabetesFumador50(presion);
+                        color = riesgoTablaSinColesterolFemNoDiabetesFumador50(presion);
                     } else if (edad >= 60 && edad <= 69) {
-                        return riesgoTablaSinColesterolFemNoDiabetesFumador60(presion);
+                        color = riesgoTablaSinColesterolFemNoDiabetesFumador60(presion);
                     } else if (edad >= 70) {
-                        return riesgoTablaSinColesterolFemNoDiabetesFumador70(presion);
+                        color = riesgoTablaSinColesterolFemNoDiabetesFumador70(presion);
                     }
                 } else {
                     if (edad >= 40 && edad <= 49) {
-                        return riesgoTablaSinColesterolFemNoDiabetesNoFumador40(presion);
+                        color = riesgoTablaSinColesterolFemNoDiabetesNoFumador40(presion);
                     } else if (edad >= 50 && edad <= 59) {
-                        return riesgoTablaSinColesterolFemNoDiabetesNoFumador50(presion);
+                        color = riesgoTablaSinColesterolFemNoDiabetesNoFumador50(presion);
                     } else if (edad >= 60 && edad <= 69) {
-                        return riesgoTablaSinColesterolFemNoDiabetesNoFumador60(presion);
+                        color = riesgoTablaSinColesterolFemNoDiabetesNoFumador60(presion);
                     } else if (edad >= 70) {
-                        return riesgoTablaSinColesterolFemNoDiabetesNoFumador70(presion);
+                        color = riesgoTablaSinColesterolFemNoDiabetesNoFumador70(presion);
                     }
                 }
             }
@@ -805,48 +819,51 @@ export function calcularRiesgoCardiovascular(edad, genero, diabetes, fuma, presi
             if (diabetes === "si") {
                 if (fuma === "si") {
                     if (edad >= 40 && edad <= 49) {
-                        return riesgoTablaSinColesterolMascDiabetesFumador40(presion);
+                        color = riesgoTablaSinColesterolMascDiabetesFumador40(presion);
                     } else if (edad >= 50 && edad <= 59) {
-                        return riesgoTablaSinColesterolMascDiabetesFumador50(presion);
+                        color = riesgoTablaSinColesterolMascDiabetesFumador50(presion);
                     } else if (edad >= 60 && edad <= 69) {
-                        return riesgoTablaSinColesterolMascDiabetesFumador60(presion);
+                        color = riesgoTablaSinColesterolMascDiabetesFumador60(presion);
                     } else if (edad >= 70) {
-                        return riesgoTablaSinColesterolMascDiabetesFumador70(presion);
+                        color = riesgoTablaSinColesterolMascDiabetesFumador70(presion);
                     }
                 } else {
                     if (edad >= 40 && edad <= 49) {
-                        return riesgoTablaSinColesterolMascDiabetesNoFumador40(presion);
+                        color = riesgoTablaSinColesterolMascDiabetesNoFumador40(presion);
                     } else if (edad >= 50 && edad <= 59) {
-                        return riesgoTablaSinColesterolMascDiabetesNoFumador50(presion);
+                        color = riesgoTablaSinColesterolMascDiabetesNoFumador50(presion);
                     } else if (edad >= 60 && edad <= 69) {
-                        return riesgoTablaSinColesterolMascDiabetesNoFumador60(presion);
+                        color = riesgoTablaSinColesterolMascDiabetesNoFumador60(presion);
                     } else if (edad >= 70) {
-                        return riesgoTablaSinColesterolMascDiabetesNoFumador70(presion);
+                        color = riesgoTablaSinColesterolMascDiabetesNoFumador70(presion);
                     }
                 }
             } else {
                 if (fuma === "si") {
                     if (edad >= 40 && edad <= 49) {
-                        return riesgoTablaSinColesterolMascNoDiabetesFumador40(presion);
+                        color = riesgoTablaSinColesterolMascNoDiabetesFumador40(presion);
                     } else if (edad >= 50 && edad <= 59) {
-                        return riesgoTablaSinColesterolMascNoDiabetesFumador50(presion);
+                        color = riesgoTablaSinColesterolMascNoDiabetesFumador50(presion);
                     } else if (edad >= 60 && edad <= 69) {
-                        return riesgoTablaSinColesterolMascNoDiabetesFumador60(presion);
+                        color = riesgoTablaSinColesterolMascNoDiabetesFumador60(presion);
                     } else if (edad >= 70) {
-                        return riesgoTablaSinColesterolMascNoDiabetesFumador70(presion);
+                        color = riesgoTablaSinColesterolMascNoDiabetesFumador70(presion);
                     }
                 } else {
                     if (edad >= 40 && edad <= 49) {
-                        return riesgoTablaSinColesterolMascNoDiabetesNoFumador40(presion);
+                        color = riesgoTablaSinColesterolMascNoDiabetesNoFumador40(presion);
                     } else if (edad >= 50 && edad <= 59) {
-                        return riesgoTablaSinColesterolMascNoDiabetesNoFumador50(presion);
+                        color = riesgoTablaSinColesterolMascNoDiabetesNoFumador50(presion);
                     } else if (edad >= 60 && edad <= 69) {
-                        return riesgoTablaSinColesterolMascNoDiabetesNoFumador60(presion);
+                        color = riesgoTablaSinColesterolMascNoDiabetesNoFumador60(presion);
                     } else if (edad >= 70) {
-                        return riesgoTablaSinColesterolMascNoDiabetesNoFumador70(presion);
+                        color = riesgoTablaSinColesterolMascNoDiabetesNoFumador70(presion);
                     }
                 }
             }
         }
     }
+
+    // Usar la función obtenerRiesgoTexto para convertir el color en texto
+    return obtenerRiesgoTexto(color);
 }
