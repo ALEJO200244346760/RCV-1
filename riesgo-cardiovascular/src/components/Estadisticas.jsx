@@ -34,7 +34,7 @@ function Estadisticas() {
 
   useEffect(() => {
     aplicarFiltros(); // Aplica filtros cada vez que cambian
-  }, [filtros, pacientes, nivelColesterolConocido]);
+  }, [filtros, nivelColesterolConocido]);
 
   const manejarSeleccionColesterol = (e) => {
     const valor = e.target.value;
@@ -42,7 +42,6 @@ function Estadisticas() {
     if (valor === 'no') {
       setFiltros(prev => ({
         ...prev,
-        colesterol: '', // Resetea el valor del colesterol si se selecciona "no"
         cantidadColesterol: '', // Resetea el valor del colesterol específico si se selecciona "no"
       }));
     }
@@ -57,8 +56,6 @@ function Estadisticas() {
   };
 
   const aplicarFiltros = () => {
-    console.log('Filtros aplicados:', filtros); // Debugging
-
     const filtrados = pacientes.filter(paciente => {
       const edadFiltro = filtros.edad === '' ? null : filtros.edad;
       const presionArterialFiltro = filtros.presionArterial === '' ? null : filtros.presionArterial;
@@ -70,15 +67,15 @@ function Estadisticas() {
         (filtros.diabetes === '' || paciente.diabetes.toLowerCase() === filtros.diabetes.toLowerCase()) &&
         (filtros.fumador === '' || paciente.fumador.toLowerCase() === filtros.fumador.toLowerCase()) &&
         (presionArterialFiltro === null || paciente.presionArterial.toString() === presionArterialFiltro) &&
-        (nivelColesterolConocido === 'todos' || 
-          (nivelColesterolConocido === 'no') || // Si no se conoce el nivel de colesterol, aplica el resto de los filtros
-          (filtros.cantidadColesterol === '' || paciente.colesterol === filtros.cantidadColesterol) // Filtro de colesterol por cantidad
+        (
+          nivelColesterolConocido === 'todos' || 
+          (nivelColesterolConocido === 'no' && (paciente.colesterol === 'No' || paciente.colesterol === null)) || // Si el nivel de colesterol es "no", solo mostrar pacientes con colesterol "No" o null
+          (nivelColesterolConocido === 'si' && paciente.colesterol !== null && paciente.colesterol !== 'No' && (filtros.cantidadColesterol === '' || paciente.colesterol === filtros.cantidadColesterol)) // Si se conoce el colesterol, filtrar por cantidad
         ) &&
         (filtros.nivelRiesgo === '' || paciente.nivelRiesgo.toLowerCase() === filtros.nivelRiesgo.toLowerCase())
       );
     });
 
-    console.log('Pacientes filtrados:', filtrados); // Debugging
     setPacientesFiltrados(filtrados);
   };
 
@@ -124,13 +121,18 @@ function Estadisticas() {
             {/* Filtros */}
             <div>
               <label className="block text-sm font-medium text-gray-700">Edad</label>
-              <input
-                type="text" // Cambiado de 'number' a 'text'
+              <select
                 name="edad"
                 value={filtros.edad || ''}
                 onChange={manejarCambio}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              />
+              >
+                <option value="">Todos</option>
+                <option value="40">40</option>
+                <option value="50">50</option>
+                <option value="60">60</option>
+                <option value="70">70</option>
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Género</label>
@@ -173,17 +175,22 @@ function Estadisticas() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Presión Arterial (mmHg)</label>
-              <input
-                type="text" // Cambiado de 'number' a 'text'
+              <select
                 name="presionArterial"
                 value={filtros.presionArterial || ''}
                 onChange={manejarCambio}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              />
+              >
+                <option value="">Todos</option>
+                <option value="120">120</option>
+                <option value="140">140</option>
+                <option value="160">160</option>
+                <option value="180">180</option>
+              </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">¿Conoce su nivel de colesterol?</label>
+              <label className="block text-sm font-medium text-gray-700">Colesterol</label>
               <select
                 name="colesterol"
                 value={nivelColesterolConocido}
@@ -196,7 +203,7 @@ function Estadisticas() {
               </select>
               {nivelColesterolConocido === 'si' && (
                 <input
-                  type="number"
+                  type="text"
                   name="cantidadColesterol"
                   value={filtros.cantidadColesterol || ''}
                   onChange={manejarCambio}

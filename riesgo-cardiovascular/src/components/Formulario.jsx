@@ -27,28 +27,65 @@ const Formulario = () => {
 
     const manejarSeleccionColesterol = (value) => {
         setNivelColesterolConocido(value === 'si');
-        if (value === 'no') {
-            setDatosPaciente({
-                ...datosPaciente,
-                colesterol: ''
-            });
+        setDatosPaciente({
+            ...datosPaciente,
+            colesterol: value === 'no' ? 'No' : datosPaciente.colesterol
+        });
+    };
+
+    const ajustarPresionArterial = (presion) => {
+        if (presion < 140) {
+            return 120;
+        } else if (presion >= 140 && presion <= 159) {
+            return 140;
+        } else if (presion >= 160 && presion <= 179) {
+            return 160;
+        } else {
+            return 180;
         }
     };
 
+    const ajustarEdad = (edad) => {
+        const edadNumerica = parseInt(edad, 10);
+        if (edadNumerica < 50) return 40;
+        if (edadNumerica >= 50 && edadNumerica < 60) return 50;
+        if (edadNumerica >= 60 && edadNumerica < 70) return 60;
+        return 70; // Para 70 y más
+    };
+
+    const validarCampos = () => {
+        const { edad, genero, diabetes, fumador, presionArterial } = datosPaciente;
+        return edad && genero && diabetes && fumador && presionArterial;
+    };
+
     const calcularRiesgo = async () => {
+        if (!validarCampos()) {
+            setModalAdvertencia('Todos los campos excepto colesterol deben estar completos.');
+            setMostrarModal(true);
+            return;
+        }
+
         const { edad, genero, diabetes, fumador, presionArterial, colesterol } = datosPaciente;
-        const nivelRiesgo = calcularRiesgoCardiovascular(parseInt(edad), genero, diabetes, fumador, parseInt(presionArterial), colesterol);
+
+        // Ajustar la edad
+        const edadAjustada = ajustarEdad(edad);
+
+        // Ajustar la presión arterial
+        const presionAjustada = ajustarPresionArterial(parseInt(presionArterial, 10));
+
+        // Calcular el riesgo
+        const nivelRiesgo = calcularRiesgoCardiovascular(edadAjustada, genero, diabetes, fumador, presionAjustada, colesterol);
         setNivelRiesgo(nivelRiesgo);
         setMostrarModal(true);
 
         // Enviar los datos al backend
         try {
             await axiosInstance.post('/api/pacientes', {
-                edad,
+                edad: edadAjustada,  // Enviar la edad ajustada
                 genero,
                 diabetes,
                 fumador,
-                presionArterial,
+                presionArterial: presionAjustada, // Enviar la presión ajustada
                 colesterol,
                 nivelRiesgo
             });
