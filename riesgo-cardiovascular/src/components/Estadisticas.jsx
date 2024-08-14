@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import EstadisticasGraficos from './EstadisticasGraficos'; // Asegúrate de que la ruta sea correcta
 
 function Estadisticas() {
   const [pacientes, setPacientes] = useState([]);
@@ -238,6 +239,9 @@ function Estadisticas() {
           </button>
         </div>
       </div>
+
+      {/* Gráficos */}
+      <EstadisticasGraficos pacientesFiltrados={pacientesFiltrados} />
 
       <div className="mt-4">
         <h2 className="text-xl font-semibold">Total de Personas que Coinciden con los Filtros: {pacientesFiltrados.length}</h2>
