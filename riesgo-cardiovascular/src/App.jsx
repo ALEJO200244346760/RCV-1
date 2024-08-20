@@ -16,7 +16,7 @@ function App() {
         <Route path="/tomarPresion" element={<TomarPresion />} />
         <Route path="/formulario" element={<Formulario />} />
         <Route path="/estadisticas" element={<Estadisticas />} />
-        <Route path="/editar-paciente/:id" component={EditarPaciente} />
+        <Route path="/editar-paciente/:id" element={<EditarPaciente />} />
       </Routes>
     </Router>
   );

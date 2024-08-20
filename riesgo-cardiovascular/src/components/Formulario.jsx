@@ -10,6 +10,7 @@ const Formulario = () => {
         fumador: '',
         presionArterial: '',
         colesterol: '',
+        ubicacion: '' // Agregado para ubicación
     });
 
     const [nivelRiesgo, setNivelRiesgo] = useState(null);
@@ -33,44 +34,43 @@ const Formulario = () => {
         });
     };
 
-    const ajustarPresionArterial = (presion) => {
-        if (presion < 140) {
-            return 120;
-        } else if (presion >= 140 && presion <= 159) {
-            return 140;
-        } else if (presion >= 160 && presion <= 179) {
-            return 160;
-        } else {
-            return 180;
-        }
+    const ajustarEdad = (edad) => {
+        if (edad < 50) return 40;
+        if (edad >= 50 && edad <= 59) return 50;
+        if (edad >= 60 && edad <= 69) return 60;
+        return 70;
     };
 
-    const ajustarEdad = (edad) => {
-        const edadNumerica = parseInt(edad, 10);
-        if (edadNumerica < 50) return 40;
-        if (edadNumerica >= 50 && edadNumerica < 60) return 50;
-        if (edadNumerica >= 60 && edadNumerica < 70) return 60;
-        return 70; // Para 70 y más
+    const ajustarPresionArterial = (presion) => {
+        if (presion < 140) return 120;
+        if (presion >= 140 && presion <= 159) return 140;
+        if (presion >= 160 && presion <= 179) return 160;
+        return 180;
     };
 
     const validarCampos = () => {
-        const { edad, genero, diabetes, fumador, presionArterial } = datosPaciente;
-        return edad && genero && diabetes && fumador && presionArterial;
+        const { edad, genero, diabetes, fumador, presionArterial, ubicacion } = datosPaciente;
+        return edad && genero && diabetes && fumador && presionArterial && ubicacion;
     };
 
     const calcularRiesgo = async () => {
         if (!validarCampos()) {
-            setModalAdvertencia('Todos los campos excepto colesterol deben estar completos.');
+            setModalAdvertencia('Todos los campos deben estar completos.');
             setMostrarModal(true);
             return;
         }
 
-        const { edad, genero, diabetes, fumador, presionArterial, colesterol } = datosPaciente;
+        // Verificar si se seleccionó "Sí" para colesterol y el campo está vacío
+        if (nivelColesterolConocido && !datosPaciente.colesterol) {
+            setModalAdvertencia('Debe ingresar el nivel de colesterol.');
+            setMostrarModal(true);
+            return;
+        }
 
-        // Ajustar la edad
-        const edadAjustada = ajustarEdad(edad);
+        const { edad, genero, diabetes, fumador, presionArterial, colesterol, ubicacion } = datosPaciente;
 
-        // Ajustar la presión arterial
+        // Ajustar la edad y la presión arterial
+        const edadAjustada = ajustarEdad(parseInt(edad, 10));
         const presionAjustada = ajustarPresionArterial(parseInt(presionArterial, 10));
 
         // Calcular el riesgo
@@ -81,12 +81,13 @@ const Formulario = () => {
         // Enviar los datos al backend
         try {
             await axiosInstance.post('/api/pacientes', {
-                edad: edadAjustada,  // Enviar la edad ajustada
+                edad: edadAjustada, // Enviar la edad ajustada
                 genero,
                 diabetes,
                 fumador,
                 presionArterial: presionAjustada, // Enviar la presión ajustada
                 colesterol,
+                ubicacion,
                 nivelRiesgo
             });
             console.log('Datos guardados exitosamente');
@@ -195,6 +196,24 @@ const Formulario = () => {
         <div className="flex flex-col items-center p-6 max-w-2xl mx-auto">
             <h1 className="text-3xl font-bold mb-6">Formulario de Evaluación de Riesgo Cardiovascular</h1>
             <form className="w-full space-y-6">
+                {/* Ubicación */}
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium text-gray-700">Ubicación:</label>
+                    <select
+                        name="ubicacion"
+                        value={datosPaciente.ubicacion}
+                        onChange={manejarCambio}
+                        className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                    >
+                        <option value="">Seleccione una ubicación</option>
+                        {['DEM NORTE', 'DEM CENTRO', 'DEM OESTE', 'DAPS', 'HPA', 'HU.'].map(option => (
+                            <option key={option} value={option}>
+                                {option}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                
                 {/* Edad */}
                 <div className="flex flex-col">
                     <label className="text-sm font-medium text-gray-700">Edad:</label>
@@ -204,7 +223,6 @@ const Formulario = () => {
                         value={datosPaciente.edad}
                         onChange={manejarCambio}
                         className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                        style={{ appearance: 'none' }}
                     />
                 </div>
 
@@ -216,8 +234,8 @@ const Formulario = () => {
                             <button
                                 key={option}
                                 type="button"
-                                onClick={() => setDatosPaciente({ ...datosPaciente, genero: option })}
-                                className={`p-2 border rounded-md ${datosPaciente.genero === option ? `bg-${option === 'masculino' ? 'blue' : 'pink'}-500 text-white` : 'border-gray-300'}`}
+                                className={`p-2 border rounded ${datosPaciente.genero === option ? 'bg-indigo-500 text-white' : 'bg-white text-gray-700'}`}
+                                onClick={() => setDatosPaciente(prevDatos => ({ ...prevDatos, genero: option }))}
                             >
                                 {option.charAt(0).toUpperCase() + option.slice(1)}
                             </button>
@@ -291,7 +309,7 @@ const Formulario = () => {
                         <input
                             type="number"
                             name="colesterol"
-                            value={datosPaciente.colesterol || ''}
+                            value={datosPaciente.colesterol === 'No' ? '' : datosPaciente.colesterol}
                             onChange={manejarCambio}
                             className="p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                             style={{ appearance: 'none' }}
@@ -309,7 +327,7 @@ const Formulario = () => {
             </form>
 
             {/* Modal Resultados */}
-            {mostrarModal && (
+            {mostrarModal && !modalAdvertencia && (
                 <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg">
                         <h2 className="text-lg font-semibold mb-4">Resultados</h2>
@@ -319,6 +337,7 @@ const Formulario = () => {
                         <p><strong>Fumador:</strong> {datosPaciente.fumador}</p>
                         <p><strong>Presión Arterial:</strong> {datosPaciente.presionArterial}</p>
                         <p><strong>Colesterol:</strong> {datosPaciente.colesterol || 'No especificado'}</p>
+                        <p><strong>Ubicación:</strong> {datosPaciente.ubicacion}</p>
                         <p><strong>Nivel de Riesgo:</strong></p>
                         <div className="mb-4">
                             {renderRiesgoGrid(nivelRiesgo)}

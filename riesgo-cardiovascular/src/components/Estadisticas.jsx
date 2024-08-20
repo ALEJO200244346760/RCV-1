@@ -13,8 +13,9 @@ function Estadisticas() {
     fumador: '',
     presionArterial: '',
     colesterol: '',
-    cantidadColesterol: '', // Campo para el valor específico del colesterol
+    nivelColesterol: '', // Campo para el nivel específico de colesterol
     nivelRiesgo: '',
+    ubicacion: '', // Nuevo campo para la ubicación
   });
   const [nivelColesterolConocido, setNivelColesterolConocido] = useState('todos'); // Estado para el conocimiento del nivel de colesterol
   const [loading, setLoading] = useState(true);
@@ -43,7 +44,7 @@ function Estadisticas() {
     if (valor === 'no') {
       setFiltros(prev => ({
         ...prev,
-        cantidadColesterol: '', // Resetea el valor del colesterol específico si se selecciona "no"
+        nivelColesterol: '', // Resetea el nivel de colesterol específico si se selecciona "no"
       }));
     }
   };
@@ -56,11 +57,21 @@ function Estadisticas() {
     }));
   };
 
+  const obtenerNivelColesterol = (valor) => {
+    if (valor < 154) return 4;
+    if (valor >= 155 && valor <= 192) return 5;
+    if (valor >= 193 && valor <= 231) return 6;
+    if (valor >= 232 && valor <= 269) return 7;
+    return 8;
+  };
+
   const aplicarFiltros = () => {
     const filtrados = pacientes.filter(paciente => {
       const edadFiltro = filtros.edad === '' ? null : filtros.edad;
       const presionArterialFiltro = filtros.presionArterial === '' ? null : filtros.presionArterial;
-      const cantidadColesterolFiltro = filtros.cantidadColesterol === '' ? null : filtros.cantidadColesterol;
+      const nivelColesterolFiltro = filtros.nivelColesterol === '' ? null : Number(filtros.nivelColesterol);
+
+      const nivelColesterolPaciente = paciente.colesterol ? obtenerNivelColesterol(Number(paciente.colesterol)) : null;
 
       return (
         (edadFiltro === null || paciente.edad.toString() === edadFiltro) &&
@@ -71,10 +82,11 @@ function Estadisticas() {
         (
           nivelColesterolConocido === 'todos' || 
           (nivelColesterolConocido === 'no' && (paciente.colesterol === 'No' || paciente.colesterol === null)) || // Si el nivel de colesterol es "no", solo mostrar pacientes con colesterol "No" o null
-          (nivelColesterolConocido === 'si' && paciente.colesterol !== null && paciente.colesterol !== 'No' && (filtros.cantidadColesterol === '' || paciente.colesterol === filtros.cantidadColesterol)) // Si se conoce el colesterol, filtrar por cantidad
+          (nivelColesterolConocido === 'si' && paciente.colesterol !== null && paciente.colesterol !== 'No' && (filtros.nivelColesterol === '' || nivelColesterolPaciente === nivelColesterolFiltro)) // Si se conoce el colesterol, filtrar por nivel
         ) &&
-        (filtros.nivelRiesgo === '' || paciente.nivelRiesgo.toLowerCase() === filtros.nivelRiesgo.toLowerCase())
-      );
+        (filtros.nivelRiesgo === '' || paciente.nivelRiesgo.toLowerCase() === filtros.nivelRiesgo.toLowerCase()) &&
+        (filtros.ubicacion === '' || (paciente.ubicacion && paciente.ubicacion.toLowerCase() === filtros.ubicacion.toLowerCase())) // Filtrar por ubicación
+    );
     });
 
     setPacientesFiltrados(filtrados);
@@ -203,13 +215,19 @@ function Estadisticas() {
                 <option value="no">No</option>
               </select>
               {nivelColesterolConocido === 'si' && (
-                <input
-                  type="text"
-                  name="cantidadColesterol"
-                  value={filtros.cantidadColesterol || ''}
+                <select
+                  name="nivelColesterol"
+                  value={filtros.nivelColesterol || ''}
                   onChange={manejarCambio}
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
+                >
+                  <option value="">Seleccione un Nivel</option>
+                  <option value="4">Muy Bajo</option>
+                  <option value="5">Bajo</option>
+                  <option value="6">Moderado</option>
+                  <option value="7">Alto</option>
+                  <option value="8">Muy Alto</option>
+                </select>
               )}
             </div>
 
@@ -227,6 +245,24 @@ function Estadisticas() {
                 <option value=">20% <30% Alto">Alto</option>
                 <option value=">30% <40% Muy Alto">Muy Alto</option>
                 <option value=">40% Crítico">Crítico</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Ubicación</label>
+              <select
+                name="ubicacion"
+                value={filtros.ubicacion || ''}
+                onChange={manejarCambio}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              >
+                <option value="">Todos</option>
+                <option value="DEM NORTE">DEM NORTE</option>
+                <option value="DEM CENTRO">DEM CENTRO</option>
+                <option value="DEM OESTE">DEM OESTE</option>
+                <option value="DAPS">DAPS</option>
+                <option value="HPA">HPA</option>
+                <option value="HU">HU</option>
               </select>
             </div>
           </div>
@@ -251,33 +287,35 @@ function Estadisticas() {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Edad</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Género</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Diabetes</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fumador</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Presión Arterial</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Colesterol</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nivel de Riesgo</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Edad</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Género</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Diabetes</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fumador</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Presión Arterial</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Colesterol</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nivel de Riesgo</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ubicación</th> {/* Nueva columna */}
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {pacientesFiltrados.map(paciente => (
               <tr key={paciente.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{paciente.id}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.edad}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.genero}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.diabetes}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.fumador}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.presionArterial}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.colesterol}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{paciente.id}</td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.edad}</td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.genero}</td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.diabetes}</td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.fumador}</td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.presionArterial}</td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.colesterol}</td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                   <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${obtenerColorRiesgo(paciente.nivelRiesgo)}`}>
                     {paciente.nivelRiesgo}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.ubicacion}</td> {/* Nueva celda */}
+                <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
                     onClick={() => editarPaciente(paciente.id)}
                     className="text-indigo-600 hover:text-indigo-900"

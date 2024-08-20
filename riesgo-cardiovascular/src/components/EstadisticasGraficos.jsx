@@ -25,16 +25,16 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
       label: 'Cantidad',
       data: Object.values(edades),
       backgroundColor: [
-        'rgba(75, 192, 192, 0.5)', 
-        'rgba(153, 102, 255, 0.5)', 
-        'rgba(255, 159, 64, 0.5)', 
-        'rgba(255, 99, 132, 0.5)'
+        '#34D399', // bg-green-500
+        '#FDE047', // bg-yellow-500
+        '#F97316', // bg-orange-500
+        '#EF4444'  // bg-red-500
       ],
       borderColor: [
-        'rgba(75, 192, 192, 1)', 
-        'rgba(153, 102, 255, 1)', 
-        'rgba(255, 159, 64, 1)', 
-        'rgba(255, 99, 132, 1)'
+        '#34D399', // bg-green-500
+        '#FDE047', // bg-yellow-500
+        '#F97316', // bg-orange-500
+        '#EF4444'  // bg-red-500
       ],
       borderWidth: 1
     }]
@@ -51,16 +51,17 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
       label: 'Cantidad',
       data: Object.values(generos),
       backgroundColor: [
-        'rgba(75, 192, 192, 0.5)', 
-        'rgba(255, 205, 86, 0.5)'
+        '#1D4ED8', // Azul
+        '#F472B6'  // Rosa
       ],
       borderColor: [
-        'rgba(75, 192, 192, 1)', 
-        'rgba(255, 205, 86, 1)'
+        '#1D4ED8', // Azul
+        '#F472B6'  // Rosa
       ],
       borderWidth: 1
     }]
   };
+  
 
   // Datos para Diabetes
   const diabetes = pacientesFiltrados.reduce((acc, paciente) => {
@@ -73,12 +74,12 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
       label: 'Cantidad',
       data: Object.values(diabetes),
       backgroundColor: [
-        'rgba(75, 192, 192, 0.5)', 
-        'rgba(255, 99, 132, 0.5)'
+        '#34D399', // bg-green-500
+        '#EF4444'  // bg-red-500
       ],
       borderColor: [
-        'rgba(75, 192, 192, 1)', 
-        'rgba(255, 99, 132, 1)'
+        '#34D399', // bg-green-500
+        '#EF4444'  // bg-red-500
       ],
       borderWidth: 1
     }]
@@ -95,12 +96,12 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
       label: 'Cantidad',
       data: Object.values(fumadores),
       backgroundColor: [
-        'rgba(75, 192, 192, 0.5)', 
-        'rgba(255, 159, 64, 0.5)'
+        '#34D399', // bg-green-500
+        '#F97316'  // bg-orange-500
       ],
       borderColor: [
-        'rgba(75, 192, 192, 1)', 
-        'rgba(255, 159, 64, 1)'
+        '#34D399', // bg-green-500
+        '#F97316'  // bg-orange-500
       ],
       borderWidth: 1
     }]
@@ -117,16 +118,16 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
       label: 'Cantidad',
       data: Object.values(presiones),
       backgroundColor: [
-        'rgba(75, 192, 192, 0.5)', 
-        'rgba(153, 102, 255, 0.5)', 
-        'rgba(255, 159, 64, 0.5)', 
-        'rgba(255, 99, 132, 0.5)'
+        '#34D399', // bg-green-500
+        '#FDE047', // bg-yellow-500
+        '#F97316', // bg-orange-500
+        '#EF4444'  // bg-red-500
       ],
       borderColor: [
-        'rgba(75, 192, 192, 1)', 
-        'rgba(153, 102, 255, 1)', 
-        'rgba(255, 159, 64, 1)', 
-        'rgba(255, 99, 132, 1)'
+        '#34D399', // bg-green-500
+        '#FDE047', // bg-yellow-500
+        '#F97316', // bg-orange-500
+        '#EF4444'  // bg-red-500
       ],
       borderWidth: 1
     }]
@@ -153,18 +154,18 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
       label: 'Cantidad',
       data: Object.values(colesterol),
       backgroundColor: [
-        'rgba(75, 192, 192, 0.5)', 
-        'rgba(153, 102, 255, 0.5)', 
-        'rgba(255, 159, 64, 0.5)', 
-        'rgba(255, 99, 132, 0.5)', 
-        'rgba(255, 205, 86, 0.5)'
+        '#34D399', // bg-green-500
+        '#FDE047', // bg-yellow-500
+        '#F97316', // bg-orange-500
+        '#EF4444', // bg-red-500
+        '#B91C1C'  // bg-red-800
       ],
       borderColor: [
-        'rgba(75, 192, 192, 1)', 
-        'rgba(153, 102, 255, 1)', 
-        'rgba(255, 159, 64, 1)', 
-        'rgba(255, 99, 132, 1)', 
-        'rgba(255, 205, 86, 1)'
+        '#34D399', // bg-green-500
+        '#FDE047', // bg-yellow-500
+        '#F97316', // bg-orange-500
+        '#EF4444', // bg-red-500
+        '#B91C1C'  // bg-red-800
       ],
       borderWidth: 1
     }]
@@ -190,18 +191,46 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
       label: 'Cantidad',
       data: Object.values(riesgos),
       backgroundColor: [
-        'rgba(75, 192, 192, 0.5)', 
-        'rgba(153, 102, 255, 0.5)', 
-        'rgba(255, 159, 64, 0.5)', 
-        'rgba(255, 99, 132, 0.5)', 
-        'rgba(255, 205, 86, 0.5)'
+        '#34D399', // bg-green-500
+        '#FDE047', // bg-yellow-500
+        '#F97316', // bg-orange-500
+        '#EF4444', // bg-red-500
+        '#B91C1C'  // bg-red-800
       ],
       borderColor: [
-        'rgba(75, 192, 192, 1)', 
-        'rgba(153, 102, 255, 1)', 
-        'rgba(255, 159, 64, 1)', 
-        'rgba(255, 99, 132, 1)', 
-        'rgba(255, 205, 86, 1)'
+        '#34D399', // bg-green-500
+        '#FDE047', // bg-yellow-500
+        '#F97316', // bg-orange-500
+        '#EF4444', // bg-red-500
+        '#B91C1C'  // bg-red-800
+      ],
+      borderWidth: 1
+    }]
+  };
+
+  // Datos para Ubicación
+  const ubicaciones = pacientesFiltrados.reduce((acc, paciente) => {
+    acc[paciente.ubicacion] = (acc[paciente.ubicacion] || 0) + 1;
+    return acc;
+  }, {});
+  const dataUbicacion = {
+    labels: Object.keys(ubicaciones),
+    datasets: [{
+      label: 'Cantidad',
+      data: Object.values(ubicaciones),
+      backgroundColor: [
+        '#34D399', // bg-green-500
+        '#FDE047', // bg-yellow-500
+        '#F97316', // bg-orange-500
+        '#EF4444',  // bg-red-500
+        '#B91C1C'  // bg-red-800
+      ],
+      borderColor: [
+        '#34D399', // bg-green-500
+        '#FDE047', // bg-yellow-500
+        '#F97316', // bg-orange-500
+        '#EF4444',  // bg-red-500
+        '#B91C1C'  // bg-red-800
       ],
       borderWidth: 1
     }]
@@ -297,6 +326,16 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
           plugins: { 
             legend: { display: true }, 
             tooltip: { callbacks: { label: (tooltipItem) => `${tooltipItem.label}: ${tooltipItem.raw} (${calcularPorcentajes(fumadores)[tooltipItem.label]}%)` } }
+          }
+        }} />
+      </div>
+      <div style={{ width: '30%', display: 'inline-block', marginLeft: '5%' }}>
+        <h3>Ubicación</h3>
+        <Pie data={dataUbicacion} options={{ 
+          responsive: true,
+          plugins: { 
+            legend: { display: true }, 
+            tooltip: { callbacks: { label: (tooltipItem) => `${tooltipItem.label}: ${tooltipItem.raw} (${calcularPorcentajes(ubicaciones)[tooltipItem.label]}%)` } }
           }
         }} />
       </div>

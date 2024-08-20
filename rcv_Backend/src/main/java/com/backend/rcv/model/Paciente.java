@@ -8,6 +8,8 @@ public class Paciente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column
+    private String ubicacion;
+    @Column
     private String edad;
     @Column
     private String genero;
@@ -84,5 +86,13 @@ public class Paciente {
 
     public void setNivelRiesgo(String nivelRiesgo) {
         this.nivelRiesgo = nivelRiesgo;
+    }
+
+    public String getUbicacion() {
+        return ubicacion;
+    }
+
+    public void setUbicacion(String ubicacion) {
+        this.ubicacion = ubicacion;
     }
 }
