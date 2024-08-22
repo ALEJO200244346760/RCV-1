@@ -24,11 +24,15 @@ function Estadisticas() {
   useEffect(() => {
     axios.get('/api/pacientes')
       .then(response => {
-        if (Array.isArray(response.data)) {
-          setPacientes(response.data);
-          setPacientesFiltrados(response.data);
+        if (response.headers['content-type']?.includes('application/json')) {
+          if (Array.isArray(response.data)) {
+            setPacientes(response.data);
+            setPacientesFiltrados(response.data);
+          } else {
+            console.error('La respuesta de la API no es un array:', response.data);
+          }
         } else {
-          console.error('La respuesta de la API no es un array:', response.data);
+          console.error('La respuesta de la API no es JSON:', response.headers['content-type']);
         }
         setLoading(false);
       })
@@ -191,7 +195,7 @@ function Estadisticas() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Presión Arterial (mmHg)</label>
+              <label className="block text-sm font-medium text-gray-700">Presión Arterial</label>
               <select
                 name="presionArterial"
                 value={filtros.presionArterial || ''}
