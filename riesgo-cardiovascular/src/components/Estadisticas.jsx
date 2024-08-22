@@ -13,19 +13,21 @@ function Estadisticas() {
     fumador: '',
     presionArterial: '',
     colesterol: '',
-    nivelColesterol: '', // Campo para el nivel específico de colesterol
+    nivelColesterol: '',
     nivelRiesgo: '',
-    ubicacion: '', // Nuevo campo para la ubicación
+    ubicacion: '',
   });
-  const [nivelColesterolConocido, setNivelColesterolConocido] = useState('todos'); // Estado para el conocimiento del nivel de colesterol
+  const [nivelColesterolConocido, setNivelColesterolConocido] = useState('todos');
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     axios.get('/api/pacientes')
       .then(response => {
-        setPacientes(response.data);
-        setPacientesFiltrados(response.data);
+        if (Array.isArray(response.data)) {
+          setPacientes(response.data);
+          setPacientesFiltrados(response.data);
+        }
         setLoading(false);
       })
       .catch(error => {
@@ -35,7 +37,7 @@ function Estadisticas() {
   }, []);
 
   useEffect(() => {
-    aplicarFiltros(); // Aplica filtros cada vez que cambian
+    aplicarFiltros();
   }, [filtros, nivelColesterolConocido]);
 
   const manejarSeleccionColesterol = (e) => {
@@ -44,7 +46,7 @@ function Estadisticas() {
     if (valor === 'no') {
       setFiltros(prev => ({
         ...prev,
-        nivelColesterol: '', // Resetea el nivel de colesterol específico si se selecciona "no"
+        nivelColesterol: '',
       }));
     }
   };
@@ -53,25 +55,29 @@ function Estadisticas() {
     const { name, value } = e.target;
     setFiltros(prev => ({
       ...prev,
-      [name]: value || '', // Maneja el valor vacío como cadena vacía
+      [name]: value || '',
     }));
   };
 
   const obtenerNivelColesterol = (valor) => {
-    if (valor < 154) return 4;
-    if (valor >= 155 && valor <= 192) return 5;
-    if (valor >= 193 && valor <= 231) return 6;
-    if (valor >= 232 && valor <= 269) return 7;
+    const numValor = Number(valor);
+    if (isNaN(numValor)) return null;
+    if (numValor < 154) return 4;
+    if (numValor >= 155 && numValor <= 192) return 5;
+    if (numValor >= 193 && numValor <= 231) return 6;
+    if (numValor >= 232 && numValor <= 269) return 7;
     return 8;
   };
 
   const aplicarFiltros = () => {
+    if (!Array.isArray(pacientes)) return;
+
     const filtrados = pacientes.filter(paciente => {
-      const edadFiltro = filtros.edad === '' ? null : filtros.edad;
-      const presionArterialFiltro = filtros.presionArterial === '' ? null : filtros.presionArterial;
+      const edadFiltro = filtros.edad || null;
+      const presionArterialFiltro = filtros.presionArterial || null;
       const nivelColesterolFiltro = filtros.nivelColesterol === '' ? null : Number(filtros.nivelColesterol);
 
-      const nivelColesterolPaciente = paciente.colesterol ? obtenerNivelColesterol(Number(paciente.colesterol)) : null;
+      const nivelColesterolPaciente = paciente.colesterol ? obtenerNivelColesterol(paciente.colesterol) : null;
 
       return (
         (edadFiltro === null || paciente.edad.toString() === edadFiltro) &&
@@ -81,11 +87,11 @@ function Estadisticas() {
         (presionArterialFiltro === null || paciente.presionArterial.toString() === presionArterialFiltro) &&
         (
           nivelColesterolConocido === 'todos' || 
-          (nivelColesterolConocido === 'no' && (paciente.colesterol === 'No' || paciente.colesterol === null)) || // Si el nivel de colesterol es "no", solo mostrar pacientes con colesterol "No" o null
-          (nivelColesterolConocido === 'si' && paciente.colesterol !== null && paciente.colesterol !== 'No' && (filtros.nivelColesterol === '' || nivelColesterolPaciente === nivelColesterolFiltro)) // Si se conoce el colesterol, filtrar por nivel
+          (nivelColesterolConocido === 'no' && (paciente.colesterol === 'No' || paciente.colesterol === null)) ||
+          (nivelColesterolConocido === 'si' && paciente.colesterol !== null && paciente.colesterol !== 'No' && (filtros.nivelColesterol === '' || nivelColesterolPaciente === nivelColesterolFiltro))
         ) &&
         (filtros.nivelRiesgo === '' || paciente.nivelRiesgo.toLowerCase() === filtros.nivelRiesgo.toLowerCase()) &&
-        (filtros.ubicacion === '' || (paciente.ubicacion && paciente.ubicacion.toLowerCase() === filtros.ubicacion.toLowerCase())) // Filtrar por ubicación
+        (filtros.ubicacion === '' || (paciente.ubicacion && paciente.ubicacion.toLowerCase() === filtros.ubicacion.toLowerCase()))
     );
     });
 
@@ -95,8 +101,8 @@ function Estadisticas() {
   const eliminarPaciente = (id) => {
     axios.delete(`/api/pacientes/${id}`)
       .then(() => {
-        setPacientes(pacientes.filter(paciente => paciente.id !== id));
-        setPacientesFiltrados(pacientesFiltrados.filter(paciente => paciente.id !== id));
+        setPacientes(prev => prev.filter(paciente => paciente.id !== id));
+        setPacientesFiltrados(prev => prev.filter(paciente => paciente.id !== id));
       })
       .catch(error => console.error('Error al eliminar el paciente:', error));
   };
@@ -131,7 +137,6 @@ function Estadisticas() {
       <div className="mb-6 flex flex-col md:flex-row items-start gap-4">
         <div className="flex-1">
           <div className="mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Filtros */}
             <div>
               <label className="block text-sm font-medium text-gray-700">Edad</label>
               <select
@@ -276,7 +281,6 @@ function Estadisticas() {
         </div>
       </div>
 
-      {/* Gráficos */}
       <EstadisticasGraficos pacientesFiltrados={pacientesFiltrados} />
 
       <div className="mt-4">
@@ -295,7 +299,7 @@ function Estadisticas() {
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Presión Arterial</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Colesterol</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nivel de Riesgo</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ubicación</th> {/* Nueva columna */}
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ubicación</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
             </tr>
           </thead>
@@ -314,7 +318,7 @@ function Estadisticas() {
                     {paciente.nivelRiesgo}
                   </span>
                 </td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.ubicacion}</td> {/* Nueva celda */}
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.ubicacion}</td>
                 <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
                     onClick={() => editarPaciente(paciente.id)}
