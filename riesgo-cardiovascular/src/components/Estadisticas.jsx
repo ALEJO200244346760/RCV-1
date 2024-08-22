@@ -24,8 +24,12 @@ function Estadisticas() {
   useEffect(() => {
     axios.get('/api/pacientes')
       .then(response => {
-        setPacientes(response.data);
-        setPacientesFiltrados(response.data);
+        if (Array.isArray(response.data)) {
+          setPacientes(response.data);
+          setPacientesFiltrados(response.data);
+        } else {
+          console.error('La respuesta de la API no es un array:', response.data);
+        }
         setLoading(false);
       })
       .catch(error => {
