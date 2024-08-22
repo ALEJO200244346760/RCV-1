@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const axiosInstance = axios.create({
     baseURL: 'https://charismatic-mindfulness-production.up.railway.app', // Asegúrate de que esta URL sea correcta
-    timeout: 1000,
+    timeout: 5000,
     headers: {'Content-Type': 'application/json'}
 });
 

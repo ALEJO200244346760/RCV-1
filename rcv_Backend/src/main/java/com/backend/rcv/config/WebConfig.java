@@ -8,10 +8,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/*")
-                .allowedOrigins("https://ercv-oms.vercel.app/")
+        registry.addMapping("/**") // Permite el acceso a todos los sub-recursos
+                .allowedOrigins("https://ercv-oms.vercel.app") // Sin la barra final
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("")
-                .allowCredentials(true);
+                .allowedHeaders("*") // Permite todos los encabezados
+                .allowCredentials(true); // Permite el uso de credenciales
     }
 }
