@@ -10,7 +10,7 @@ const Formulario = () => {
         fumador: '',
         presionArterial: '',
         colesterol: '',
-        ubicacion: '' // Agregado para ubicación
+        ubicacion: ''
     });
 
     const [nivelRiesgo, setNivelRiesgo] = useState(null);
@@ -20,18 +20,18 @@ const Formulario = () => {
 
     const manejarCambio = (e) => {
         const { name, value } = e.target;
-        setDatosPaciente({
-            ...datosPaciente,
+        setDatosPaciente(prevDatos => ({
+            ...prevDatos,
             [name]: value,
-        });
+        }));
     };
 
     const manejarSeleccionColesterol = (value) => {
         setNivelColesterolConocido(value === 'si');
-        setDatosPaciente({
-            ...datosPaciente,
-            colesterol: value === 'no' ? 'No' : datosPaciente.colesterol
-        });
+        setDatosPaciente(prevDatos => ({
+            ...prevDatos,
+            colesterol: value === 'no' ? 'No' : prevDatos.colesterol
+        }));
     };
 
     const ajustarEdad = (edad) => {
@@ -60,7 +60,6 @@ const Formulario = () => {
             return;
         }
 
-        // Verificar si se seleccionó "Sí" para colesterol y el campo está vacío
         if (nivelColesterolConocido && !datosPaciente.colesterol) {
             setModalAdvertencia('Debe ingresar el nivel de colesterol.');
             setMostrarModal(true);
@@ -69,23 +68,20 @@ const Formulario = () => {
 
         const { edad, genero, diabetes, fumador, presionArterial, colesterol, ubicacion } = datosPaciente;
 
-        // Ajustar la edad y la presión arterial
         const edadAjustada = ajustarEdad(parseInt(edad, 10));
         const presionAjustada = ajustarPresionArterial(parseInt(presionArterial, 10));
 
-        // Calcular el riesgo
         const nivelRiesgo = calcularRiesgoCardiovascular(edadAjustada, genero, diabetes, fumador, presionAjustada, colesterol);
         setNivelRiesgo(nivelRiesgo);
         setMostrarModal(true);
 
-        // Enviar los datos al backend
         try {
             await axiosInstance.post('/api/pacientes', {
-                edad: edadAjustada, // Enviar la edad ajustada
+                edad: edadAjustada,
                 genero,
                 diabetes,
                 fumador,
-                presionArterial: presionAjustada, // Enviar la presión ajustada
+                presionArterial: presionAjustada,
                 colesterol,
                 ubicacion,
                 nivelRiesgo
@@ -93,6 +89,8 @@ const Formulario = () => {
             console.log('Datos guardados exitosamente');
         } catch (error) {
             console.error('Error al guardar los datos:', error);
+            setModalAdvertencia('Ocurrió un error al guardar los datos. Por favor, inténtelo de nuevo.');
+            setMostrarModal(true);
         }
     };
 
@@ -103,44 +101,39 @@ const Formulario = () => {
 
     const abrirModalAdvertencia = (nivel) => {
         const advertencias = {
-            '<10% Poco': `-Bajo riesgo no significa ningún riesgo, se sugiere intervenciones como estilo de vida más saludable.
--Vigilar el perfil de riesgo cada 12 meses.
--Esto incluye básicamente control de presión arterial, colesterol y glucemia.
--Reducción de hábitos tóxicos.
--Mayor actividad física y alimentación saludable.
-            `,
-            '>10% <20% Moderado': `-Significa que hay un riesgo moderado de sufrir un episodio vascular en los próximos 10 años.
--Vigilar el perfil de riesgo cada 6 a 12 meses.
--Esto incluye básicamente control de presión arterial, colesterol y glucemia.
--Control de peso y cintura.
--Reducción de hábitos tóxicos.
--Mayor actividad física y alimentación saludable.
--Cumplimiento en la medicación indicada.
-            `,
-            '>20% <30% Alto': `-Significa que hay un alto riesgo de sufrir un episodio vascular en los próximos 10 años.
--Vigilar el perfil de riesgo cada 3 a 6 meses.
--Esto incluye básicamente control de presión arterial, colesterol y glucemia.
--Control de peso y cintura.
--Reducción de hábitos tóxicos.
--Mayor actividad física y alimentación saludable.
--Cumplimiento en la medicación indicada.
-            `,
-            '>30% <40% Muy Alto': `-Significa que hay un alto riesgo de sufrir un episodio vascular en los próximos 10 años.
--Vigilar el perfil de riesgo cada 3 a 6 meses.
--Esto incluye básicamente control de presión arterial, colesterol y glucemia.
--Control de peso y cintura.
--Reducción de hábitos tóxicos.
--Mayor actividad física y alimentación saludable.
--Cumplimiento en la medicación indicada.
-            `,
-            '>40% Crítico': `-Significa que hay un alto riesgo de sufrir un episodio vascular en los próximos 10 años.
--Vigilar el perfil de riesgo cada 3 a 6 meses.
--Esto incluye básicamente control de presión arterial, colesterol y glucemia.
--Control de peso y cintura.
--Reducción de hábitos tóxicos.
--Mayor actividad física y alimentación saludable.
--Cumplimiento en la medicación indicada.
-            `
+            '<10% Poco': `- Bajo riesgo no significa ningún riesgo, se sugiere intervenciones como estilo de vida más saludable.
+- Vigilar el perfil de riesgo cada 12 meses.
+- Esto incluye básicamente control de presión arterial, colesterol y glucemia.
+- Reducción de hábitos tóxicos.
+- Mayor actividad física y alimentación saludable.`,
+            '>10% <20% Moderado': `- Significa que hay un riesgo moderado de sufrir un episodio vascular en los próximos 10 años.
+- Vigilar el perfil de riesgo cada 6 a 12 meses.
+- Esto incluye básicamente control de presión arterial, colesterol y glucemia.
+- Control de peso y cintura.
+- Reducción de hábitos tóxicos.
+- Mayor actividad física y alimentación saludable.
+- Cumplimiento en la medicación indicada.`,
+            '>20% <30% Alto': `- Significa que hay un alto riesgo de sufrir un episodio vascular en los próximos 10 años.
+- Vigilar el perfil de riesgo cada 3 a 6 meses.
+- Esto incluye básicamente control de presión arterial, colesterol y glucemia.
+- Control de peso y cintura.
+- Reducción de hábitos tóxicos.
+- Mayor actividad física y alimentación saludable.
+- Cumplimiento en la medicación indicada.`,
+            '>30% <40% Muy Alto': `- Significa que hay un alto riesgo de sufrir un episodio vascular en los próximos 10 años.
+- Vigilar el perfil de riesgo cada 3 a 6 meses.
+- Esto incluye básicamente control de presión arterial, colesterol y glucemia.
+- Control de peso y cintura.
+- Reducción de hábitos tóxicos.
+- Mayor actividad física y alimentación saludable.
+- Cumplimiento en la medicación indicada.`,
+            '>40% Crítico': `- Significa que hay un alto riesgo de sufrir un episodio vascular en los próximos 10 años.
+- Vigilar el perfil de riesgo cada 3 a 6 meses.
+- Esto incluye básicamente control de presión arterial, colesterol y glucemia.
+- Control de peso y cintura.
+- Reducción de hábitos tóxicos.
+- Mayor actividad física y alimentación saludable.
+- Cumplimiento en la medicación indicada.`
         };
         setModalAdvertencia(advertencias[nivel]);
     };
@@ -251,7 +244,7 @@ const Formulario = () => {
                             <button
                                 key={option}
                                 type="button"
-                                onClick={() => setDatosPaciente({ ...datosPaciente, diabetes: option })}
+                                onClick={() => setDatosPaciente(prevDatos => ({ ...prevDatos, diabetes: option }))}
                                 className={`p-2 border rounded-md ${datosPaciente.diabetes === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
                             >
                                 {option.charAt(0).toUpperCase() + option.slice(1)}
@@ -268,7 +261,7 @@ const Formulario = () => {
                             <button
                                 key={option}
                                 type="button"
-                                onClick={() => setDatosPaciente({ ...datosPaciente, fumador: option })}
+                                onClick={() => setDatosPaciente(prevDatos => ({ ...prevDatos, fumador: option }))}
                                 className={`p-2 border rounded-md ${datosPaciente.fumador === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
                             >
                                 {option.charAt(0).toUpperCase() + option.slice(1)}
