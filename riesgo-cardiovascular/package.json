@@ -43,5 +43,5 @@
   "devDependencies": {
     "tailwindcss": "^3.4.7"
   },
-  "proxy": "https://rcv-production.up.railway.app"
+  "proxy": "http://localhost:8080"
 }
