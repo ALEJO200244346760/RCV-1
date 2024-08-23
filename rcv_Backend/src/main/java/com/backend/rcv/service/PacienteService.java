@@ -12,22 +12,41 @@ import java.util.Optional;
 public class PacienteService {
 
     @Autowired
-    PacienteRepository pacienteRepository;
+    private PacienteRepository pacienteRepository;
 
     public List<Paciente> getAllPacientes() {
-        return pacienteRepository.findAll();
+        try {
+            return pacienteRepository.findAll();
+        } catch (Exception e) {
+            // Log the error
+            throw new RuntimeException("Error fetching all pacientes", e);
+        }
     }
 
     public Optional<Paciente> getPacienteById(Long id) {
-        return pacienteRepository.findById(id);
+        try {
+            return pacienteRepository.findById(id);
+        } catch (Exception e) {
+            // Log the error
+            throw new RuntimeException("Error fetching paciente by id", e);
+        }
     }
 
     public Paciente savePaciente(Paciente paciente) {
-        return pacienteRepository.save(paciente);
+        try {
+            return pacienteRepository.save(paciente);
+        } catch (Exception e) {
+            // Log the error
+            throw new RuntimeException("Error saving paciente", e);
+        }
     }
 
     public void deletePaciente(Long id) {
-        pacienteRepository.deleteById(id);
+        try {
+            pacienteRepository.deleteById(id);
+        } catch (Exception e) {
+            // Log the error
+            throw new RuntimeException("Error deleting paciente", e);
+        }
     }
-
 }
