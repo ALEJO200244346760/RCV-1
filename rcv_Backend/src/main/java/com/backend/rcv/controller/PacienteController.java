@@ -12,13 +12,13 @@ import java.util.Optional;
 
 @CrossOrigin(origins = "https://ercv-oms.vercel.app")
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/pacientes")
 public class PacienteController {
 
     @Autowired
     private PacienteService pacienteService;
 
-    @GetMapping("/pacientes")
+    @GetMapping
     public ResponseEntity<List<Paciente>> getAllPacientes() {
         List<Paciente> pacientes = pacienteService.getAllPacientes();
         return ResponseEntity.ok(pacientes);
