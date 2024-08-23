@@ -25,6 +25,7 @@ function Estadisticas() {
   useEffect(() => {
     axios.get('/api/pacientes')
       .then(response => {
+        console.log(response.data); // Añadir esto para depurar
         const data = response.data;
         if (Array.isArray(data)) {
           setPacientes(data);
@@ -39,6 +40,7 @@ function Estadisticas() {
         setLoading(false);
       });
   }, []);
+  
 
   // Hook useEffect para aplicar filtros cada vez que cambian
   useEffect(() => {
