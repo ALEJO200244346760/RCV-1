@@ -21,6 +21,7 @@ function Estadisticas() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Hook useEffect para obtener datos de pacientes desde la API
   useEffect(() => {
     axios.get('/api/pacientes')
       .then(response => {
@@ -39,10 +40,12 @@ function Estadisticas() {
       });
   }, []);
 
+  // Hook useEffect para aplicar filtros cada vez que cambian
   useEffect(() => {
     aplicarFiltros(); // Aplica filtros cada vez que cambian
   }, [filtros, nivelColesterolConocido]);
 
+  // Función para manejar el cambio en el filtro de colesterol
   const manejarSeleccionColesterol = (e) => {
     const valor = e.target.value;
     setNivelColesterolConocido(valor);
@@ -54,6 +57,7 @@ function Estadisticas() {
     }
   };
 
+  // Función para manejar cambios en los filtros
   const manejarCambio = (e) => {
     const { name, value } = e.target;
     setFiltros(prev => ({
@@ -62,6 +66,7 @@ function Estadisticas() {
     }));
   };
 
+  // Función para obtener el nivel de colesterol basado en el valor
   const obtenerNivelColesterol = (valor) => {
     if (valor < 154) return 4;
     if (valor >= 155 && valor <= 192) return 5;
@@ -70,6 +75,7 @@ function Estadisticas() {
     return 8;
   };
 
+  // Función para aplicar filtros a la lista de pacientes
   const aplicarFiltros = () => {
     const filtrados = pacientes.filter(paciente => {
       const edadFiltro = filtros.edad === '' ? null : filtros.edad;
@@ -97,6 +103,7 @@ function Estadisticas() {
     setPacientesFiltrados(filtrados);
   };
 
+  // Función para eliminar un paciente
   const eliminarPaciente = (id) => {
     axios.delete(`/api/pacientes/${id}`)
       .then(() => {
@@ -106,10 +113,12 @@ function Estadisticas() {
       .catch(error => console.error('Error al eliminar el paciente:', error));
   };
 
+  // Función para redirigir al usuario a la página de edición de un paciente
   const editarPaciente = (id) => {
     navigate(`/editar-paciente/${id}`);
   };
 
+  // Función para obtener el color de riesgo basado en el nivel
   const obtenerColorRiesgo = (nivel) => {
     switch (nivel) {
       case 'Poco':
@@ -192,7 +201,7 @@ function Estadisticas() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Presión Arterial (mmHg)</label>
+              <label className="block text-sm font-medium text-gray-700">Presión Arterial</label>
               <select
                 name="presionArterial"
                 value={filtros.presionArterial || ''}
