@@ -19,8 +19,9 @@ public class PacienteController {
     private PacienteService pacienteService;
 
     @GetMapping
-    public List<Paciente> getAllPacientes() {
-        return pacienteService.getAllPacientes();
+    public ResponseEntity<List<Paciente>> getAllPacientes() {
+        List<Paciente> pacientes = pacienteService.getAllPacientes();
+        return ResponseEntity.ok(pacientes);
     }
 
     @GetMapping("/{id}")
