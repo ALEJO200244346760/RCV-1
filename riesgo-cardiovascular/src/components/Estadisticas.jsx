@@ -24,8 +24,13 @@ function Estadisticas() {
   useEffect(() => {
     axios.get('/api/pacientes')
       .then(response => {
-        setPacientes(response.data);
-        setPacientesFiltrados(response.data);
+        const data = response.data;
+        if (Array.isArray(data)) {
+          setPacientes(data);
+          setPacientesFiltrados(data);
+        } else {
+          console.error('La respuesta de la API no es un arreglo');
+        }
         setLoading(false);
       })
       .catch(error => {
