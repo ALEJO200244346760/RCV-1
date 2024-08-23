@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "https://ercv-oms.vercel.app")
 @RestController
 @RequestMapping("/api/pacientes")
 public class PacienteController {
@@ -19,9 +19,8 @@ public class PacienteController {
     private PacienteService pacienteService;
 
     @GetMapping
-    public ResponseEntity<List<Paciente>> getAllPacientes() {
-        List<Paciente> pacientes = pacienteService.getAllPacientes();
-        return ResponseEntity.ok(pacientes);
+    public List<Paciente> getAllPacientes() {
+        return pacienteService.getAllPacientes();
     }
 
     @GetMapping("/{id}")
