@@ -170,7 +170,7 @@ const Formulario = () => {
         ];
         return (
             <div className="grid grid-cols-12 gap-2">
-                {riesgos.map((nivel, index) => (
+                {riesgos.map((nivel) => (
                     <React.Fragment key={nivel}>
                         <div className={`col-span-4 ${obtenerColorRiesgo(nivel)}`}></div>
                         <div
@@ -279,7 +279,6 @@ const Formulario = () => {
                         value={datosPaciente.presionArterial}
                         onChange={manejarCambio}
                         className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                        style={{ appearance: 'none' }}
                     />
                 </div>
 
@@ -305,7 +304,6 @@ const Formulario = () => {
                             value={datosPaciente.colesterol === 'No' ? '' : datosPaciente.colesterol}
                             onChange={manejarCambio}
                             className="p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                            style={{ appearance: 'none' }}
                         />
                     )}
                 </div>
