@@ -21,16 +21,19 @@ function Estadisticas() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Configuración de la URL base para la API
+  const apiBaseURL = 'https://rcv-production.up.railway.app';
+
   // Hook useEffect para obtener datos de pacientes desde la API
   useEffect(() => {
-    axios.get('/api/pacientes')
+    axios.get(`${apiBaseURL}/api/pacientes`)
       .then(response => {
         console.log('Datos de respuesta:', response.data); // Verifica la estructura de los datos
         const data = response.data;
-  
+
         // Verifica el tipo de datos
         console.log('Es un arreglo:', Array.isArray(data));
-  
+
         if (Array.isArray(data)) {
           setPacientes(data);
           setPacientesFiltrados(data);
@@ -44,8 +47,6 @@ function Estadisticas() {
         setLoading(false);
       });
   }, []);
-  
-  
 
   // Hook useEffect para aplicar filtros cada vez que cambian
   useEffect(() => {
@@ -112,7 +113,7 @@ function Estadisticas() {
 
   // Función para eliminar un paciente
   const eliminarPaciente = (id) => {
-    axios.delete(`/api/pacientes/${id}`)
+    axios.delete(`${apiBaseURL}/api/pacientes/${id}`)
       .then(() => {
         setPacientes(pacientes.filter(paciente => paciente.id !== id));
         setPacientesFiltrados(pacientesFiltrados.filter(paciente => paciente.id !== id));
