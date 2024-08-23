@@ -24,6 +24,9 @@ function Estadisticas() {
   useEffect(() => {
     axios.get('/api/pacientes')
       .then(response => {
+        console.log('Tipo de respuesta:', response.headers['content-type']);
+        console.log('Datos de la respuesta:', response.data);
+  
         if (response.headers['content-type']?.includes('application/json')) {
           if (Array.isArray(response.data)) {
             setPacientes(response.data);
@@ -37,10 +40,11 @@ function Estadisticas() {
         setLoading(false);
       })
       .catch(error => {
-        console.error('Error al obtener los pacientes:', error);
+        console.error('Error al obtener los pacientes:', error.response ? error.response.data : error.message);
         setLoading(false);
       });
   }, []);
+  
 
   useEffect(() => {
     aplicarFiltros(); // Aplica filtros cada vez que cambian
