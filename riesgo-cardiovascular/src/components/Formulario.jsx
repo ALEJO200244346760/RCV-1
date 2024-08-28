@@ -43,9 +43,6 @@ const Formulario = () => {
         return '';
     };
 
-    const imc = calcularIMC();
-        setDatosPaciente((prevDatos) => ({ ...prevDatos, imc }));
-
     const manejarSeleccionColesterol = (value) => {
         setNivelColesterolConocido(value === 'si');
         setDatosPaciente(prevDatos => ({
@@ -85,6 +82,9 @@ const Formulario = () => {
             setMostrarModal(true);
             return;
         }
+
+        const imc = calcularIMC();
+        setDatosPaciente((prevDatos) => ({ ...prevDatos, imc }));
 
         const { edad, genero, diabetes, fumador, presionArterial, colesterol, ubicacion, fechaRegistro } = datosPaciente;
 
