@@ -7,7 +7,6 @@ import EditarPaciente from './components/EditarPaciente';
 import TomarPresion from './components/tomarPresion';
 import Login from './components/Login';
 import Register from './components/Register'; // Importa el componente Register
-import RoleProtectedRoute from './components/RoleProtectedRoute';
 
 
 function App() {
