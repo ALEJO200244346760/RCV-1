@@ -32,6 +32,16 @@ const Formulario = () => {
             [name]: value,
         }));
     };
+    const calcularIMC = () => {
+        const peso = parseFloat(datosPaciente.peso);
+        const tallaCm = parseFloat(datosPaciente.talla);
+        if (peso && tallaCm) {
+            const tallaM = tallaCm / 100; // Convertir centímetros a metros
+            const imc = peso / (tallaM * tallaM);
+            return imc.toFixed(2);
+        }
+        return '';
+    };
 
     const imc = calcularIMC();
         setDatosPaciente((prevDatos) => ({ ...prevDatos, imc }));
