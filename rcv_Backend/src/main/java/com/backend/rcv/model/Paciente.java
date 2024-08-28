@@ -1,12 +1,18 @@
 package com.backend.rcv.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
+
+import java.util.Date;
 
 @Entity
+@Data
 public class Paciente {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column
+    private String fechaRegistro;
     @Column
     private String ubicacion;
     @Column
@@ -23,6 +29,18 @@ public class Paciente {
     private String colesterol;
     @Column
     private String nivelRiesgo;
+    @Column
+    private String peso;
+    @Column
+    private String talla;
+    @Column
+    private String imc;
+    @Column
+    private String hipertenso;
+    @Column
+    private String infarto;
+    @Column
+    private String acv;
 
     public Long getId() {
         return id;
@@ -30,6 +48,22 @@ public class Paciente {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getFechaRegistro() {
+        return fechaRegistro;
+    }
+
+    public void setFechaRegistro(String fechaRegistro) {
+        this.fechaRegistro = fechaRegistro;
+    }
+
+    public String getUbicacion() {
+        return ubicacion;
+    }
+
+    public void setUbicacion(String ubicacion) {
+        this.ubicacion = ubicacion;
     }
 
     public String getEdad() {
@@ -88,11 +122,51 @@ public class Paciente {
         this.nivelRiesgo = nivelRiesgo;
     }
 
-    public String getUbicacion() {
-        return ubicacion;
+    public String getPeso() {
+        return peso;
     }
 
-    public void setUbicacion(String ubicacion) {
-        this.ubicacion = ubicacion;
+    public void setPeso(String peso) {
+        this.peso = peso;
+    }
+
+    public String getTalla() {
+        return talla;
+    }
+
+    public void setTalla(String talla) {
+        this.talla = talla;
+    }
+
+    public String getImc() {
+        return imc;
+    }
+
+    public void setImc(String imc) {
+        this.imc = imc;
+    }
+
+    public String getHipertenso() {
+        return hipertenso;
+    }
+
+    public void setHipertenso(String hipertenso) {
+        this.hipertenso = hipertenso;
+    }
+
+    public String getInfarto() {
+        return infarto;
+    }
+
+    public void setInfarto(String infarto) {
+        this.infarto = infarto;
+    }
+
+    public String getAcv() {
+        return acv;
+    }
+
+    public void setAcv(String acv) {
+        this.acv = acv;
     }
 }

@@ -10,7 +10,14 @@ const Formulario = () => {
         fumador: '',
         presionArterial: '',
         colesterol: '',
-        ubicacion: ''
+        peso: '',
+        talla: '', // Talla en centímetros
+        ubicacion: '',
+        fechaRegistro: new Date().toISOString().split('T')[0],
+        imc: '',
+        hipertenso: '',
+        infarto: '',
+        acv:''
     });
 
     const [nivelRiesgo, setNivelRiesgo] = useState(null);
@@ -66,7 +73,7 @@ const Formulario = () => {
             return;
         }
 
-        const { edad, genero, diabetes, fumador, presionArterial, colesterol, ubicacion } = datosPaciente;
+        const { edad, genero, diabetes, fumador, presionArterial, colesterol, ubicacion, fechaRegistro } = datosPaciente;
 
         const edadAjustada = ajustarEdad(parseInt(edad, 10));
         const presionAjustada = ajustarPresionArterial(parseInt(presionArterial, 10));
@@ -83,8 +90,15 @@ const Formulario = () => {
                 fumador,
                 presionArterial: presionAjustada,
                 colesterol,
+                peso: datosPaciente.peso,
+                talla: datosPaciente.talla,
+                imc,
                 ubicacion,
-                nivelRiesgo
+                fechaRegistro,
+                nivelRiesgo,
+                hipertenso: datosPaciente.hipertenso,
+                infarto: datosPaciente.infarto,
+                acv: datosPaciente.acv,
             });
             console.log('Datos guardados exitosamente');
         } catch (error) {
@@ -244,7 +258,7 @@ const Formulario = () => {
                             <button
                                 key={option}
                                 type="button"
-                                onClick={() => setDatosPaciente(prevDatos => ({ ...prevDatos, diabetes: option }))}
+                                onClick={() => setDatosPaciente({ ...datosPaciente, diabetes: option })}
                                 className={`p-2 border rounded-md ${datosPaciente.diabetes === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
                             >
                                 {option.charAt(0).toUpperCase() + option.slice(1)}
@@ -261,7 +275,7 @@ const Formulario = () => {
                             <button
                                 key={option}
                                 type="button"
-                                onClick={() => setDatosPaciente(prevDatos => ({ ...prevDatos, fumador: option }))}
+                                onClick={() => setDatosPaciente({ ...datosPaciente, fumador: option })}
                                 className={`p-2 border rounded-md ${datosPaciente.fumador === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
                             >
                                 {option.charAt(0).toUpperCase() + option.slice(1)}
@@ -279,8 +293,84 @@ const Formulario = () => {
                         value={datosPaciente.presionArterial}
                         onChange={manejarCambio}
                         className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                        style={{ appearance: 'none' }}
                     />
                 </div>
+
+                {/* Peso */}
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium text-gray-700">Peso (kg):</label>
+                    <input
+                        type="number"
+                        name="peso"
+                        value={datosPaciente.peso}
+                        onChange={manejarCambio}
+                        className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                </div>
+
+                {/* Talla */}
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium text-gray-700">Talla (cm):</label>
+                    <input
+                        type="number"
+                        name="talla"
+                        value={datosPaciente.talla}
+                        onChange={manejarCambio}
+                        className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                </div>
+
+                {/* Hipertenso */}
+            <div className="flex flex-col">
+                <label className="text-sm font-medium text-gray-700">¿Es hipertenso?</label>
+                <div className="flex space-x-2 mb-2">
+                    {['Sí', 'No'].map(option => (
+                        <button
+                            key={option}
+                            type="button"
+                            onClick={() => setDatosPaciente({ ...datosPaciente, hipertenso: option })}
+                            className={`p-2 border rounded-md ${datosPaciente.hipertenso === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
+                        >
+                            {option}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Infarto */}
+            <div className="flex flex-col">
+                <label className="text-sm font-medium text-gray-700">¿Ha tenido un infarto?</label>
+                <div className="flex space-x-2 mb-2">
+                    {['Sí', 'No'].map(option => (
+                        <button
+                            key={option}
+                            type="button"
+                            onClick={() => setDatosPaciente({ ...datosPaciente, infarto: option })}
+                            className={`p-2 border rounded-md ${datosPaciente.infarto === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
+                        >
+                            {option}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* ACV */}
+            <div className="flex flex-col">
+                <label className="text-sm font-medium text-gray-700">¿Ha tenido un ACV?</label>
+                <div className="flex space-x-2 mb-2">
+                    {['Sí', 'No'].map(option => (
+                        <button
+                            key={option}
+                            type="button"
+                            onClick={() => setDatosPaciente({ ...datosPaciente, acv: option })}
+                            className={`p-2 border rounded-md ${datosPaciente.acv === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
+                        >
+                            {option}
+                        </button>
+                    ))}
+                </div>
+            </div>
 
                 {/* Colesterol */}
                 <div className="flex flex-col">
@@ -304,9 +394,12 @@ const Formulario = () => {
                             value={datosPaciente.colesterol === 'No' ? '' : datosPaciente.colesterol}
                             onChange={manejarCambio}
                             className="p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            style={{ appearance: 'none' }}
                         />
                     )}
                 </div>
+
+                
 
                 <button
                     type="button"
@@ -328,7 +421,14 @@ const Formulario = () => {
                         <p><strong>Fumador:</strong> {datosPaciente.fumador}</p>
                         <p><strong>Presión Arterial:</strong> {datosPaciente.presionArterial}</p>
                         <p><strong>Colesterol:</strong> {datosPaciente.colesterol || 'No especificado'}</p>
+                        <p><strong>Peso:</strong> {datosPaciente.peso || 'No especificado'}</p>
+                        <p><strong>Talla:</strong> {datosPaciente.talla || 'No especificada'} cm</p>
+                        <p><strong>IMC:</strong> {datosPaciente.imc || 'No calculado'}</p>
                         <p><strong>Ubicación:</strong> {datosPaciente.ubicacion}</p>
+                        <p><strong>Fecha de Registro:</strong> {datosPaciente.fechaRegistro}</p>
+                        <p><strong>Hipertenso:</strong> {datosPaciente.hipertenso}</p>
+                        <p><strong>Infarto:</strong> {datosPaciente.infarto}</p>
+                        <p><strong>ACV:</strong> {datosPaciente.acv}</p>
                         <p><strong>Nivel de Riesgo:</strong></p>
                         <div className="mb-4">
                             {renderRiesgoGrid(nivelRiesgo)}

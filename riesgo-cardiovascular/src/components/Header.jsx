@@ -10,6 +10,7 @@ const Header = () => {
         <Link to="/tomarPresion" className="hover:text-gray-300">Indicaciones</Link>
         <Link to="/formulario" className="hover:text-gray-300">Formulario</Link>
         <Link to="/estadisticas" className="hover:text-gray-300">Estadísticas</Link>
+        <Link to="/Login" className="hover:text-gray-300">Iniciar Sesión</Link>
       </nav>
     </header>
   );
