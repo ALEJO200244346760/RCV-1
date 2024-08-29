@@ -23,12 +23,12 @@ public class AdminConfig {
 
     @PostConstruct
     public void init() {
-        if (!usuarioRepository.existsByEmail("bmlosada@hotmail.com")) {
+        if (!usuarioRepository.existsByEmail("admin@example.com")) {
             Usuario cardiologo = new Usuario();
-            cardiologo.setNombre("Blanca");
-            cardiologo.setApellido("Losada");
-            cardiologo.setPassword(passwordEncoder.encode("casa1892"));
-            cardiologo.setEmail("bmlosada@hotmail.com");
+            cardiologo.setNombre("admin");
+            cardiologo.setApellido("admin");
+            cardiologo.setPassword(passwordEncoder.encode("admin123"));
+            cardiologo.setEmail("admin@example.com");
 
             Rol cardiologoRole = rolRepository.findByNombre("CARDIOLOGO");
             if (cardiologoRole == null) {
