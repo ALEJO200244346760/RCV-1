@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/useAuth'; // Asegúrate de la ruta correcta
+import { useAuth } from '../context/useAuth'; // Asegúrate de la ruta correcta
 
 const Login = () => {
   const [email, setEmail] = useState('');
