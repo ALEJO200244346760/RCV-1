@@ -39,8 +39,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login", "/register").permitAll() // Permite acceso sin autenticación a estos endpoints
-                        .requestMatchers("/administracion/**").hasRole("CARDIOLOGO") // Permite acceso a administradores con rol específico
+                        .requestMatchers("/login", "/register").permitAll() // Asegúrate de que estos endpoints estén permitidos
+                        .requestMatchers("/administracion/**").hasRole("CARDIOLOGO") // Acceso restringido a administradores
                         .anyRequest().authenticated() // Requiere autenticación para cualquier otra solicitud
                 )
                 .exceptionHandling(exception -> exception
