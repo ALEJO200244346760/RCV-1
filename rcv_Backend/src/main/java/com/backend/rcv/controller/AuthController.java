@@ -54,6 +54,7 @@ public class AuthController {
         return ResponseEntity.ok(new JwtResponse(token));
     }
 
+
     @PostMapping("/register")
     public ResponseEntity<?> saveUser(@RequestBody UsuarioDto usuario) throws Exception {
         usuario.setRol("ENFERMERO");
