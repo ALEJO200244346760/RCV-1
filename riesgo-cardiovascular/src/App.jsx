@@ -5,7 +5,7 @@ import Estadisticas from './components/Estadisticas';
 import Formulario from './components/Formulario';
 import EditarPaciente from './components/EditarPaciente';
 import TomarPresion from './components/tomarPresion';
-import Login from './components/login';
+import Login from './components/Login';
 import Register from './components/Register'; // Importa el componente Register
 
 
