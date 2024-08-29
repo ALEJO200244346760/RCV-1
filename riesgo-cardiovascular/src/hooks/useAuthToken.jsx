@@ -1,4 +1,4 @@
-import useAuth from '../context/useAuth'; // Adjusted path
+import useAuth from '../context/useAuth'; // Ensure this path is correct
 
 const useAuthToken = () => {
     const { token } = useAuth();
