@@ -21,11 +21,25 @@ function Estadisticas() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Configuración de la URL base para la API
+  const apiBaseURL = 'https://rcv-production.up.railway.app';
+
+  // Hook useEffect para obtener datos de pacientes desde la API
   useEffect(() => {
-    axios.get('/api/pacientes')
+    axios.get(`${apiBaseURL}/api/pacientes`)
       .then(response => {
-        setPacientes(response.data);
-        setPacientesFiltrados(response.data);
+        console.log('Datos de respuesta:', response.data); // Verifica la estructura de los datos
+        const data = response.data;
+
+        // Verifica el tipo de datos
+        console.log('Es un arreglo:', Array.isArray(data));
+
+        if (Array.isArray(data)) {
+          setPacientes(data);
+          setPacientesFiltrados(data);
+        } else {
+          console.error('La respuesta de la API no es un arreglo');
+        }
         setLoading(false);
       })
       .catch(error => {
@@ -34,10 +48,12 @@ function Estadisticas() {
       });
   }, []);
 
+  // Hook useEffect para aplicar filtros cada vez que cambian
   useEffect(() => {
     aplicarFiltros(); // Aplica filtros cada vez que cambian
   }, [filtros, nivelColesterolConocido]);
 
+  // Función para manejar el cambio en el filtro de colesterol
   const manejarSeleccionColesterol = (e) => {
     const valor = e.target.value;
     setNivelColesterolConocido(valor);
@@ -49,6 +65,7 @@ function Estadisticas() {
     }
   };
 
+  // Función para manejar cambios en los filtros
   const manejarCambio = (e) => {
     const { name, value } = e.target;
     setFiltros(prev => ({
@@ -57,6 +74,7 @@ function Estadisticas() {
     }));
   };
 
+  // Función para obtener el nivel de colesterol basado en el valor
   const obtenerNivelColesterol = (valor) => {
     if (valor < 154) return 4;
     if (valor >= 155 && valor <= 192) return 5;
@@ -65,6 +83,7 @@ function Estadisticas() {
     return 8;
   };
 
+  // Función para aplicar filtros a la lista de pacientes
   const aplicarFiltros = () => {
     const filtrados = pacientes.filter(paciente => {
       const edadFiltro = filtros.edad === '' ? null : filtros.edad;
@@ -92,8 +111,9 @@ function Estadisticas() {
     setPacientesFiltrados(filtrados);
   };
 
+  // Función para eliminar un paciente
   const eliminarPaciente = (id) => {
-    axios.delete(`/api/pacientes/${id}`)
+    axios.delete(`${apiBaseURL}/api/pacientes/${id}`)
       .then(() => {
         setPacientes(pacientes.filter(paciente => paciente.id !== id));
         setPacientesFiltrados(pacientesFiltrados.filter(paciente => paciente.id !== id));
@@ -101,10 +121,12 @@ function Estadisticas() {
       .catch(error => console.error('Error al eliminar el paciente:', error));
   };
 
+  // Función para redirigir al usuario a la página de edición de un paciente
   const editarPaciente = (id) => {
     navigate(`/editar-paciente/${id}`);
   };
 
+  // Función para obtener el color de riesgo basado en el nivel
   const obtenerColorRiesgo = (nivel) => {
     switch (nivel) {
       case 'Poco':
@@ -187,7 +209,7 @@ function Estadisticas() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Presión Arterial (mmHg)</label>
+              <label className="block text-sm font-medium text-gray-700">Presión Arterial</label>
               <select
                 name="presionArterial"
                 value={filtros.presionArterial || ''}
