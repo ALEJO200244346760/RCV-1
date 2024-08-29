@@ -37,7 +37,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.csrf(csrf -> csrf.disable()) // Desactiva CSRF para facilitar pruebas
+        httpSecurity.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/login", "/register").permitAll() // Permite acceso sin autenticación a estos endpoints
                         .requestMatchers("/administracion/**").hasRole("CARDIOLOGO") // Permite acceso a administradores con rol específico
