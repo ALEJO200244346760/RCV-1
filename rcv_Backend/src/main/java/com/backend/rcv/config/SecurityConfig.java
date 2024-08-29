@@ -39,18 +39,17 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login", "/register").permitAll() // Asegúrate de que estos endpoints estén permitidos
-                        .requestMatchers("/administracion/**").hasRole("CARDIOLOGO") // Acceso restringido a administradores
-                        .anyRequest().authenticated() // Requiere autenticación para cualquier otra solicitud
+                        .requestMatchers("/administracion/**").hasRole("CARDIOLOGO")
+                        .anyRequest().permitAll()
                 )
                 .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(jwtAuthenticationEntryPoint) // Maneja errores de autenticación
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Desactiva el uso de sesiones
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
 
-        httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class); // Agrega el filtro JWT
+        httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
 }
