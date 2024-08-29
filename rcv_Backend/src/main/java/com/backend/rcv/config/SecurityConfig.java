@@ -37,19 +37,20 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.csrf(csrf -> csrf.disable())
+        httpSecurity.csrf(csrf -> csrf.disable()) // Desactiva CSRF para facilitar pruebas
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/administracion/**").hasRole("CARDIOLOGO")
-                        .anyRequest().permitAll()
+                        .requestMatchers("/login", "/register").permitAll() // Permite acceso sin autenticación a estos endpoints
+                        .requestMatchers("/administracion/**").hasRole("CARDIOLOGO") // Permite acceso a administradores con rol específico
+                        .anyRequest().authenticated() // Requiere autenticación para cualquier otra solicitud
                 )
                 .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint) // Maneja errores de autenticación
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Desactiva el uso de sesiones
                 );
 
-        httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class); // Agrega el filtro JWT
         return httpSecurity.build();
     }
 }
