@@ -13,7 +13,7 @@ const Login = () => {
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post('/login', { email, password });
+      const response = await api.post('/login', { email, password });
       const token = response.data.token;
       login(token); // Almacena el token usando la función login del contexto
       navigate('/'); // Redirige al home o a la página deseada
