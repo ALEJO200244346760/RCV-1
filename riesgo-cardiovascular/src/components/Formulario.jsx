@@ -17,35 +17,21 @@ const Formulario = () => {
         imc: '',
         hipertenso: '',
         infarto: '',
-        acv:'',
-        medicamentos:''
+        acv:''
     });
 
     const [nivelRiesgo, setNivelRiesgo] = useState(null);
     const [nivelColesterolConocido, setNivelColesterolConocido] = useState(false);
     const [mostrarModal, setMostrarModal] = useState(false);
     const [modalAdvertencia, setModalAdvertencia] = useState(null);
-    const [mostrarModalMedicamentos, setMostrarModalMedicamentos] = useState(false);
-    const [medicamentosSeleccionados, setMedicamentosSeleccionados] = useState('');
-    const [medicamentos, setMedicamentos] = useState('');
-    const [mensajeExito, setMensajeExito] = useState('');
 
     const manejarCambio = (e) => {
         const { name, value } = e.target;
-        setDatosPaciente({
-            ...datosPaciente,
+        setDatosPaciente(prevDatos => ({
+            ...prevDatos,
             [name]: value,
-        });
+        }));
     };
-
-    const manejarSeleccionColesterol = (value) => {
-        setNivelColesterolConocido(value === 'si');
-        setDatosPaciente({
-            ...datosPaciente,
-            colesterol: value === 'no' ? 'No' : datosPaciente.colesterol
-        });
-    };
-
     const calcularIMC = () => {
         const peso = parseFloat(datosPaciente.peso);
         const tallaCm = parseFloat(datosPaciente.talla);
@@ -55,6 +41,14 @@ const Formulario = () => {
             return imc.toFixed(2);
         }
         return '';
+    };
+
+    const manejarSeleccionColesterol = (value) => {
+        setNivelColesterolConocido(value === 'si');
+        setDatosPaciente(prevDatos => ({
+            ...prevDatos,
+            colesterol: value === 'no' ? 'No' : prevDatos.colesterol
+        }));
     };
 
     const ajustarEdad = (edad) => {
@@ -76,89 +70,57 @@ const Formulario = () => {
         return edad && genero && diabetes && fumador && presionArterial && ubicacion;
     };
 
-    const calcularRiesgo = () => {
+    const calcularRiesgo = async () => {
         if (!validarCampos()) {
             setModalAdvertencia('Todos los campos deben estar completos.');
             setMostrarModal(true);
             return;
         }
-    
+
         if (nivelColesterolConocido && !datosPaciente.colesterol) {
             setModalAdvertencia('Debe ingresar el nivel de colesterol.');
             setMostrarModal(true);
             return;
         }
-    
-        // Ajustar la edad y la presión arterial
-        const edadAjustada = ajustarEdad(parseInt(datosPaciente.edad, 10));
-        const presionAjustada = ajustarPresionArterial(parseInt(datosPaciente.presionArterial, 10));
-    
-        // Calcular el IMC
+
         const imc = calcularIMC();
         setDatosPaciente((prevDatos) => ({ ...prevDatos, imc }));
-    
-        // Calcular el riesgo
-        const nivelRiesgo = calcularRiesgoCardiovascular(edadAjustada, datosPaciente.genero, datosPaciente.diabetes, datosPaciente.fumador, presionAjustada, datosPaciente.colesterol);
+
+        const { edad, genero, diabetes, fumador, presionArterial, colesterol, ubicacion, fechaRegistro } = datosPaciente;
+
+        const edadAjustada = ajustarEdad(parseInt(edad, 10));
+        const presionAjustada = ajustarPresionArterial(parseInt(presionArterial, 10));
+
+        const nivelRiesgo = calcularRiesgoCardiovascular(edadAjustada, genero, diabetes, fumador, presionAjustada, colesterol);
         setNivelRiesgo(nivelRiesgo);
         setMostrarModal(true);
-    
-        // Mostrar la opción de agregar medicamentos
-        setMostrarOpcionesMedicamentos(true);
-    };
-    
-    // 2. Guardar el paciente y todos los datos
-    const guardarPaciente = async () => {
+
         try {
-            // Enviar todos los datos del paciente al backend, incluidos los medicamentos seleccionados
-            const response = await axiosInstance.post('/api/pacientes', {
-                ...datosPaciente,
-                nivelRiesgo, // El nivel de riesgo calculado
-                medicamentos: datosPaciente.medicamentos // Medicamentos seleccionados
+            await axiosInstance.post('/api/pacientes', {
+                edad: edadAjustada,
+                genero,
+                diabetes,
+                fumador,
+                presionArterial: presionAjustada,
+                colesterol,
+                peso: datosPaciente.peso,
+                talla: datosPaciente.talla,
+                imc,
+                ubicacion,
+                fechaRegistro,
+                nivelRiesgo,
+                hipertenso: datosPaciente.hipertenso,
+                infarto: datosPaciente.infarto,
+                acv: datosPaciente.acv,
             });
-    
             console.log('Datos guardados exitosamente');
-            setMensajeExito('Paciente guardado con éxito');
-    
-            // Actualizar el ID del paciente en el estado, si es necesario
-            const pacienteGuardado = response.data;
-            setDatosPaciente((prevDatos) => ({
-                ...prevDatos,
-                id: pacienteGuardado.id
-            }));
-    
         } catch (error) {
             console.error('Error al guardar los datos:', error);
+            setModalAdvertencia('Ocurrió un error al guardar los datos. Por favor, inténtelo de nuevo.');
+            setMostrarModal(true);
         }
     };
-    
-    
-    const guardarMedicamentos = async (idPaciente) => {
-        try {
-            // Verifica que idPaciente esté definido
-            if (!idPaciente) {
-                console.error('El ID del paciente no está definido');
-                return;
-            }
-    
-            // Obtener los medicamentos seleccionados
-            const medicamentosSeleccionados = datosPaciente.medicamentos.split('\n').filter(Boolean).join('\n');
-    
-            // Hacer la solicitud PUT para guardar los medicamentos en el paciente
-            await axiosInstance.put(`/api/pacientes/${idPaciente}/medicamentos`, {
-                medicamentos: medicamentosSeleccionados
-            });
-    
-            console.log('Medicamentos guardados exitosamente');
-    
-            // Mostrar un mensaje de éxito y cerrar el modal
-            setMensajeExito('Medicamentos guardados con éxito');
-            toggleModalMedicamentos(); // Cerrar el modal de medicamentos
-        } catch (error) {
-            console.error('Error al guardar los medicamentos:', error);
-        }
-    };
-    
-    
+
     const cerrarModal = () => {
         setMostrarModal(false);
         setModalAdvertencia(null);
@@ -166,89 +128,42 @@ const Formulario = () => {
 
     const abrirModalAdvertencia = (nivel) => {
         const advertencias = {
-            '<10% Poco': `-Bajo riesgo no significa ningún riesgo, se sugiere intervenciones como estilo de vida más saludable.
--Vigilar el perfil de riesgo cada 12 meses.
--Esto incluye básicamente control de presión arterial, colesterol y glucemia.
--Reducción de hábitos tóxicos.
--Mayor actividad física y alimentación saludable.
-            `,
-            '>10% <20% Moderado': `-Significa que hay un riesgo moderado de sufrir un episodio vascular en los próximos 10 años.
--Vigilar el perfil de riesgo cada 6 a 12 meses.
--Esto incluye básicamente control de presión arterial, colesterol y glucemia.
--Control de peso y cintura.
--Reducción de hábitos tóxicos.
--Mayor actividad física y alimentación saludable.
--Cumplimiento en la medicación indicada.
-            `,
-            '>20% <30% Alto': `-Significa que hay un alto riesgo de sufrir un episodio vascular en los próximos 10 años.
--Vigilar el perfil de riesgo cada 3 a 6 meses.
--Esto incluye básicamente control de presión arterial, colesterol y glucemia.
--Control de peso y cintura.
--Reducción de hábitos tóxicos.
--Mayor actividad física y alimentación saludable.
--Cumplimiento en la medicación indicada.
-            `,
-            '>30% <40% Muy Alto': `-Significa que hay un alto riesgo de sufrir un episodio vascular en los próximos 10 años.
--Vigilar el perfil de riesgo cada 3 a 6 meses.
--Esto incluye básicamente control de presión arterial, colesterol y glucemia.
--Control de peso y cintura.
--Reducción de hábitos tóxicos.
--Mayor actividad física y alimentación saludable.
--Cumplimiento en la medicación indicada.
-            `,
-            '>40% Crítico': `-Significa que hay un alto riesgo de sufrir un episodio vascular en los próximos 10 años.
--Vigilar el perfil de riesgo cada 3 a 6 meses.
--Esto incluye básicamente control de presión arterial, colesterol y glucemia.
--Control de peso y cintura.
--Reducción de hábitos tóxicos.
--Mayor actividad física y alimentación saludable.
--Cumplimiento en la medicación indicada.
-            `
+            '<10% Poco': `- Bajo riesgo no significa ningún riesgo, se sugiere intervenciones como estilo de vida más saludable.
+- Vigilar el perfil de riesgo cada 12 meses.
+- Esto incluye básicamente control de presión arterial, colesterol y glucemia.
+- Reducción de hábitos tóxicos.
+- Mayor actividad física y alimentación saludable.`,
+            '>10% <20% Moderado': `- Significa que hay un riesgo moderado de sufrir un episodio vascular en los próximos 10 años.
+- Vigilar el perfil de riesgo cada 6 a 12 meses.
+- Esto incluye básicamente control de presión arterial, colesterol y glucemia.
+- Control de peso y cintura.
+- Reducción de hábitos tóxicos.
+- Mayor actividad física y alimentación saludable.
+- Cumplimiento en la medicación indicada.`,
+            '>20% <30% Alto': `- Significa que hay un alto riesgo de sufrir un episodio vascular en los próximos 10 años.
+- Vigilar el perfil de riesgo cada 3 a 6 meses.
+- Esto incluye básicamente control de presión arterial, colesterol y glucemia.
+- Control de peso y cintura.
+- Reducción de hábitos tóxicos.
+- Mayor actividad física y alimentación saludable.
+- Cumplimiento en la medicación indicada.`,
+            '>30% <40% Muy Alto': `- Significa que hay un alto riesgo de sufrir un episodio vascular en los próximos 10 años.
+- Vigilar el perfil de riesgo cada 3 a 6 meses.
+- Esto incluye básicamente control de presión arterial, colesterol y glucemia.
+- Control de peso y cintura.
+- Reducción de hábitos tóxicos.
+- Mayor actividad física y alimentación saludable.
+- Cumplimiento en la medicación indicada.`,
+            '>40% Crítico': `- Significa que hay un alto riesgo de sufrir un episodio vascular en los próximos 10 años.
+- Vigilar el perfil de riesgo cada 3 a 6 meses.
+- Esto incluye básicamente control de presión arterial, colesterol y glucemia.
+- Control de peso y cintura.
+- Reducción de hábitos tóxicos.
+- Mayor actividad física y alimentación saludable.
+- Cumplimiento en la medicación indicada.`
         };
         setModalAdvertencia(advertencias[nivel]);
     };
-
-    const listaMedicamentos = [
-        "1800*Consulta de detección y/o seguimiento de HTA CTC074K86",
-        "270*Notificación de riesgo cardiovascular < 10% (a partir de 18 años) NTN007K22",
-        "270*Notificación de riesgo cardiovascular 10% ≤ 20% (a partir de 18 años) NTN008K22",
-        "270*Notificación de riesgo cardiovascular 20% ≤ 30% (a partir de 18 años) NTN009K22",
-        "270*Notificación de riesgo cardiovascular ≥ 30% (a partir de 18 años) NTN010K22",
-        "936*Consejería Consejo conductual breve de cese de tabaquismo COT023P22",                              
-        "180*Glucemia LBL045VMD",
-        "180*Perfil lipídico LBL073VMD",
-        "180*Albuminuria LBL137VMD",
-        "180*Creatinina sérica LBL022VMD",
-        "180*IFGe LBL140VMD",
-        "504*Notificación de persona con hipertensión en tratamiento farmacológico NTN030K86",
-        "558**Prescripción de enalapril P052 M07",
-        "558*Prescripción de losartán P052 M08",
-        "558*Prescripción de hidroclorotiazida P052 M09",
-        "558*Prescripción de amlodipina P052 M10",
-        "612*Dispensa de enalapril P053 M07",
-        "612*Dispensa de losartán P053 M08",
-        "612*Dispensa de hidroclorotiazida P053 M09",
-        "612*Dispensa de amlodipina P053 M10",
-        "936*Consulta para la evaluación de riesgo cardiovascular CTC048K22",
-        "702*Consulta de seguimiento de persona con riesgo cardiovascular CTC049K22",
-        "936*Consulta con cardiología en persona con alto RCV CTC044K22",
-        "468*Consejeria abandono de tabaquismo",
-        "936*Consulta para cesación tabáquica (personas adultas y mayores) CTC075A98",
-    ];
-    
-    const toggleModalMedicamentos = () => setMostrarModalMedicamentos(!mostrarModalMedicamentos);
-    
-    const handleMedicamentoChange = (event) => {
-        const { value, checked } = event.target;
-        if (checked) {
-            setMedicamentosSeleccionados([...medicamentosSeleccionados, value]);
-        } else {
-            setMedicamentosSeleccionados(
-                medicamentosSeleccionados.filter((med) => med !== value)
-            );
-        }
-    };
-    
 
     const obtenerColorRiesgo = (riesgo) => {
         switch (riesgo) {
@@ -282,7 +197,7 @@ const Formulario = () => {
         ];
         return (
             <div className="grid grid-cols-12 gap-2">
-                {riesgos.map((nivel, index) => (
+                {riesgos.map((nivel) => (
                     <React.Fragment key={nivel}>
                         <div className={`col-span-4 ${obtenerColorRiesgo(nivel)}`}></div>
                         <div
@@ -511,25 +426,7 @@ const Formulario = () => {
             {/* Modal Resultados */}
             {mostrarModal && !modalAdvertencia && (
                 <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg flex flex-col">
-                        <div className="flex justify-between items-start mb-4">
-                            {/* Botón para agregar medicamentos */}
-                            <button
-                                onClick={toggleModalMedicamentos}
-                                className="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
-                            >
-                                Agregar Medicamento
-                            </button>
-
-                            {/* Botón para guardar todos los datos */}
-                            <button
-                                onClick={guardarPaciente}
-                                className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 ml-4"
-                            >
-                                Guardar Paciente
-                            </button>
-                        </div>
-
+                    <div className="bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg">
                         <h2 className="text-lg font-semibold mb-4">Resultados</h2>
                         <p><strong>Edad:</strong> {datosPaciente.edad}</p>
                         <p><strong>Género:</strong> {datosPaciente.genero}</p>
@@ -549,56 +446,13 @@ const Formulario = () => {
                         <div className="mb-4">
                             {renderRiesgoGrid(nivelRiesgo)}
                         </div>
-
-                        {/* Botón para cerrar el modal */}
                         <button
                             onClick={cerrarModal}
-                            className="mt-auto py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
-                        >
-                            Cerrar
-                        </button>
-                    </div>
-                </div>
-            )}
-
-
-            {/* Modal para agregar medicamentos */}
-            {mostrarModalMedicamentos && (
-                <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg">
-                        <h2 className="text-lg font-semibold mb-4">Seleccionar Medicamentos</h2>
-                        <div className="mb-4 max-h-60 overflow-y-auto">
-                            {listaMedicamentos.map((medicamento, index) => (
-                                <div key={index}>
-                                    <input
-                                        type="checkbox"
-                                        value={medicamento}
-                                        onChange={handleMedicamentoChange}
-                                    />
-                                    <label className="ml-2">{medicamento}</label>
-                                </div>
-                            ))}
-                        </div>
-                        <button
-                            onClick={guardarMedicamentos}
-                            className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                        >
-                            Guardar
-                        </button>
-                        <button
-                            onClick={toggleModalMedicamentos}
                             className="mt-4 py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
                         >
                             Cerrar
                         </button>
                     </div>
-                </div>
-            )}
-
-            {/* Mensaje de éxito */}
-            {mensajeExito && (
-                <div className="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded-md shadow-md">
-                    {mensajeExito}
                 </div>
             )}
 
