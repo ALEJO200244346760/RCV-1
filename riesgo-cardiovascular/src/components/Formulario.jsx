@@ -93,35 +93,40 @@ const Formulario = () => {
         const presionAjustada = ajustarPresionArterial(parseInt(datosPaciente.presionArterial, 10));
         const imc = calcularIMC();
 
+        // Actualizar el estado con los valores calculados
         setDatosPaciente(prevDatos => ({
             ...prevDatos,
             imc,
             riesgo: calcularRiesgoCardiovascular(edadAjustada, datosPaciente.genero, datosPaciente.diabetes, datosPaciente.fumador, presionAjustada, datosPaciente.colesterol)
         }));
 
+        // Mostrar el modal de resultados, sin guardar nada aún
         setMostrarModal(true);
     };
 
+
+
     const guardarPaciente = async () => {
-        // Enviar los datos al backend
-        try {
-            await axiosInstance.post('/api/pacientes', {
-                edad: edadAjustada,
-                genero,
-                diabetes,
-                fumador,
-                presionArterial: presionAjustada,
-                colesterol,
-                peso: datosPaciente.peso,
-                talla: datosPaciente.talla,
-                imc, // Enviar el IMC calculado
-                ubicacion,
-                fechaRegistro,
-                nivelRiesgo,
-                hipertenso: datosPaciente.hipertenso,
-                infarto: datosPaciente.infarto,
-                acv: datosPaciente.acv,
-                medicamentos // Incluir los medicamentos seleccionados en la petición
+            try {
+                const edadAjustada = ajustarEdad(parseInt(datosPaciente.edad, 10));
+                const presionAjustada = ajustarPresionArterial(parseInt(datosPaciente.presionArterial, 10));
+                await axiosInstance.post('/api/pacientes', {
+                    edad: edadAjustada,
+                    genero,
+                    diabetes,
+                    fumador,
+                    presionArterial: presionAjustada,
+                    colesterol,
+                    peso: datosPaciente.peso,
+                    talla: datosPaciente.talla,
+                    imc, // Enviar el IMC calculado
+                    ubicacion,
+                    fechaRegistro,
+                    nivelRiesgo,
+                    hipertenso: datosPaciente.hipertenso,
+                    infarto: datosPaciente.infarto,
+                    acv: datosPaciente.acv,
+                    medicamentos // Incluir los medicamentos seleccionados en la petición
             });
             console.log('Datos guardados exitosamente');
         } catch (error) {
@@ -137,8 +142,8 @@ const Formulario = () => {
                 return;
             }
     
-            // Filtra los medicamentos seleccionados y únelos en un solo string, separados por saltos de línea
-            const medicamentosSeleccionados = medicamentosSeleccionados.split('\n').filter(Boolean).join('\n');
+            // Obtener los medicamentos seleccionados (deberías definir esta variable correctamente)
+            const medicamentosSeleccionados = medicamentos.split('\n').filter(Boolean).join('\n');
             
             // Hacer la solicitud PUT para guardar el string de medicamentos en el paciente
             await axiosInstance.put(`/api/pacientes/${datosPaciente.id}/medicamentos`, {
@@ -153,7 +158,8 @@ const Formulario = () => {
         } catch (error) {
             console.error('Error al guardar los medicamentos:', error);
         }
-    };    
+    };
+    
     
     const cerrarModal = () => {
         setMostrarModal(false);
@@ -528,17 +534,23 @@ const Formulario = () => {
                             {renderRiesgoGrid(nivelRiesgo)}
                         </div>
 
-                        {/* Botón Agregar Medicamento */}
+                        {/* Botón para agregar medicamentos */}
                         <button
                             onClick={toggleModalMedicamentos}
                             className="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
                         >
                             Agregar Medicamento
                         </button>
-                        {/* Botón para guardar todos los datos */}
-                        <button onClick={guardarPaciente}>Guardar Paciente</button>
-                
 
+                        {/* Botón para guardar todos los datos */}
+                        <button
+                            onClick={guardarPaciente}
+                            className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 ml-4"
+                        >
+                            Guardar Paciente
+                        </button>
+
+                        {/* Botón para cerrar el modal */}
                         <button
                             onClick={cerrarModal}
                             className="mt-4 py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
