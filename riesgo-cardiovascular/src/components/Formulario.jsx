@@ -561,12 +561,6 @@ const Formulario = () => {
                             ))}
                         </div>
                         <button
-                            onClick={guardarMedicamentos}
-                            className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                        >
-                            Guardar
-                        </button>
-                        <button
                             onClick={toggleModalMedicamentos}
                             className="mt-4 py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
                         >
