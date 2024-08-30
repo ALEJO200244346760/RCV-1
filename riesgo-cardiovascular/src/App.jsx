@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext'; // Asegúrate de que la ruta sea correcta
 import Header from './components/Header';
 import Estadisticas from './components/Estadisticas';
 import Formulario from './components/Formulario';
@@ -11,6 +12,7 @@ import Register from './components/Register'; // Importa el componente Register
 
 function App() {
   return (
+    <AuthProvider>
     <Router>
       <Header />  {/* Muestra el Header en todas las páginas */}
       <Routes>
@@ -23,6 +25,7 @@ function App() {
         <Route path="/register" element={<Register />} />
       </Routes>
     </Router>
+    </AuthProvider>
   );
 }
 
