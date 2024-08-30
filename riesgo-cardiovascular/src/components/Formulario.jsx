@@ -82,76 +82,74 @@ const Formulario = () => {
             setMostrarModal(true);
             return;
         }
-
+    
         if (nivelColesterolConocido && !datosPaciente.colesterol) {
             setModalAdvertencia('Debe ingresar el nivel de colesterol.');
             setMostrarModal(true);
             return;
         }
-
+    
+        // Ajustar la edad y la presión arterial
         const edadAjustada = ajustarEdad(parseInt(datosPaciente.edad, 10));
         const presionAjustada = ajustarPresionArterial(parseInt(datosPaciente.presionArterial, 10));
+    
+        // Calcular el IMC
         const imc = calcularIMC();
-
-        // Actualizar el estado con los valores calculados
-        setDatosPaciente(prevDatos => ({
-            ...prevDatos,
-            imc,
-            riesgo: calcularRiesgoCardiovascular(edadAjustada, datosPaciente.genero, datosPaciente.diabetes, datosPaciente.fumador, presionAjustada, datosPaciente.colesterol)
-        }));
-
-        // Mostrar el modal de resultados, sin guardar nada aún
+        setDatosPaciente((prevDatos) => ({ ...prevDatos, imc }));
+    
+        // Calcular el riesgo
+        const nivelRiesgo = calcularRiesgoCardiovascular(edadAjustada, datosPaciente.genero, datosPaciente.diabetes, datosPaciente.fumador, presionAjustada, datosPaciente.colesterol);
+        setNivelRiesgo(nivelRiesgo);
         setMostrarModal(true);
+    
+        // Mostrar la opción de agregar medicamentos
+        setMostrarOpcionesMedicamentos(true);
     };
-
-
-
+    
+    // 2. Guardar el paciente y todos los datos
     const guardarPaciente = async () => {
-            try {
-                const edadAjustada = ajustarEdad(parseInt(datosPaciente.edad, 10));
-                const presionAjustada = ajustarPresionArterial(parseInt(datosPaciente.presionArterial, 10));
-                await axiosInstance.post('/api/pacientes', {
-                    edad: edadAjustada,
-                    genero,
-                    diabetes,
-                    fumador,
-                    presionArterial: presionAjustada,
-                    colesterol,
-                    peso: datosPaciente.peso,
-                    talla: datosPaciente.talla,
-                    imc, // Enviar el IMC calculado
-                    ubicacion,
-                    fechaRegistro,
-                    nivelRiesgo,
-                    hipertenso: datosPaciente.hipertenso,
-                    infarto: datosPaciente.infarto,
-                    acv: datosPaciente.acv,
-                    medicamentos // Incluir los medicamentos seleccionados en la petición
+        try {
+            // Enviar todos los datos del paciente al backend, incluidos los medicamentos seleccionados
+            const response = await axiosInstance.post('/api/pacientes', {
+                ...datosPaciente,
+                nivelRiesgo, // El nivel de riesgo calculado
+                medicamentos: datosPaciente.medicamentos // Medicamentos seleccionados
             });
+    
             console.log('Datos guardados exitosamente');
+            setMensajeExito('Paciente guardado con éxito');
+    
+            // Actualizar el ID del paciente en el estado, si es necesario
+            const pacienteGuardado = response.data;
+            setDatosPaciente((prevDatos) => ({
+                ...prevDatos,
+                id: pacienteGuardado.id
+            }));
+    
         } catch (error) {
             console.error('Error al guardar los datos:', error);
         }
     };
     
-    const guardarMedicamentos = async () => {
+    
+    const guardarMedicamentos = async (idPaciente) => {
         try {
-            // Verifica que datosPaciente.id esté definido
-            if (!datosPaciente.id) {
+            // Verifica que idPaciente esté definido
+            if (!idPaciente) {
                 console.error('El ID del paciente no está definido');
                 return;
             }
     
-            // Obtener los medicamentos seleccionados (deberías definir esta variable correctamente)
-            const medicamentosSeleccionados = medicamentos.split('\n').filter(Boolean).join('\n');
-            
-            // Hacer la solicitud PUT para guardar el string de medicamentos en el paciente
-            await axiosInstance.put(`/api/pacientes/${datosPaciente.id}/medicamentos`, {
+            // Obtener los medicamentos seleccionados
+            const medicamentosSeleccionados = datosPaciente.medicamentos.split('\n').filter(Boolean).join('\n');
+    
+            // Hacer la solicitud PUT para guardar los medicamentos en el paciente
+            await axiosInstance.put(`/api/pacientes/${idPaciente}/medicamentos`, {
                 medicamentos: medicamentosSeleccionados
             });
     
             console.log('Medicamentos guardados exitosamente');
-            
+    
             // Mostrar un mensaje de éxito y cerrar el modal
             setMensajeExito('Medicamentos guardados con éxito');
             toggleModalMedicamentos(); // Cerrar el modal de medicamentos
@@ -510,56 +508,59 @@ const Formulario = () => {
                 </button>
             </form>
 
-                                    {/* Modal Resultados */}
-                                    {mostrarModal && !modalAdvertencia && (
-                                        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-                                            <div className="bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg">
-                                                <h2 className="text-lg font-semibold mb-4">Resultados</h2>
-                                                <p><strong>Edad:</strong> {datosPaciente.edad}</p>
-                                                <p><strong>Género:</strong> {datosPaciente.genero}</p>
-                                                <p><strong>Diabetes:</strong> {datosPaciente.diabetes}</p>
-                                                <p><strong>Fumador:</strong> {datosPaciente.fumador}</p>
-                                                <p><strong>Presión Arterial:</strong> {datosPaciente.presionArterial}</p>
-                                                <p><strong>Colesterol:</strong> {datosPaciente.colesterol || 'No especificado'}</p>
-                                                <p><strong>Peso:</strong> {datosPaciente.peso || 'No especificado'}</p>
-                                                <p><strong>Talla:</strong> {datosPaciente.talla || 'No especificada'} cm</p>
-                                                <p><strong>IMC:</strong> {datosPaciente.imc || 'No calculado'}</p>
-                                                <p><strong>Ubicación:</strong> {datosPaciente.ubicacion}</p>
-                                                <p><strong>Fecha de Registro:</strong> {datosPaciente.fechaRegistro}</p>
-                                                <p><strong>Hipertenso:</strong> {datosPaciente.hipertenso}</p>
-                                                <p><strong>Infarto:</strong> {datosPaciente.infarto}</p>
-                                                <p><strong>ACV:</strong> {datosPaciente.acv}</p>
-                                                <p><strong>Nivel de Riesgo:</strong></p>
-                                                <div className="mb-4">
-                                                    {renderRiesgoGrid(nivelRiesgo)}
-                                                </div>
+            {/* Modal Resultados */}
+            {mostrarModal && !modalAdvertencia && (
+                <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+                    <div className="bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg flex flex-col">
+                        <div className="flex justify-between items-start mb-4">
+                            {/* Botón para agregar medicamentos */}
+                            <button
+                                onClick={toggleModalMedicamentos}
+                                className="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                            >
+                                Agregar Medicamento
+                            </button>
 
-                                                {/* Botón para agregar medicamentos */}
-                                                <button
-                                                    onClick={toggleModalMedicamentos}
-                                                    className="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
-                                                >
-                                                    Agregar Medicamento
-                                                </button>
+                            {/* Botón para guardar todos los datos */}
+                            <button
+                                onClick={guardarPaciente}
+                                className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 ml-4"
+                            >
+                                Guardar Paciente
+                            </button>
+                        </div>
 
-                                                {/* Botón para guardar todos los datos */}
-                                                <button
-                                                    onClick={guardarPaciente}
-                                                    className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 ml-4"
-                                                >
-                                                    Guardar Paciente
-                                                </button>
+                        <h2 className="text-lg font-semibold mb-4">Resultados</h2>
+                        <p><strong>Edad:</strong> {datosPaciente.edad}</p>
+                        <p><strong>Género:</strong> {datosPaciente.genero}</p>
+                        <p><strong>Diabetes:</strong> {datosPaciente.diabetes}</p>
+                        <p><strong>Fumador:</strong> {datosPaciente.fumador}</p>
+                        <p><strong>Presión Arterial:</strong> {datosPaciente.presionArterial}</p>
+                        <p><strong>Colesterol:</strong> {datosPaciente.colesterol || 'No especificado'}</p>
+                        <p><strong>Peso:</strong> {datosPaciente.peso || 'No especificado'}</p>
+                        <p><strong>Talla:</strong> {datosPaciente.talla || 'No especificada'} cm</p>
+                        <p><strong>IMC:</strong> {datosPaciente.imc || 'No calculado'}</p>
+                        <p><strong>Ubicación:</strong> {datosPaciente.ubicacion}</p>
+                        <p><strong>Fecha de Registro:</strong> {datosPaciente.fechaRegistro}</p>
+                        <p><strong>Hipertenso:</strong> {datosPaciente.hipertenso}</p>
+                        <p><strong>Infarto:</strong> {datosPaciente.infarto}</p>
+                        <p><strong>ACV:</strong> {datosPaciente.acv}</p>
+                        <p><strong>Nivel de Riesgo:</strong></p>
+                        <div className="mb-4">
+                            {renderRiesgoGrid(nivelRiesgo)}
+                        </div>
 
-                                                {/* Botón para cerrar el modal */}
-                                                <button
-                                                    onClick={cerrarModal}
-                                                    className="mt-4 py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
-                                                >
-                                                    Cerrar
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
+                        {/* Botón para cerrar el modal */}
+                        <button
+                            onClick={cerrarModal}
+                            className="mt-auto py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                        >
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            )}
+
 
             {/* Modal para agregar medicamentos */}
             {mostrarModalMedicamentos && (
