@@ -132,11 +132,30 @@ const Formulario = () => {
     };
     
     
-    const manejarSeleccionMedicamentos = (medicamentosSeleccionados) => {
-        setDatosPaciente((prevDatos) => ({
-            ...prevDatos,
-            medicamentos: medicamentosSeleccionados.join('\n') // Almacena los medicamentos en un string
-        }));
+    const guardarMedicamentos = async (idPaciente) => {
+        try {
+            // Verifica que idPaciente esté definido
+            if (!idPaciente) {
+                console.error('El ID del paciente no está definido');
+                return;
+            }
+    
+            // Obtener los medicamentos seleccionados
+            const medicamentosSeleccionados = datosPaciente.medicamentos.split('\n').filter(Boolean).join('\n');
+    
+            // Hacer la solicitud PUT para guardar los medicamentos en el paciente
+            await axiosInstance.put(`/api/pacientes/${idPaciente}/medicamentos`, {
+                medicamentos: medicamentosSeleccionados
+            });
+    
+            console.log('Medicamentos guardados exitosamente');
+    
+            // Mostrar un mensaje de éxito y cerrar el modal
+            setMensajeExito('Medicamentos guardados con éxito');
+            toggleModalMedicamentos(); // Cerrar el modal de medicamentos
+        } catch (error) {
+            console.error('Error al guardar los medicamentos:', error);
+        }
     };
     
     
@@ -560,6 +579,12 @@ const Formulario = () => {
                                 </div>
                             ))}
                         </div>
+                        <button
+                            onClick={guardarMedicamentos}
+                            className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                        >
+                            Guardar
+                        </button>
                         <button
                             onClick={toggleModalMedicamentos}
                             className="mt-4 py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
