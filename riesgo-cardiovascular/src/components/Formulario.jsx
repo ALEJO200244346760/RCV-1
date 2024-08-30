@@ -89,65 +89,35 @@ const Formulario = () => {
             return;
         }
 
-        const edadAjustada = ajustarEdad(parseInt(datosPaciente.edad, 10));
-        const presionAjustada = ajustarPresionArterial(parseInt(datosPaciente.presionArterial, 10));
-        const imc = calcularIMC();
+        const { edad, genero, diabetes, fumador, presionArterial, colesterol } = datosPaciente;
 
-        // Actualizar el estado con los valores calculados
-        setDatosPaciente(prevDatos => ({
+        const edadAjustada = parseInt(edad, 10);
+        const presionAjustada = parseInt(presionArterial, 10);
+
+        const imc = calcularIMC();
+        const nivelRiesgo = calcularRiesgoCardiovascular(edadAjustada, genero, diabetes, fumador, presionAjustada, colesterol);
+
+        setDatosPaciente((prevDatos) => ({
             ...prevDatos,
             imc,
-            riesgo: calcularRiesgoCardiovascular(edadAjustada, datosPaciente.genero, datosPaciente.diabetes, datosPaciente.fumador, presionAjustada, datosPaciente.colesterol)
+            nivelRiesgo
         }));
 
-        // Mostrar el modal de resultados, sin guardar nada aún
+        setNivelRiesgo(nivelRiesgo);
         setMostrarModal(true);
     };
 
 
-
     const guardarPaciente = async () => {
-        // Extraer todas las propiedades de datosPaciente
-        const {
-            edad, 
-            genero, 
-            diabetes, 
-            fumador, 
-            presionArterial, 
-            colesterol, 
-            imc, 
-            ubicacion, 
-            fechaRegistro, 
-            hipertenso, 
-            infarto, 
-            acv 
-        } = datosPaciente;
-    
-        // Ajustar la edad y la presión arterial
-        const edadAjustada = ajustarEdad(parseInt(edad, 10));
-        const presionAjustada = ajustarPresionArterial(parseInt(presionArterial, 10));
-    
-        // Enviar los datos al backend
         try {
-            await axiosInstance.post('/api/pacientes', {
-                edad: edadAjustada,
-                genero,
-                diabetes,
-                fumador,
-                presionArterial: presionAjustada,
-                colesterol,
-                peso: datosPaciente.peso,
-                talla: datosPaciente.talla,
-                imc, // Enviar el IMC calculado
-                ubicacion,
-                fechaRegistro,
-                nivelRiesgo,
-                hipertenso,
-                infarto,
-                acv,
-                medicamentos // Incluir los medicamentos seleccionados en la petición
-            });
+            const response = await axiosInstance.post('/api/pacientes', datosPaciente);
+            const pacienteGuardado = response.data;
+            setDatosPaciente((prevDatos) => ({
+                ...prevDatos,
+                id: pacienteGuardado.id
+            }));
             console.log('Datos guardados exitosamente');
+            setMensajeExito('Paciente guardado con éxito');
         } catch (error) {
             console.error('Error al guardar los datos:', error);
         }
