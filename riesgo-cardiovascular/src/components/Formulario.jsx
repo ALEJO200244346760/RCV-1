@@ -110,34 +110,46 @@ const Formulario = () => {
 
     const guardarPaciente = async () => {
         try {
+            // Enviar los datos del paciente al backend
             const response = await axiosInstance.post('/api/pacientes', datosPaciente);
             const pacienteGuardado = response.data;
+    
+            // Actualiza el estado del paciente con el ID recibido del backend
             setDatosPaciente((prevDatos) => ({
                 ...prevDatos,
                 id: pacienteGuardado.id
             }));
+    
             console.log('Datos guardados exitosamente');
             setMensajeExito('Paciente guardado con éxito');
+            
+            // Después de guardar el paciente, guarda los medicamentos
+            await guardarMedicamentos(pacienteGuardado.id);
+            
         } catch (error) {
             console.error('Error al guardar los datos:', error);
         }
     };
     
     
-    const guardarMedicamentos = async () => {
+    const guardarMedicamentos = async (idPaciente) => {
         try {
-            // Verifica que datosPaciente.id esté definido
+            // Verifica que idPaciente esté definido
+            if (!idPaciente) {
+                console.error('El ID del paciente no está definido');
+                return;
+            }
     
-            // Obtener los medicamentos seleccionados (deberías definir esta variable correctamente)
-            const medicamentosSeleccionados = medicamentos.split('\n').filter(Boolean).join('\n');
-            
-            // Hacer la solicitud PUT para guardar el string de medicamentos en el paciente
-            await axiosInstance.put(`/api/pacientes/${datosPaciente.id}/medicamentos`, {
+            // Obtener los medicamentos seleccionados
+            const medicamentosSeleccionados = datosPaciente.medicamentos.split('\n').filter(Boolean).join('\n');
+    
+            // Hacer la solicitud PUT para guardar los medicamentos en el paciente
+            await axiosInstance.put(`/api/pacientes/${idPaciente}/medicamentos`, {
                 medicamentos: medicamentosSeleccionados
             });
     
             console.log('Medicamentos guardados exitosamente');
-            
+    
             // Mostrar un mensaje de éxito y cerrar el modal
             setMensajeExito('Medicamentos guardados con éxito');
             toggleModalMedicamentos(); // Cerrar el modal de medicamentos
