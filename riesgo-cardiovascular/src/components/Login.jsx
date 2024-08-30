@@ -1,21 +1,19 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext'; // Asegúrate de que la ruta sea correcta
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { login } = useAuth();
+  const navigate = useNavigate(); // Para redirigir al usuario después del login
 
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post('/login', {  // Asegúrate de que esta URL sea correcta
-        email,
-        password,
-      });
-      localStorage.setItem('token', response.data.token);
-      console.log('Login exitoso:', response.data);
-      // Redirige o actualiza el estado de la aplicación según sea necesario
+      await login(email, password);
+      console.log('Login exitoso');
+      navigate('/'); // Redirige a la página principal o a donde necesites
     } catch (error) {
       console.error('Error en el login:', error.response?.data || error.message);
       if (error.response) {
