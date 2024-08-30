@@ -9,15 +9,21 @@ const Login = () => {
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post('/login', {
+      const response = await axios.post('https://ercv-oms.vercel.app/login', {  // Asegúrate de que esta URL sea correcta
         email,
         password,
       });
       localStorage.setItem('token', response.data.token);
       console.log('Login exitoso:', response.data);
+      // Redirige o actualiza el estado de la aplicación según sea necesario
     } catch (error) {
-      console.error('Error en el login:', error.response?.data);
-      alert('Error en el inicio de sesión. Verifica tus credenciales.');
+      console.error('Error en el login:', error.response?.data || error.message);
+      if (error.response) {
+        // Dependiendo del error puedes dar mensajes más específicos
+        alert(`Error: ${error.response.data.message || 'Error desconocido'}`);
+      } else {
+        alert('Error de red o servidor');
+      }
     }
   };
 
