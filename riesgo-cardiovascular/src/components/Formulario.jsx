@@ -142,8 +142,8 @@ const Formulario = () => {
                 return;
             }
     
-            // Filtra los medicamentos seleccionados y únelos en un solo string, separados por saltos de línea
-            const medicamentosSeleccionados = medicamentosSeleccionados.split('\n').filter(Boolean).join('\n');
+            // Obtener los medicamentos seleccionados (deberías definir esta variable correctamente)
+            const medicamentosSeleccionados = medicamentos.split('\n').filter(Boolean).join('\n');
             
             // Hacer la solicitud PUT para guardar el string de medicamentos en el paciente
             await axiosInstance.put(`/api/pacientes/${datosPaciente.id}/medicamentos`, {
@@ -158,7 +158,8 @@ const Formulario = () => {
         } catch (error) {
             console.error('Error al guardar los medicamentos:', error);
         }
-    };    
+    };
+    
     
     const cerrarModal = () => {
         setMostrarModal(false);
@@ -512,7 +513,25 @@ const Formulario = () => {
             {/* Modal Resultados */}
             {mostrarModal && !modalAdvertencia && (
                 <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg">
+                    <div className="bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg flex flex-col">
+                        <div className="flex justify-between items-start mb-4">
+                            {/* Botón para agregar medicamentos */}
+                            <button
+                                onClick={toggleModalMedicamentos}
+                                className="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                            >
+                                Agregar Medicamento
+                            </button>
+
+                            {/* Botón para guardar todos los datos */}
+                            <button
+                                onClick={guardarPaciente}
+                                className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 ml-4"
+                            >
+                                Guardar Paciente
+                            </button>
+                        </div>
+
                         <h2 className="text-lg font-semibold mb-4">Resultados</h2>
                         <p><strong>Edad:</strong> {datosPaciente.edad}</p>
                         <p><strong>Género:</strong> {datosPaciente.genero}</p>
@@ -533,32 +552,17 @@ const Formulario = () => {
                             {renderRiesgoGrid(nivelRiesgo)}
                         </div>
 
-                        {/* Botón para agregar medicamentos */}
-                        <button
-                            onClick={toggleModalMedicamentos}
-                            className="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
-                        >
-                            Agregar Medicamento
-                        </button>
-
-                        {/* Botón para guardar todos los datos */}
-                        <button
-                            onClick={guardarPaciente}
-                            className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 ml-4"
-                        >
-                            Guardar Paciente
-                        </button>
-
                         {/* Botón para cerrar el modal */}
                         <button
                             onClick={cerrarModal}
-                            className="mt-4 py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                            className="mt-auto py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
                         >
                             Cerrar
                         </button>
                     </div>
                 </div>
             )}
+
 
             {/* Modal para agregar medicamentos */}
             {mostrarModalMedicamentos && (
