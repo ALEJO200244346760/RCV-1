@@ -26,7 +26,7 @@ const Formulario = () => {
     const [mostrarModal, setMostrarModal] = useState(false);
     const [modalAdvertencia, setModalAdvertencia] = useState(null);
     const [mostrarModalMedicamentos, setMostrarModalMedicamentos] = useState(false);
-    const [medicamentosSeleccionados, setMedicamentosSeleccionados] = useState('');
+    const [medicamentosSeleccionados, setMostrarOpcionesMedicamentos] = useState('');
     const [medicamentos, setMedicamentos] = useState('');
     const [mensajeExito, setMensajeExito] = useState('');
 
