@@ -9,7 +9,7 @@ const Login = () => {
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post('https://ercv-oms.vercel.app/login', {  // Asegúrate de que esta URL sea correcta
+      const response = await axios.post('/login', {  // Asegúrate de que esta URL sea correcta
         email,
         password,
       });
