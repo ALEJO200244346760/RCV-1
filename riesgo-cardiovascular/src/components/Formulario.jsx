@@ -127,10 +127,6 @@ const Formulario = () => {
     const guardarMedicamentos = async () => {
         try {
             // Verifica que datosPaciente.id esté definido
-            if (!datosPaciente.id) {
-                console.error('El ID del paciente no está definido');
-                return;
-            }
     
             // Obtener los medicamentos seleccionados (deberías definir esta variable correctamente)
             const medicamentosSeleccionados = medicamentos.split('\n').filter(Boolean).join('\n');
