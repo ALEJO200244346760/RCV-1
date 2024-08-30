@@ -107,6 +107,9 @@ const Formulario = () => {
         // Incluir los medicamentos seleccionados
         const { medicamentos } = datosPaciente;
     
+    };
+
+    const guardarPaciente = async () => {
         // Enviar los datos al backend
         try {
             await axiosInstance.post('/api/pacientes', {
@@ -539,6 +542,9 @@ const Formulario = () => {
                         >
                             Agregar Medicamento
                         </button>
+                        {/* Botón para guardar todos los datos */}
+                        <button onClick={guardarPaciente}>Guardar Paciente</button>
+                
 
                         <button
                             onClick={cerrarModal}
