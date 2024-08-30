@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
   // Función de inicio de sesión
   const login = async (email, password) => {
     try {
-      const response = await axios.post('http://localhost:8080/login', { email, password });
+      const response = await axios.post('/login', { email, password });
       const { token } = response.data;
       localStorage.setItem('token', token);
       setToken(token);
