@@ -27,6 +27,7 @@ const Formulario = () => {
     const [modalAdvertencia, setModalAdvertencia] = useState(null);
     const [mostrarModalMedicamentos, setMostrarModalMedicamentos] = useState(false);
     const [medicamentosSeleccionados, setMedicamentosSeleccionados] = useState('');
+    const [mostrarOpcionesMedicamentos, setMostrarOpcionesMedicamentos] = useState(false);
     const [medicamentos, setMedicamentos] = useState('');
     const [mensajeExito, setMensajeExito] = useState('');
 
@@ -218,6 +219,7 @@ const Formulario = () => {
     ];
     
     const toggleModalMedicamentos = () => setMostrarModalMedicamentos(!mostrarModalMedicamentos);
+    
     
     const handleMedicamentoChange = (event) => {
         const { value, checked } = event.target;
@@ -544,7 +546,7 @@ const Formulario = () => {
 
 
             {/* Modal para agregar medicamentos */}
-            {mostrarModalMedicamentos && (
+            {mostrarOpcionesMedicamentos && (
                 <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg">
                         <h2 className="text-lg font-semibold mb-4">Seleccionar Medicamentos</h2>
@@ -562,8 +564,7 @@ const Formulario = () => {
                         </div>
                         <button
                             onClick={() => {
-                                // Aquí puedes actualizar el estado de los medicamentos y cerrar el modal
-                                toggleModalMedicamentos();
+                                toggleModalMedicamentos(); // Cierra el modal y guarda los medicamentos
                             }}
                             className="mt-4 py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
                         >
@@ -572,6 +573,7 @@ const Formulario = () => {
                     </div>
                 </div>
             )}
+
 
             // Mensaje de éxito
             {mensajeExito && (
