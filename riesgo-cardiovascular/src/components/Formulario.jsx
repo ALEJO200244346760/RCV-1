@@ -82,80 +82,61 @@ const Formulario = () => {
             setMostrarModal(true);
             return;
         }
-
+    
         if (nivelColesterolConocido && !datosPaciente.colesterol) {
             setModalAdvertencia('Debe ingresar el nivel de colesterol.');
             setMostrarModal(true);
             return;
         }
-
-        const { edad, genero, diabetes, fumador, presionArterial, colesterol } = datosPaciente;
-
-        const edadAjustada = parseInt(edad, 10);
-        const presionAjustada = parseInt(presionArterial, 10);
-
+    
+        // Ajustar la edad y la presión arterial
+        const edadAjustada = ajustarEdad(parseInt(datosPaciente.edad, 10));
+        const presionAjustada = ajustarPresionArterial(parseInt(datosPaciente.presionArterial, 10));
+    
+        // Calcular el IMC
         const imc = calcularIMC();
-        const nivelRiesgo = calcularRiesgoCardiovascular(edadAjustada, genero, diabetes, fumador, presionAjustada, colesterol);
-
-        setDatosPaciente((prevDatos) => ({
-            ...prevDatos,
-            imc,
-            nivelRiesgo
-        }));
-
+        setDatosPaciente((prevDatos) => ({ ...prevDatos, imc }));
+    
+        // Calcular el riesgo
+        const nivelRiesgo = calcularRiesgoCardiovascular(edadAjustada, datosPaciente.genero, datosPaciente.diabetes, datosPaciente.fumador, presionAjustada, datosPaciente.colesterol);
         setNivelRiesgo(nivelRiesgo);
         setMostrarModal(true);
+    
+        // Mostrar la opción de agregar medicamentos
+        setMostrarOpcionesMedicamentos(true);
     };
-
-
+    
+    // 2. Guardar el paciente y todos los datos
     const guardarPaciente = async () => {
         try {
-            // Enviar los datos del paciente al backend
-            const response = await axiosInstance.post('/api/pacientes', datosPaciente);
-            const pacienteGuardado = response.data;
+            // Enviar todos los datos del paciente al backend, incluidos los medicamentos seleccionados
+            const response = await axiosInstance.post('/api/pacientes', {
+                ...datosPaciente,
+                nivelRiesgo, // El nivel de riesgo calculado
+                medicamentos: datosPaciente.medicamentos // Medicamentos seleccionados
+            });
     
-            // Actualiza el estado del paciente con el ID recibido del backend
+            console.log('Datos guardados exitosamente');
+            setMensajeExito('Paciente guardado con éxito');
+    
+            // Actualizar el ID del paciente en el estado, si es necesario
+            const pacienteGuardado = response.data;
             setDatosPaciente((prevDatos) => ({
                 ...prevDatos,
                 id: pacienteGuardado.id
             }));
     
-            console.log('Datos guardados exitosamente');
-            setMensajeExito('Paciente guardado con éxito');
-            
-            // Después de guardar el paciente, guarda los medicamentos
-            await guardarMedicamentos(pacienteGuardado.id);
-            
         } catch (error) {
             console.error('Error al guardar los datos:', error);
         }
     };
     
     
-    const guardarMedicamentos = async (idPaciente) => {
-        try {
-            // Verifica que idPaciente esté definido
-            if (!idPaciente) {
-                console.error('El ID del paciente no está definido');
-                return;
-            }
-    
-            // Obtener los medicamentos seleccionados
-            const medicamentosSeleccionados = datosPaciente.medicamentos.split('\n').filter(Boolean).join('\n');
-    
-            // Hacer la solicitud PUT para guardar los medicamentos en el paciente
-            await axiosInstance.put(`/api/pacientes/${idPaciente}/medicamentos`, {
-                medicamentos: medicamentosSeleccionados
-            });
-    
-            console.log('Medicamentos guardados exitosamente');
-    
-            // Mostrar un mensaje de éxito y cerrar el modal
-            setMensajeExito('Medicamentos guardados con éxito');
-            toggleModalMedicamentos(); // Cerrar el modal de medicamentos
-        } catch (error) {
-            console.error('Error al guardar los medicamentos:', error);
-        }
+    const manejarSeleccionMedicamentos = (medicamentosSeleccionados) => {
+        setDatosPaciente((prevDatos) => ({
+            ...prevDatos,
+            medicamentos: medicamentosSeleccionados.join('\n') // Almacena los medicamentos en un string
+        }));
     };
     
     
