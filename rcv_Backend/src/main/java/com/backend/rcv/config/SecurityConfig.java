@@ -39,7 +39,6 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login", "/register").permitAll()  // Permitir acceso a estos endpoints sin autenticación
                         .requestMatchers("/administracion/**").hasRole("CARDIOLOGO")
                         .anyRequest().authenticated()
                 )
