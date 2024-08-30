@@ -107,32 +107,52 @@ const Formulario = () => {
 
 
     const guardarPaciente = async () => {
-            try {
-                const edadAjustada = ajustarEdad(parseInt(datosPaciente.edad, 10));
-                const presionAjustada = ajustarPresionArterial(parseInt(datosPaciente.presionArterial, 10));
-                await axiosInstance.post('/api/pacientes', {
-                    edad: edadAjustada,
-                    genero,
-                    diabetes,
-                    fumador,
-                    presionArterial: presionAjustada,
-                    colesterol,
-                    peso: datosPaciente.peso,
-                    talla: datosPaciente.talla,
-                    imc, // Enviar el IMC calculado
-                    ubicacion,
-                    fechaRegistro,
-                    nivelRiesgo,
-                    hipertenso: datosPaciente.hipertenso,
-                    infarto: datosPaciente.infarto,
-                    acv: datosPaciente.acv,
-                    medicamentos // Incluir los medicamentos seleccionados en la petición
+        // Extraer todas las propiedades de datosPaciente
+        const {
+            edad, 
+            genero, 
+            diabetes, 
+            fumador, 
+            presionArterial, 
+            colesterol, 
+            imc, 
+            ubicacion, 
+            fechaRegistro, 
+            hipertenso, 
+            infarto, 
+            acv 
+        } = datosPaciente;
+    
+        // Ajustar la edad y la presión arterial
+        const edadAjustada = ajustarEdad(parseInt(edad, 10));
+        const presionAjustada = ajustarPresionArterial(parseInt(presionArterial, 10));
+    
+        // Enviar los datos al backend
+        try {
+            await axiosInstance.post('/api/pacientes', {
+                edad: edadAjustada,
+                genero,
+                diabetes,
+                fumador,
+                presionArterial: presionAjustada,
+                colesterol,
+                peso: datosPaciente.peso,
+                talla: datosPaciente.talla,
+                imc, // Enviar el IMC calculado
+                ubicacion,
+                fechaRegistro,
+                nivelRiesgo,
+                hipertenso,
+                infarto,
+                acv,
+                medicamentos // Incluir los medicamentos seleccionados en la petición
             });
             console.log('Datos guardados exitosamente');
         } catch (error) {
             console.error('Error al guardar los datos:', error);
         }
     };
+    
     
     const guardarMedicamentos = async () => {
         try {
