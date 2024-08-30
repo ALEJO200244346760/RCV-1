@@ -29,12 +29,16 @@ public class AuthController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
     @Autowired
     private JwtUtil jwtUtil;
+
     @Autowired
     private JwtUserDetailsService userDetailsService;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
+
     @Autowired
     private UsuarioService usuarioService;
 
@@ -58,6 +62,8 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> saveUser(@RequestBody UsuarioDto usuario) throws Exception {
+        // Encriptar la contraseña antes de guardarla
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         usuario.setRol("ENFERMERO");
         return ResponseEntity.ok(userDetailsService.save(usuario));
     }
