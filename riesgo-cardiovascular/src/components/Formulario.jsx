@@ -545,40 +545,43 @@ const Formulario = () => {
 
             {/* Modal para agregar medicamentos */}
             {mostrarModalMedicamentos && (
-            <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-                <div className="bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg">
-                    <h2 className="text-lg font-semibold mb-4">Seleccionar Medicamentos</h2>
-                    <div className="mb-4 max-h-60 overflow-y-auto">
-                        {listaMedicamentos.map((medicamento, index) => (
-                            <div key={index}>
-                                <input
-                                    type="checkbox"
-                                    value={medicamento}
-                                    onChange={handleMedicamentoChange}
-                                />
-                                <label className="ml-2">{medicamento}</label>
-                            </div>
-                        ))}
+                <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+                    <div className="bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg">
+                        <h2 className="text-lg font-semibold mb-4">Seleccionar Medicamentos</h2>
+                        <div className="mb-4 max-h-60 overflow-y-auto">
+                            {listaMedicamentos.map((medicamento, index) => (
+                                <div key={index}>
+                                    <input
+                                        type="checkbox"
+                                        value={medicamento}
+                                        onChange={handleMedicamentoChange}
+                                    />
+                                    <label className="ml-2">{medicamento}</label>
+                                </div>
+                            ))}
+                        </div>
+                        <button
+                            onClick={guardarMedicamentos}
+                            className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                        >
+                            Guardar
+                        </button>
+                        <button
+                            onClick={toggleModalMedicamentos}
+                            className="mt-4 py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                        >
+                            Cerrar
+                        </button>
                     </div>
-                    <button
-                        onClick={() => {
-                            // Aquí puedes actualizar el estado de los medicamentos y cerrar el modal
-                            toggleModalMedicamentos();
-                        }}
-                        className="mt-4 py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
-                    >
-                        Cerrar
-                    </button>
                 </div>
-            </div>
-        )}
+            )}
 
-        // Mensaje de éxito
-        {mensajeExito && (
-            <div className="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded-md shadow-md">
-                {mensajeExito}
-            </div>
-        )}
+            {/* Mensaje de éxito */}
+            {mensajeExito && (
+                <div className="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded-md shadow-md">
+                    {mensajeExito}
+                </div>
+            )}
 
             {/* Modal Advertencia */}
             {modalAdvertencia && (
