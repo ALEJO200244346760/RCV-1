@@ -76,37 +76,30 @@ const Formulario = () => {
         return edad && genero && diabetes && fumador && presionArterial && ubicacion;
     };
 
-    const calcularRiesgo = async () => {
+    const calcularRiesgo = () => {
         if (!validarCampos()) {
             setModalAdvertencia('Todos los campos deben estar completos.');
             setMostrarModal(true);
             return;
         }
-    
+
         if (nivelColesterolConocido && !datosPaciente.colesterol) {
             setModalAdvertencia('Debe ingresar el nivel de colesterol.');
             setMostrarModal(true);
             return;
         }
-    
-        const { edad, genero, diabetes, fumador, presionArterial, colesterol, ubicacion, fechaRegistro } = datosPaciente;
-    
-        // Ajustar la edad y la presión arterial
-        const edadAjustada = ajustarEdad(parseInt(edad, 10));
-        const presionAjustada = ajustarPresionArterial(parseInt(presionArterial, 10));
-    
-        // Calcular el IMC
+
+        const edadAjustada = ajustarEdad(parseInt(datosPaciente.edad, 10));
+        const presionAjustada = ajustarPresionArterial(parseInt(datosPaciente.presionArterial, 10));
         const imc = calcularIMC();
-        setDatosPaciente((prevDatos) => ({ ...prevDatos, imc }));
-    
-        // Calcular el riesgo
-        const nivelRiesgo = calcularRiesgoCardiovascular(edadAjustada, genero, diabetes, fumador, presionAjustada, colesterol);
-        setNivelRiesgo(nivelRiesgo);
+
+        setDatosPaciente(prevDatos => ({
+            ...prevDatos,
+            imc,
+            riesgo: calcularRiesgoCardiovascular(edadAjustada, datosPaciente.genero, datosPaciente.diabetes, datosPaciente.fumador, presionAjustada, datosPaciente.colesterol)
+        }));
+
         setMostrarModal(true);
-    
-        // Incluir los medicamentos seleccionados
-        const { medicamentos } = datosPaciente;
-    
     };
 
     const guardarPaciente = async () => {
