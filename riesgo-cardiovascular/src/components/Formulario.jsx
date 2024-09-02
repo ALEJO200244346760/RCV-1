@@ -76,61 +76,49 @@ const Formulario = () => {
         return edad && genero && diabetes && fumador && presionArterial && ubicacion;
     };
 
-    const calcularRiesgo = () => {
+    const calcularRiesgo = async () => {
         if (!validarCampos()) {
             setModalAdvertencia('Todos los campos deben estar completos.');
             setMostrarModal(true);
             return;
         }
-
+    
         if (nivelColesterolConocido && !datosPaciente.colesterol) {
             setModalAdvertencia('Debe ingresar el nivel de colesterol.');
             setMostrarModal(true);
             return;
         }
-
-        const { edad, genero, diabetes, fumador, presionArterial, colesterol } = datosPaciente;
-
-        const edadAjustada = parseInt(edad, 10);
-        const presionAjustada = parseInt(presionArterial, 10);
-
+    
+        const { edad, genero, diabetes, fumador, presionArterial, colesterol, ubicacion, fechaRegistro } = datosPaciente;
+    
+        // Ajustar la edad y la presión arterial
+        const edadAjustada = ajustarEdad(parseInt(edad, 10));
+        const presionAjustada = ajustarPresionArterial(parseInt(presionArterial, 10));
+    
+        // Calcular el IMC
         const imc = calcularIMC();
+        setDatosPaciente((prevDatos) => ({ ...prevDatos, imc }));
+    
+        // Calcular el riesgo
         const nivelRiesgo = calcularRiesgoCardiovascular(edadAjustada, genero, diabetes, fumador, presionAjustada, colesterol);
-
-        setDatosPaciente((prevDatos) => ({
-            ...prevDatos,
-            imc,
-            nivelRiesgo
-        }));
-
         setNivelRiesgo(nivelRiesgo);
         setMostrarModal(true);
+    
+        // Incluir los medicamentos seleccionados
+        const { medicamentos } = datosPaciente;
+    
     };
-
 
     const guardarPaciente = async () => {
         try {
-            // Enviar los datos del paciente al backend
-            const response = await axiosInstance.post('/api/pacientes', datosPaciente);
-            const pacienteGuardado = response.data;
-    
-            // Actualiza el estado del paciente con el ID recibido del backend
-            setDatosPaciente((prevDatos) => ({
-                ...prevDatos,
-                id: pacienteGuardado.id
-            }));
-    
-            console.log('Datos guardados exitosamente');
+            // Hacer la solicitud PUT para guardar todos los datos del paciente, incluidos los medicamentos
+            await axiosInstance.put(`/api/pacientes/${datosPaciente.id}`, datosPaciente);
+            console.log('Paciente guardado exitosamente');
             setMensajeExito('Paciente guardado con éxito');
-            
-            // Después de guardar el paciente, guarda los medicamentos
-            await guardarMedicamentos(pacienteGuardado.id);
-            
         } catch (error) {
-            console.error('Error al guardar los datos:', error);
+            console.error('Error al guardar el paciente:', error);
         }
     };
-    
     
     const guardarMedicamentos = async () => {
         try {
@@ -140,8 +128,8 @@ const Formulario = () => {
                 return;
             }
     
-            // Obtener los medicamentos seleccionados (deberías definir esta variable correctamente)
-            const medicamentosSeleccionados = medicamentos.split('\n').filter(Boolean).join('\n');
+            // Filtra los medicamentos seleccionados y únelos en un solo string, separados por saltos de línea
+            const medicamentosSeleccionados = medicamentosSeleccionados.split('\n').filter(Boolean).join('\n');
             
             // Hacer la solicitud PUT para guardar el string de medicamentos en el paciente
             await axiosInstance.put(`/api/pacientes/${datosPaciente.id}/medicamentos`, {
@@ -156,8 +144,7 @@ const Formulario = () => {
         } catch (error) {
             console.error('Error al guardar los medicamentos:', error);
         }
-    };
-    
+    };    
     
     const cerrarModal = () => {
         setMostrarModal(false);
@@ -511,25 +498,7 @@ const Formulario = () => {
             {/* Modal Resultados */}
             {mostrarModal && !modalAdvertencia && (
                 <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg flex flex-col">
-                        <div className="flex justify-between items-start mb-4">
-                            {/* Botón para agregar medicamentos */}
-                            <button
-                                onClick={toggleModalMedicamentos}
-                                className="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
-                            >
-                                Agregar Medicamento
-                            </button>
-
-                            {/* Botón para guardar todos los datos */}
-                            <button
-                                onClick={guardarPaciente}
-                                className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 ml-4"
-                            >
-                                Guardar Paciente
-                            </button>
-                        </div>
-
+                    <div className="bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg">
                         <h2 className="text-lg font-semibold mb-4">Resultados</h2>
                         <p><strong>Edad:</strong> {datosPaciente.edad}</p>
                         <p><strong>Género:</strong> {datosPaciente.genero}</p>
@@ -550,17 +519,23 @@ const Formulario = () => {
                             {renderRiesgoGrid(nivelRiesgo)}
                         </div>
 
-                        {/* Botón para cerrar el modal */}
+                        {/* Botón Agregar Medicamento */}
+                        <button
+                            onClick={toggleModalMedicamentos}
+                            className="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                        >
+                            Agregar Medicamento
+                        </button>
+
                         <button
                             onClick={cerrarModal}
-                            className="mt-auto py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                            className="mt-4 py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
                         >
                             Cerrar
                         </button>
                     </div>
                 </div>
             )}
-
 
             {/* Modal para agregar medicamentos */}
             {mostrarModalMedicamentos && (
