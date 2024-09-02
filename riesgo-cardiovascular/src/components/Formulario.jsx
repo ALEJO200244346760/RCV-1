@@ -283,7 +283,7 @@ const Formulario = () => {
 
     const renderRiesgoGrid = (riesgo) => {
         const riesgos = [
-            '<10% Poco',
+            '<10% Bajo',
             '>10% <20% Moderado',
             '>20% <30% Alto',
             '>30% <40% Muy Alto',
