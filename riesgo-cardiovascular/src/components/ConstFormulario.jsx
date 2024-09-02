@@ -1,6 +1,6 @@
 // ConstFormulario.jsx
 import { calcularRiesgoCardiovascular } from './Calculadora';
-
+import React from 'react';
 
 export const manejarCambio = (e, datosPaciente, setDatosPaciente) => {
     const { name, value } = e.target;
