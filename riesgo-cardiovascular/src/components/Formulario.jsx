@@ -521,6 +521,22 @@ const Formulario = () => {
             {mostrarModal && !modalAdvertencia && (
                 <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg">
+                        {/* Botón Agregar Medicamento */}
+                        <button
+                            onClick={toggleModalMedicamentos}
+                            className="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                        >
+                            Agregar Medicamento
+                        </button>
+
+                        {/* Botón Agregar Medicamento */}
+                        <button
+                            onClick={guardarPaciente}
+                            className="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600 items-end"
+                        >
+                            Guardar paciente
+                        </button>
+
                         <h2 className="text-lg font-semibold mb-4">Resultados</h2>
                         <p><strong>Edad:</strong> {datosPaciente.edad}</p>
                         <p><strong>Género:</strong> {datosPaciente.genero}</p>
@@ -540,14 +556,6 @@ const Formulario = () => {
                         <div className="mb-4">
                             {renderRiesgoGrid(nivelRiesgo)}
                         </div>
-
-                        {/* Botón Agregar Medicamento */}
-                        <button
-                            onClick={toggleModalMedicamentos}
-                            className="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
-                        >
-                            Agregar Medicamento
-                        </button>
 
                         <button
                             onClick={cerrarModal}

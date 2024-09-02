@@ -1,6 +1,6 @@
 // Definir las tablas de riesgo para todas las combinaciones
 const riesgoMap = {
-    "verde": "<10% Bajo",
+    "verde": "<10% Poco",
     "amarillo": ">10% <20% Moderado",
     "naranja": ">20% <30% Alto",
     "rojo": ">30% <40% Muy Alto",
