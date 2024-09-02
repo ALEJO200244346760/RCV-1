@@ -112,7 +112,7 @@ const Formulario = () => {
     const guardarPaciente = async () => {
         try {
             // Hacer la solicitud PUT para guardar todos los datos del paciente, incluidos los medicamentos
-            await axiosInstance.put(`/api/pacientes/${datosPaciente.id}`, datosPaciente);
+            await axiosInstance.put(`/api/pacientes/`, datosPaciente);
             console.log('Paciente guardado exitosamente');
             setMensajeExito('Paciente guardado con éxito');
         } catch (error) {
