@@ -2,7 +2,7 @@ import React from 'react';
 
 const TomarPresion = () => {
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#ECF0F1'}}>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh'}}>
       <img 
         src="/tomarPresion.jpg" 
         alt="Tomar Presión" 

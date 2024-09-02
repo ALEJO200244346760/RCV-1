@@ -153,43 +153,65 @@ const Formulario = () => {
 
     const abrirModalAdvertencia = (nivel) => {
         const advertencias = {
-            '<10% Poco': `-Bajo riesgo no significa ningún riesgo, se sugiere intervenciones como estilo de vida más saludable.
--Vigilar el perfil de riesgo cada 12 meses.
--Esto incluye básicamente control de presión arterial, colesterol y glucemia.
--Reducción de hábitos tóxicos.
--Mayor actividad física y alimentación saludable.
+            '<10% Poco': `-No significa no tener riesgos.
+-Se recomienda intervenciones como un estilo de vida más saludable.
+-Mejorar la calidad del sueño logrando al menos siete horas continuas.
+-Actividad física que incluya ejercicios aeróbicos (como caminata bicicleta baile natación) y otros ejercicios aeróbicos (como levantamiento de pesas en tren superior o brazos y espalda y tren inferior como piernas y muslos, comenzando con cargas de menor a mayor peso gradualmente)
+-Estos tipos de ejercicios recomiendan al menos tres veces por semana, o bien 150 minutos semanales.
+-Vigilar el perfil del riesgo con el control de la presión arterial y un análisis de laboratorio de colesterol y glucemia.
+-Alimentación saludable recomendada en lo posible por un nutricionista o profesional de la salud.
+-Evitar hábitos tóxicos.
+-Realizar el cálculo de riesgo cardiovascular cada 12 meses.
             `,
-            '>10% <20% Moderado': `-Significa que hay un riesgo moderado de sufrir un episodio vascular en los próximos 10 años.
--Vigilar el perfil de riesgo cada 6 a 12 meses.
--Esto incluye básicamente control de presión arterial, colesterol y glucemia.
--Control de peso y cintura.
--Reducción de hábitos tóxicos.
--Mayor actividad física y alimentación saludable.
--Cumplimiento en la medicación indicada.
+            '>10% <20% Moderado': `-Significa tener riesgo moderado de sufrir un episodio vascular en los próximos 10 año-Se recomienda intervenciones como un estilo de vida más saludable.
+-Mayor adherencia y cumplimiento a los tratamientos y medicamentos indicados.
+-Realización de estudios complementarios indicados por el profesional de la salud.
+-Mejorar la calidad del sueño logrando al menos siete horas continuas.
+-Actividad física que incluya ejercicios aeróbicos (como caminata bicicleta baile natación) y otros ejercicios aeróbicos (como levantamiento de pesas en tren superior o brazos y espalda y tren inferior como piernas y muslos, comenzando con cargas de menor a mayor peso gradualmente)
+-Estos tipos de ejercicios recomiendan al menos tres veces por semana, o bien 150 minutos semanales, siempre controlando la presión arterial antes de iniciar la actividad física de mayor intensidad.
+-Vigilar el perfil del riesgo con un análisis de laboratorio de colesterol y glucemia.
+-Alimentación saludable recomendada en lo posible por un nutricionista o profesional de la salud.
+-Evitar hábitos tóxicos.
+-Realizar el cálculo de riesgo cardiovascular cada 6 meses.
             `,
-            '>20% <30% Alto': `-Significa que hay un alto riesgo de sufrir un episodio vascular en los próximos 10 años.
--Vigilar el perfil de riesgo cada 3 a 6 meses.
--Esto incluye básicamente control de presión arterial, colesterol y glucemia.
--Control de peso y cintura.
--Reducción de hábitos tóxicos.
--Mayor actividad física y alimentación saludable.
--Cumplimiento en la medicación indicada.
+            '>20% <30% Alto': `-Significa tener riesgo elevado de sufrir un episodio vascular en los próximos 10 años.
+-Se recomienda intervenciones como un estilo de vida más saludable.
+-Mayor adherencia y cumplimiento a los tratamientos y medicamentos indicados.
+-Realización de estudios complementarios indicados por el profesional de la salud.
+-Mejorar la calidad del sueño logrando al menos siete horas continuas.
+-Actividad física controlada y monitorizada idealmente en un centro de rehabilitación que incluya ejercicios aeróbicos (como caminata bicicleta baile natación) y otros ejercicios aeróbicos (como levantamiento de pesas en tren superior o brazos y espalda y tren inferior como piernas y muslos, comenzando con cargas de menor a mayor peso gradualmente)
+-Estos tipos de ejercicios recomiendan al menos tres veces por semana, o bien 150 minutos semanales, siempre controlando la presión arterial antes de iniciar la actividad física de mayor intensidad.
+-Vigilar el perfil del riesgo con un análisis de laboratorio de colesterol y glucemia.
+-Alimentación saludable recomendada en lo posible por un nutricionista o profesional de la salud.
+-Evitar hábitos tóxicos.
+-Realizar el cálculo de riesgo cardiovascular cada 3 meses.
+-Revisar el calendario de vacunas.
             `,
-            '>30% <40% Muy Alto': `-Significa que hay un alto riesgo de sufrir un episodio vascular en los próximos 10 años.
--Vigilar el perfil de riesgo cada 3 a 6 meses.
--Esto incluye básicamente control de presión arterial, colesterol y glucemia.
--Control de peso y cintura.
--Reducción de hábitos tóxicos.
--Mayor actividad física y alimentación saludable.
--Cumplimiento en la medicación indicada.
+            '>30% <40% Muy Alto': `-Significa tener riesgo elevado de sufrir un episodio vascular en los próximos 10 años.
+-Se recomienda intervenciones como un estilo de vida más saludable.
+-Mayor adherencia y cumplimiento a los tratamientos y medicamentos indicados.
+-Realización de estudios complementarios indicados por el profesional de la salud.
+-Mejorar la calidad del sueño logrando al menos siete horas continuas.
+-Actividad física controlada y monitorizada idealmente en un centro de rehabilitación que incluya ejercicios aeróbicos (como caminata bicicleta baile natación) y otros ejercicios aeróbicos (como levantamiento de pesas en tren superior o brazos y espalda y tren inferior como piernas y muslos, comenzando con cargas de menor a mayor peso gradualmente)
+-Estos tipos de ejercicios recomiendan al menos tres veces por semana, o bien 150 minutos semanales, siempre controlando la presión arterial antes de iniciar la actividad física de mayor intensidad.
+-Vigilar el perfil del riesgo con un análisis de laboratorio de colesterol y glucemia.
+-Alimentación saludable recomendada en lo posible por un nutricionista o profesional de la salud.
+-Evitar hábitos tóxicos.
+-Realizar el cálculo de riesgo cardiovascular cada 3 meses.
+-Revisar el calendario de vacunas.
             `,
-            '>40% Crítico': `-Significa que hay un alto riesgo de sufrir un episodio vascular en los próximos 10 años.
--Vigilar el perfil de riesgo cada 3 a 6 meses.
--Esto incluye básicamente control de presión arterial, colesterol y glucemia.
--Control de peso y cintura.
--Reducción de hábitos tóxicos.
--Mayor actividad física y alimentación saludable.
--Cumplimiento en la medicación indicada.
+            '>40% Crítico': `-Significa tener riesgo elevado de sufrir un episodio vascular en los próximos 10 años.
+-Se recomienda intervenciones como un estilo de vida más saludable.
+-Mayor adherencia y cumplimiento a los tratamientos y medicamentos indicados.
+-Realización de estudios complementarios indicados por el profesional de la salud.
+-Mejorar la calidad del sueño logrando al menos siete horas continuas.
+-Actividad física controlada y monitorizada idealmente en un centro de rehabilitación que incluya ejercicios aeróbicos (como caminata bicicleta baile natación) y otros ejercicios aeróbicos (como levantamiento de pesas en tren superior o brazos y espalda y tren inferior como piernas y muslos, comenzando con cargas de menor a mayor peso gradualmente)
+-Estos tipos de ejercicios recomiendan al menos tres veces por semana, o bien 150 minutos semanales, siempre controlando la presión arterial antes de iniciar la actividad física de mayor intensidad.
+-Vigilar el perfil del riesgo con un análisis de laboratorio de colesterol y glucemia.
+-Alimentación saludable recomendada en lo posible por un nutricionista o profesional de la salud.
+-Evitar hábitos tóxicos.
+-Realizar el cálculo de riesgo cardiovascular cada 3 meses.
+-Revisar el calendario de vacunas.
             `
         };
         setModalAdvertencia(advertencias[nivel]);
@@ -500,6 +522,7 @@ const Formulario = () => {
                 <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg">
                         <h2 className="text-lg font-semibold mb-4">Resultados</h2>
+                        <p><strong>Id:</strong> {datosPaciente.id}</p>
                         <p><strong>Edad:</strong> {datosPaciente.edad}</p>
                         <p><strong>Género:</strong> {datosPaciente.genero}</p>
                         <p><strong>Diabetes:</strong> {datosPaciente.diabetes}</p>
