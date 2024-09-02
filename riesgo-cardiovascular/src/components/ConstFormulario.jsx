@@ -1,23 +1,25 @@
-// ConstFormulario.jsx
+import React, { useState } from 'react';
 import { calcularRiesgoCardiovascular } from './Calculadora';
-import React from 'react';
 
+// Función para manejar el cambio en los inputs
 export const manejarCambio = (e, datosPaciente, setDatosPaciente) => {
     const { name, value } = e.target;
-    setDatosPaciente({
-        ...datosPaciente,
+    setDatosPaciente(prevDatos => ({
+        ...prevDatos,
         [name]: value,
-    });
+    }));
 };
 
+// Función para manejar la selección del colesterol
 export const manejarSeleccionColesterol = (value, datosPaciente, setDatosPaciente, setNivelColesterolConocido) => {
     setNivelColesterolConocido(value === 'si');
-    setDatosPaciente({
-        ...datosPaciente,
-        colesterol: value === 'no' ? 'No' : datosPaciente.colesterol
-    });
+    setDatosPaciente(prevDatos => ({
+        ...prevDatos,
+        colesterol: value === 'no' ? 'No' : prevDatos.colesterol
+    }));
 };
 
+// Función para calcular el IMC
 export const calcularIMC = (datosPaciente) => {
     const peso = parseFloat(datosPaciente.peso);
     const tallaCm = parseFloat(datosPaciente.talla);
@@ -29,6 +31,7 @@ export const calcularIMC = (datosPaciente) => {
     return '';
 };
 
+// Función para ajustar la edad
 export const ajustarEdad = (edad) => {
     if (edad < 50) return 40;
     if (edad >= 50 && edad <= 59) return 50;
@@ -36,6 +39,7 @@ export const ajustarEdad = (edad) => {
     return 70;
 };
 
+// Función para ajustar la presión arterial
 export const ajustarPresionArterial = (presion) => {
     if (presion < 140) return 120;
     if (presion >= 140 && presion <= 159) return 140;
@@ -43,11 +47,13 @@ export const ajustarPresionArterial = (presion) => {
     return 180;
 };
 
+// Función para validar los campos
 export const validarCampos = (datosPaciente) => {
     const { edad, genero, diabetes, fumador, presionArterial, ubicacion } = datosPaciente;
     return edad && genero && diabetes && fumador && presionArterial && ubicacion;
 };
 
+// Función para calcular el riesgo
 export const calcularRiesgo = async (datosPaciente, nivelColesterolConocido, setModalAdvertencia, setMostrarModal, setDatosPaciente, setNivelRiesgo) => {
     if (!validarCampos(datosPaciente)) {
         setModalAdvertencia('Todos los campos deben estar completos.');
@@ -61,7 +67,7 @@ export const calcularRiesgo = async (datosPaciente, nivelColesterolConocido, set
         return;
     }
 
-    const { edad, genero, diabetes, fumador, presionArterial, colesterol, ubicacion, fechaRegistro } = datosPaciente;
+    const { edad, genero, diabetes, fumador, presionArterial, colesterol, ubicacion } = datosPaciente;
 
     // Ajustar la edad y la presión arterial
     const edadAjustada = ajustarEdad(parseInt(edad, 10));
@@ -69,7 +75,7 @@ export const calcularRiesgo = async (datosPaciente, nivelColesterolConocido, set
 
     // Calcular el IMC
     const imc = calcularIMC(datosPaciente);
-    setDatosPaciente((prevDatos) => ({ ...prevDatos, imc }));
+    setDatosPaciente(prevDatos => ({ ...prevDatos, imc }));
 
     // Calcular el riesgo
     const nivelRiesgo = calcularRiesgoCardiovascular(edadAjustada, genero, diabetes, fumador, presionAjustada, colesterol);
@@ -77,9 +83,9 @@ export const calcularRiesgo = async (datosPaciente, nivelColesterolConocido, set
     setMostrarModal(true);
 };
 
+// Función para guardar los datos del paciente
 export const guardarPaciente = async (datosPaciente, axiosInstance, setMensajeExito) => {
     try {
-        // Hacer la solicitud PUT para guardar todos los datos del paciente, incluidos los medicamentos
         await axiosInstance.put('/api/pacientes/', datosPaciente);
         console.log('Paciente guardado exitosamente');
         setMensajeExito('Paciente guardado con éxito');
@@ -88,18 +94,15 @@ export const guardarPaciente = async (datosPaciente, axiosInstance, setMensajeEx
     }
 };
 
+// Función para guardar los medicamentos
 export const guardarMedicamentos = async (datosPaciente, medicamentosSeleccionados, axiosInstance, setMensajeExito, toggleModalMedicamentos) => {
     try {
-        // Verifica que datosPaciente.id esté definido
         if (!datosPaciente.id) {
             console.error('El ID del paciente no está definido');
             return;
         }
 
-        // Filtra los medicamentos seleccionados y únelos en un solo string, separados por saltos de línea
-        const medicamentosSeleccionadosStr = medicamentosSeleccionados.split('\n').filter(Boolean).join('\n');
-
-        // Hacer la solicitud PUT para guardar el string de medicamentos en el paciente
+        const medicamentosSeleccionadosStr = medicamentosSeleccionados.join('\n');
         await axiosInstance.put(`/api/pacientes/${datosPaciente.id}/medicamentos`, {
             medicamentos: medicamentosSeleccionadosStr
         });
@@ -112,11 +115,13 @@ export const guardarMedicamentos = async (datosPaciente, medicamentosSeleccionad
     }
 };
 
+// Función para cerrar el modal
 export const cerrarModal = (setMostrarModal, setModalAdvertencia) => {
     setMostrarModal(false);
     setModalAdvertencia(null);
 };
 
+// Función para abrir el modal de advertencia
 export const abrirModalAdvertencia = (nivel, setModalAdvertencia) => {
     const advertencias = {
         '<10% Poco': 'No significa no tener riesgos... (descripción completa)',
@@ -128,25 +133,29 @@ export const abrirModalAdvertencia = (nivel, setModalAdvertencia) => {
     setModalAdvertencia(advertencias[nivel]);
 };
 
+// Lista de medicamentos
 export const listaMedicamentos = [
     "1800*Consulta de detección y/o seguimiento de HTA CTC074K86",
     "270*Notificación de riesgo cardiovascular < 10% (a partir de 18 años) NTN007K22",
     // Más medicamentos...
 ];
 
-export const toggleModalMedicamentos = (mostrarModalMedicamentos, setMostrarModalMedicamentos) => setMostrarModalMedicamentos(!mostrarModalMedicamentos);
+// Función para alternar el modal de medicamentos
+export const toggleModalMedicamentos = (mostrarModalMedicamentos, setMostrarModalMedicamentos) => setMostrarModalMedicamentos(prevState => !prevState);
 
+// Función para manejar el cambio en los medicamentos seleccionados
 export const handleMedicamentoChange = (event, medicamentosSeleccionados, setMedicamentosSeleccionados) => {
     const { value, checked } = event.target;
     if (checked) {
-        setMedicamentosSeleccionados([...medicamentosSeleccionados, value]);
+        setMedicamentosSeleccionados(prevMedicamentos => [...prevMedicamentos, value]);
     } else {
-        setMedicamentosSeleccionados(
-            medicamentosSeleccionados.filter((med) => med !== value)
+        setMedicamentosSeleccionados(prevMedicamentos =>
+            prevMedicamentos.filter((med) => med !== value)
         );
     }
 };
 
+// Función para obtener el color del riesgo
 export const obtenerColorRiesgo = (riesgo) => {
     switch (riesgo) {
         case '<10% Poco': return 'bg-green-500';
@@ -158,6 +167,7 @@ export const obtenerColorRiesgo = (riesgo) => {
     }
 };
 
+// Función para obtener el texto del riesgo
 export const obtenerTextoRiesgo = (riesgo) => {
     switch (riesgo) {
         case '<10% Poco': return '<10% Poco';
@@ -169,6 +179,7 @@ export const obtenerTextoRiesgo = (riesgo) => {
     }
 };
 
+// Función para renderizar la cuadrícula de riesgos
 export const renderRiesgoGrid = (riesgo) => {
     const riesgos = [
         '<10% Poco',
