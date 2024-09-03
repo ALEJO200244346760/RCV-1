@@ -235,6 +235,46 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
       borderWidth: 1
     }]
   };
+  // Agrupación de IMC
+  const imcCategorias = ['<18.5', '18.5-24.9', '25-29.9', '30-34.9', '35-39.9', '40+'];
+  const conteoIMC = imcCategorias.reduce((acc, categoria) => {
+    acc[categoria] = pacientesFiltrados.filter(paciente => {
+      const imc = paciente.imc;
+      const categoriaIMC = imc < 18.5 ? '<18.5' :
+                           (imc >= 18.5 && imc <= 24.9) ? '18.5-24.9' :
+                           (imc >= 25 && imc <= 29.9) ? '25-29.9' :
+                           (imc >= 30 && imc <= 34.9) ? '30-34.9' :
+                           (imc >= 35 && imc <= 39.9) ? '35-39.9' : '40+';
+      return categoriaIMC === categoria;
+    }).length;
+    return acc;
+  }, {});
+
+  const data = {
+    labels: imcCategorias,
+    datasets: [
+      {
+        label: 'Número de Pacientes',
+        data: imcCategorias.map(categoria => conteoIMC[categoria] || 0),
+        backgroundColor: [
+          '#34D399',
+          '#FDE047',
+          '#F97316',
+          '#EF4444',
+          '#B91C1C'
+        ],
+        borderColor: [
+          '#34D399',
+          '#FDE047',
+          '#F97316',
+          '#EF4444',
+          '#B91C1C'
+        ],
+        borderWidth: 1
+      }
+    ]
+  };
+  
 
   return (
     <div>
@@ -338,6 +378,10 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
             tooltip: { callbacks: { label: (tooltipItem) => `${tooltipItem.label}: ${tooltipItem.raw} (${calcularPorcentajes(ubicaciones)[tooltipItem.label]}%)` } }
           }
         }} />
+      </div>
+      <div>
+          <h2 className="text-xl font-semibold mb-4">Distribución de IMC</h2>
+          <Bar data={data} />
       </div>
     </div>
   );
