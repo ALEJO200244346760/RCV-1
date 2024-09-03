@@ -72,14 +72,6 @@ function Estadisticas() {
       const nivelColesterolFiltro = filtros.nivelColesterol === '' ? null : Number(filtros.nivelColesterol);
   
       const nivelColesterolPaciente = paciente.colesterol ? obtenerNivelColesterol(Number(paciente.colesterol)) : null;
-      
-      // Determinar categoría de IMC usando el valor calculado
-      const imc = paciente.imc;
-      const categoriaIMC = imc < 18.5 ? '<18.5' :
-                           (imc >= 18.5 && imc <= 24.9) ? '18.5-24.9' :
-                           (imc >= 25 && imc <= 29.9) ? '25-29.9' :
-                           (imc >= 30 && imc <= 34.9) ? '30-34.9' :
-                           (imc >= 35 && imc <= 39.9) ? '35-39.9' : '40+';
   
       return (
         (edadFiltro === null || paciente.edad.toString() === edadFiltro) &&
@@ -93,13 +85,11 @@ function Estadisticas() {
           (nivelColesterolConocido === 'si' && paciente.colesterol !== null && paciente.colesterol !== 'No' && (filtros.nivelColesterol === '' || nivelColesterolPaciente === nivelColesterolFiltro))
         ) &&
         (filtros.nivelRiesgo === '' || (paciente.nivelRiesgo && paciente.nivelRiesgo.toLowerCase() === filtros.nivelRiesgo.toLowerCase())) &&
-        (filtros.ubicacion === '' || (paciente.ubicacion && paciente.ubicacion.toLowerCase() === filtros.ubicacion.toLowerCase())) &&
-        (filtros.imc === '' || filtros.imc === categoriaIMC)
+        (filtros.ubicacion === '' || (paciente.ubicacion && paciente.ubicacion.toLowerCase() === filtros.ubicacion.toLowerCase()))
       );
     });
     setPacientesFiltrados(filtrados);
   };
-  
 
   const eliminarPaciente = (id) => {
     axios.delete(`/api/pacientes/${id}`)
@@ -274,24 +264,6 @@ function Estadisticas() {
                 <option value="HU">HU</option>
               </select>
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">IMC</label>
-            <select
-              name="imc"
-              value={filtros.imc || ''}
-              onChange={manejarCambio}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            >
-              <option value="">Todos</option>
-              <option value="<18.5">Menor a 18.5</option>
-              <option value="18.5-24.9">Saludable (18.5 - 24.9)</option>
-              <option value="25-29.9">Sobrepeso (25 - 29.9)</option>
-              <option value="30-34.9">Obesidad 1 (30 - 34.9)</option>
-              <option value="35-39.9">Obesidad 2 (35 - 39.9)</option>
-              <option value="40+">Obesidad 3 (40+)</option>
-            </select>
           </div>
 
           <button
