@@ -70,9 +70,9 @@ function Estadisticas() {
       const edadFiltro = filtros.edad === '' ? null : filtros.edad;
       const presionArterialFiltro = filtros.presionArterial === '' ? null : filtros.presionArterial;
       const nivelColesterolFiltro = filtros.nivelColesterol === '' ? null : Number(filtros.nivelColesterol);
-  
+
       const nivelColesterolPaciente = paciente.colesterol ? obtenerNivelColesterol(Number(paciente.colesterol)) : null;
-  
+
       return (
         (edadFiltro === null || paciente.edad.toString() === edadFiltro) &&
         (filtros.genero === '' || paciente.genero.toLowerCase() === filtros.genero.toLowerCase()) &&
@@ -81,13 +81,14 @@ function Estadisticas() {
         (presionArterialFiltro === null || paciente.presionArterial.toString() === presionArterialFiltro) &&
         (
           nivelColesterolConocido === 'todos' || 
-          (nivelColesterolConocido === 'no' && (paciente.colesterol === 'No' || paciente.colesterol === null)) ||
-          (nivelColesterolConocido === 'si' && paciente.colesterol !== null && paciente.colesterol !== 'No' && (filtros.nivelColesterol === '' || nivelColesterolPaciente === nivelColesterolFiltro))
+          (nivelColesterolConocido === 'no' && (paciente.colesterol === 'No' || paciente.colesterol === null)) || // Si el nivel de colesterol es "no", solo mostrar pacientes con colesterol "No" o null
+          (nivelColesterolConocido === 'si' && paciente.colesterol !== null && paciente.colesterol !== 'No' && (filtros.nivelColesterol === '' || nivelColesterolPaciente === nivelColesterolFiltro)) // Si se conoce el colesterol, filtrar por nivel
         ) &&
-        (filtros.nivelRiesgo === '' || (paciente.nivelRiesgo && paciente.nivelRiesgo.toLowerCase() === filtros.nivelRiesgo.toLowerCase())) &&
-        (filtros.ubicacion === '' || (paciente.ubicacion && paciente.ubicacion.toLowerCase() === filtros.ubicacion.toLowerCase()))
-      );
+        (filtros.nivelRiesgo === '' || paciente.nivelRiesgo.toLowerCase() === filtros.nivelRiesgo.toLowerCase()) &&
+        (filtros.ubicacion === '' || (paciente.ubicacion && paciente.ubicacion.toLowerCase() === filtros.ubicacion.toLowerCase())) // Filtrar por ubicación
+    );
     });
+
     setPacientesFiltrados(filtrados);
   };
 
