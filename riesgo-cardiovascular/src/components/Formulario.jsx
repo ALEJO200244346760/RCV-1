@@ -95,8 +95,14 @@ const Formulario = () => {
 
     const guardarPaciente = async () => {
         try {
+            // Convertir la lista de medicamentos a un string
+            const medicamentosString = datosPaciente.medicamentos.join('\n');  // o usa ',' para separarlos por comas
+    
+            // Realizar la solicitud POST
             await axiosInstance.post('/api/pacientes', {
-                datosPaciente
+                ...datosPaciente,
+                medicamentos: medicamentosString,  // Agregar los medicamentos como string
+                nivelRiesgo,  // Incluye el nivel de riesgo calculado
             });
             console.log('Datos guardados exitosamente');
         } catch (error) {
@@ -106,31 +112,12 @@ const Formulario = () => {
         }
     };
     
-    const guardarMedicamentos = async () => {
-        try {
-            // Verifica que datosPaciente.id esté definido
-            if (!datosPaciente.id) {
-                console.error('El ID del paciente no está definido');
-                return;
-            }
     
-            // Filtra los medicamentos seleccionados y únelos en un solo string, separados por saltos de línea
-            const medicamentosSeleccionados = medicamentosSeleccionados.split('\n').filter(Boolean).join('\n');
-            
-            // Hacer la solicitud PUT para guardar el string de medicamentos en el paciente
-            await axiosInstance.put(`/api/pacientes/${datosPaciente.id}/medicamentos`, {
-                medicamentos: medicamentosSeleccionados
-            });
+    const guardarMedicamentos = () => {
+        setMensajeExito('Medicamentos guardados con éxito');
+        toggleModalMedicamentos(); // Cerrar el modal de medicamentos
+    };
     
-            console.log('Medicamentos guardados exitosamente');
-            
-            // Mostrar un mensaje de éxito y cerrar el modal
-            setMensajeExito('Medicamentos guardados con éxito');
-            toggleModalMedicamentos(); // Cerrar el modal de medicamentos
-        } catch (error) {
-            console.error('Error al guardar los medicamentos:', error);
-        }
-    };    
     
     const cerrarModal = () => {
         setMostrarModal(false);
@@ -145,14 +132,18 @@ const Formulario = () => {
     
     const handleMedicamentoChange = (event) => {
         const { value, checked } = event.target;
-        if (checked) {
-            setMedicamentosSeleccionados([...medicamentosSeleccionados, value]);
-        } else {
-            setMedicamentosSeleccionados(
-                medicamentosSeleccionados.filter((med) => med !== value)
-            );
-        }
+        setDatosPaciente((prevDatos) => {
+            const nuevosMedicamentos = checked 
+                ? [...prevDatos.medicamentos, value]
+                : prevDatos.medicamentos.filter((med) => med !== value);
+            
+            return {
+                ...prevDatos,
+                medicamentos: nuevosMedicamentos
+            };
+        });
     };
+    
 
     const renderRiesgoGrid = (riesgo) => {
         const riesgos = [
