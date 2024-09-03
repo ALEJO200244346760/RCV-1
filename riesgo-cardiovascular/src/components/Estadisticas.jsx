@@ -240,7 +240,7 @@ function Estadisticas() {
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               >
                 <option value="">Todos</option>
-                <option value="<10% Poco">Poco</option>
+                <option value="<10% Bajo">Bajo</option>
                 <option value=">10% <20% Moderado">Moderado</option>
                 <option value=">20% <30% Alto">Alto</option>
                 <option value=">30% <40% Muy Alto">Muy Alto</option>
