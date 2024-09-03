@@ -129,7 +129,7 @@ function Estadisticas() {
   // Función para obtener el color de riesgo basado en el nivel
   const obtenerColorRiesgo = (nivel) => {
     switch (nivel) {
-      case 'Poco':
+      case 'Bajo':
         return 'bg-green-100 text-green-800';
       case 'Moderado':
         return 'bg-yellow-100 text-yellow-800';
