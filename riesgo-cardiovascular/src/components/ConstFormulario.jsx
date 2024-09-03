@@ -110,7 +110,7 @@ export const listaMedicamentos = [
 
 export const obtenerColorRiesgo = (riesgo) => {
     switch (riesgo) {
-        case '<10% Poco': return 'bg-green-500';
+        case '<10% Bajo': return 'bg-green-500';
         case '>10% <20% Moderado': return 'bg-yellow-500';
         case '>20% <30% Alto': return 'bg-orange-500';
         case '>30% <40% Muy Alto': return 'bg-red-500';
@@ -121,7 +121,7 @@ export const obtenerColorRiesgo = (riesgo) => {
 
 export const obtenerTextoRiesgo = (riesgo) => {
     switch (riesgo) {
-        case '<10% Poco': return '<10% Poco';
+        case '<10% Bajo': return '<10% Bajo';
         case '>10% <20% Moderado': return '>10% <20% Moderado';
         case '>20% <30% Alto': return '>20% <30% Alto';
         case '>30% <40% Muy Alto': return '>30% <40% Muy Alto';
