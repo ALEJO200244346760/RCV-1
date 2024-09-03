@@ -21,25 +21,11 @@ function Estadisticas() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Configuración de la URL base para la API
-  const apiBaseURL = 'https://rcv-production.up.railway.app';
-
-  // Hook useEffect para obtener datos de pacientes desde la API
   useEffect(() => {
-    axios.get(`${apiBaseURL}/api/pacientes`)
+    axios.get('/api/pacientes')
       .then(response => {
-        console.log('Datos de respuesta:', response.data); // Verifica la estructura de los datos
-        const data = response.data;
-
-        // Verifica el tipo de datos
-        console.log('Es un arreglo:', Array.isArray(data));
-
-        if (Array.isArray(data)) {
-          setPacientes(data);
-          setPacientesFiltrados(data);
-        } else {
-          console.error('La respuesta de la API no es un arreglo');
-        }
+        setPacientes(response.data);
+        setPacientesFiltrados(response.data);
         setLoading(false);
       })
       .catch(error => {
@@ -48,12 +34,10 @@ function Estadisticas() {
       });
   }, []);
 
-  // Hook useEffect para aplicar filtros cada vez que cambian
   useEffect(() => {
     aplicarFiltros(); // Aplica filtros cada vez que cambian
   }, [filtros, nivelColesterolConocido]);
 
-  // Función para manejar el cambio en el filtro de colesterol
   const manejarSeleccionColesterol = (e) => {
     const valor = e.target.value;
     setNivelColesterolConocido(valor);
@@ -65,7 +49,6 @@ function Estadisticas() {
     }
   };
 
-  // Función para manejar cambios en los filtros
   const manejarCambio = (e) => {
     const { name, value } = e.target;
     setFiltros(prev => ({
@@ -74,7 +57,6 @@ function Estadisticas() {
     }));
   };
 
-  // Función para obtener el nivel de colesterol basado en el valor
   const obtenerNivelColesterol = (valor) => {
     if (valor < 154) return 4;
     if (valor >= 155 && valor <= 192) return 5;
@@ -83,15 +65,22 @@ function Estadisticas() {
     return 8;
   };
 
-  // Función para aplicar filtros a la lista de pacientes
   const aplicarFiltros = () => {
     const filtrados = pacientes.filter(paciente => {
       const edadFiltro = filtros.edad === '' ? null : filtros.edad;
       const presionArterialFiltro = filtros.presionArterial === '' ? null : filtros.presionArterial;
       const nivelColesterolFiltro = filtros.nivelColesterol === '' ? null : Number(filtros.nivelColesterol);
-
+  
       const nivelColesterolPaciente = paciente.colesterol ? obtenerNivelColesterol(Number(paciente.colesterol)) : null;
-
+      
+      // Determinar categoría de IMC usando el valor calculado
+      const imc = paciente.imc;
+      const categoriaIMC = imc < 18.5 ? '<18.5' :
+                           (imc >= 18.5 && imc <= 24.9) ? '18.5-24.9' :
+                           (imc >= 25 && imc <= 29.9) ? '25-29.9' :
+                           (imc >= 30 && imc <= 34.9) ? '30-34.9' :
+                           (imc >= 35 && imc <= 39.9) ? '35-39.9' : '40+';
+  
       return (
         (edadFiltro === null || paciente.edad.toString() === edadFiltro) &&
         (filtros.genero === '' || paciente.genero.toLowerCase() === filtros.genero.toLowerCase()) &&
@@ -100,20 +89,19 @@ function Estadisticas() {
         (presionArterialFiltro === null || paciente.presionArterial.toString() === presionArterialFiltro) &&
         (
           nivelColesterolConocido === 'todos' || 
-          (nivelColesterolConocido === 'no' && (paciente.colesterol === 'No' || paciente.colesterol === null)) || // Si el nivel de colesterol es "no", solo mostrar pacientes con colesterol "No" o null
-          (nivelColesterolConocido === 'si' && paciente.colesterol !== null && paciente.colesterol !== 'No' && (filtros.nivelColesterol === '' || nivelColesterolPaciente === nivelColesterolFiltro)) // Si se conoce el colesterol, filtrar por nivel
+          (nivelColesterolConocido === 'no' && (paciente.colesterol === 'No' || paciente.colesterol === null)) ||
+          (nivelColesterolConocido === 'si' && paciente.colesterol !== null && paciente.colesterol !== 'No' && (filtros.nivelColesterol === '' || nivelColesterolPaciente === nivelColesterolFiltro))
         ) &&
-        (filtros.nivelRiesgo === '' || paciente.nivelRiesgo.toLowerCase() === filtros.nivelRiesgo.toLowerCase()) &&
-        (filtros.ubicacion === '' || (paciente.ubicacion && paciente.ubicacion.toLowerCase() === filtros.ubicacion.toLowerCase())) // Filtrar por ubicación
-    );
+        (filtros.nivelRiesgo === '' || (paciente.nivelRiesgo && paciente.nivelRiesgo.toLowerCase() === filtros.nivelRiesgo.toLowerCase())) &&
+        (filtros.ubicacion === '' || (paciente.ubicacion && paciente.ubicacion.toLowerCase() === filtros.ubicacion.toLowerCase())) &&
+        (filtros.imc === '' || filtros.imc === categoriaIMC)
+      );
     });
-
     setPacientesFiltrados(filtrados);
-  };
+  };  
 
-  // Función para eliminar un paciente
   const eliminarPaciente = (id) => {
-    axios.delete(`${apiBaseURL}/api/pacientes/${id}`)
+    axios.delete(`/api/pacientes/${id}`)
       .then(() => {
         setPacientes(pacientes.filter(paciente => paciente.id !== id));
         setPacientesFiltrados(pacientesFiltrados.filter(paciente => paciente.id !== id));
@@ -121,12 +109,10 @@ function Estadisticas() {
       .catch(error => console.error('Error al eliminar el paciente:', error));
   };
 
-  // Función para redirigir al usuario a la página de edición de un paciente
   const editarPaciente = (id) => {
     navigate(`/editar-paciente/${id}`);
   };
 
-  // Función para obtener el color de riesgo basado en el nivel
   const obtenerColorRiesgo = (nivel) => {
     switch (nivel) {
       case 'Poco':
@@ -209,7 +195,7 @@ function Estadisticas() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Presión Arterial</label>
+              <label className="block text-sm font-medium text-gray-700">Presión Arterial (mmHg)</label>
               <select
                 name="presionArterial"
                 value={filtros.presionArterial || ''}
@@ -262,7 +248,7 @@ function Estadisticas() {
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               >
                 <option value="">Todos</option>
-                <option value="<10% Poco">Bajo</option>
+                <option value="<10% Bajo">Bajo</option>
                 <option value=">10% <20% Moderado">Moderado</option>
                 <option value=">20% <30% Alto">Alto</option>
                 <option value=">30% <40% Muy Alto">Muy Alto</option>
@@ -287,6 +273,24 @@ function Estadisticas() {
                 <option value="HU">HU</option>
               </select>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">IMC</label>
+            <select
+              name="imc"
+              value={filtros.imc || ''}
+              onChange={manejarCambio}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            >
+              <option value="">Todos</option>
+              <option value="<18.5">Menor a 18.5</option>
+              <option value="18.5-24.9">Saludable (18.5 - 24.9)</option>
+              <option value="25-29.9">Sobrepeso (25 - 29.9)</option>
+              <option value="30-34.9">Obesidad 1 (30 - 34.9)</option>
+              <option value="35-39.9">Obesidad 2 (35 - 39.9)</option>
+              <option value="40+">Obesidad 3 (40+)</option>
+            </select>
           </div>
 
           <button
