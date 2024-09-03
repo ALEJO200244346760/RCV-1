@@ -257,22 +257,24 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
         label: 'Número de Pacientes',
         data: imcCategorias.map(categoria => conteoIMC[categoria] || 0),
         backgroundColor: [
-          '#34D399', // bg-green-500
-          '#FDE047', // bg-yellow-500
-          '#F97316', // bg-orange-500
-          '#EF4444', // bg-red-500
-          '#B91C1C'  // bg-red-800
+          '#34D399',
+          '#FDE047',
+          '#F97316',
+          '#EF4444',
+          '#B91C1C'
         ],
         borderColor: [
-          '#34D399', // bg-green-500
-          '#FDE047', // bg-yellow-500
-          '#F97316', // bg-orange-500
-          '#EF4444', // bg-red-500
-          '#B91C1C'  // bg-red-800
+          '#34D399',
+          '#FDE047',
+          '#F97316',
+          '#EF4444',
+          '#B91C1C'
         ],
         borderWidth: 1
-      }]
+      }
+    ]
   };
+  
 
   return (
     <div>
