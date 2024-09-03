@@ -5,6 +5,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Toolti
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 function EstadisticasGraficos({ pacientesFiltrados }) {
+  // Función para calcular porcentajes
   const calcularPorcentajes = (data) => {
     const total = Object.values(data).reduce((sum, val) => sum + val, 0);
     return Object.keys(data).reduce((acc, key) => {
@@ -23,8 +24,18 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
     datasets: [{
       label: 'Cantidad',
       data: Object.values(edades),
-      backgroundColor: ['#34D399', '#FDE047', '#F97316', '#EF4444'],
-      borderColor: ['#34D399', '#FDE047', '#F97316', '#EF4444'],
+      backgroundColor: [
+        '#34D399', // bg-green-500
+        '#FDE047', // bg-yellow-500
+        '#F97316', // bg-orange-500
+        '#EF4444'  // bg-red-500
+      ],
+      borderColor: [
+        '#34D399', // bg-green-500
+        '#FDE047', // bg-yellow-500
+        '#F97316', // bg-orange-500
+        '#EF4444'  // bg-red-500
+      ],
       borderWidth: 1
     }]
   };
@@ -39,11 +50,18 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
     datasets: [{
       label: 'Cantidad',
       data: Object.values(generos),
-      backgroundColor: ['#1D4ED8', '#F472B6'],
-      borderColor: ['#1D4ED8', '#F472B6'],
+      backgroundColor: [
+        '#1D4ED8', // Azul
+        '#F472B6'  // Rosa
+      ],
+      borderColor: [
+        '#1D4ED8', // Azul
+        '#F472B6'  // Rosa
+      ],
       borderWidth: 1
     }]
   };
+  
 
   // Datos para Diabetes
   const diabetes = pacientesFiltrados.reduce((acc, paciente) => {
@@ -55,8 +73,14 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
     datasets: [{
       label: 'Cantidad',
       data: Object.values(diabetes),
-      backgroundColor: ['#34D399', '#EF4444'],
-      borderColor: ['#34D399', '#EF4444'],
+      backgroundColor: [
+        '#34D399', // bg-green-500
+        '#EF4444'  // bg-red-500
+      ],
+      borderColor: [
+        '#34D399', // bg-green-500
+        '#EF4444'  // bg-red-500
+      ],
       borderWidth: 1
     }]
   };
@@ -71,8 +95,14 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
     datasets: [{
       label: 'Cantidad',
       data: Object.values(fumadores),
-      backgroundColor: ['#34D399', '#F97316'],
-      borderColor: ['#34D399', '#F97316'],
+      backgroundColor: [
+        '#34D399', // bg-green-500
+        '#F97316'  // bg-orange-500
+      ],
+      borderColor: [
+        '#34D399', // bg-green-500
+        '#F97316'  // bg-orange-500
+      ],
       borderWidth: 1
     }]
   };
@@ -87,8 +117,18 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
     datasets: [{
       label: 'Cantidad',
       data: Object.values(presiones),
-      backgroundColor: ['#34D399', '#FDE047', '#F97316', '#EF4444'],
-      borderColor: ['#34D399', '#FDE047', '#F97316', '#EF4444'],
+      backgroundColor: [
+        '#34D399', // bg-green-500
+        '#FDE047', // bg-yellow-500
+        '#F97316', // bg-orange-500
+        '#EF4444'  // bg-red-500
+      ],
+      borderColor: [
+        '#34D399', // bg-green-500
+        '#FDE047', // bg-yellow-500
+        '#F97316', // bg-orange-500
+        '#EF4444'  // bg-red-500
+      ],
       borderWidth: 1
     }]
   };
@@ -113,8 +153,20 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
     datasets: [{
       label: 'Cantidad',
       data: Object.values(colesterol),
-      backgroundColor: ['#34D399', '#FDE047', '#F97316', '#EF4444', '#B91C1C'],
-      borderColor: ['#34D399', '#FDE047', '#F97316', '#EF4444', '#B91C1C'],
+      backgroundColor: [
+        '#34D399', // bg-green-500
+        '#FDE047', // bg-yellow-500
+        '#F97316', // bg-orange-500
+        '#EF4444', // bg-red-500
+        '#B91C1C'  // bg-red-800
+      ],
+      borderColor: [
+        '#34D399', // bg-green-500
+        '#FDE047', // bg-yellow-500
+        '#F97316', // bg-orange-500
+        '#EF4444', // bg-red-500
+        '#B91C1C'  // bg-red-800
+      ],
       borderWidth: 1
     }]
   };
@@ -138,8 +190,20 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
     datasets: [{
       label: 'Cantidad',
       data: Object.values(riesgos),
-      backgroundColor: ['#34D399', '#FDE047', '#F97316', '#EF4444', '#B91C1C'],
-      borderColor: ['#34D399', '#FDE047', '#F97316', '#EF4444', '#B91C1C'],
+      backgroundColor: [
+        '#34D399', // bg-green-500
+        '#FDE047', // bg-yellow-500
+        '#F97316', // bg-orange-500
+        '#EF4444', // bg-red-500
+        '#B91C1C'  // bg-red-800
+      ],
+      borderColor: [
+        '#34D399', // bg-green-500
+        '#FDE047', // bg-yellow-500
+        '#F97316', // bg-orange-500
+        '#EF4444', // bg-red-500
+        '#B91C1C'  // bg-red-800
+      ],
       borderWidth: 1
     }]
   };
@@ -154,35 +218,20 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
     datasets: [{
       label: 'Cantidad',
       data: Object.values(ubicaciones),
-      backgroundColor: ['#34D399', '#FDE047', '#F97316', '#EF4444', '#B91C1C'],
-      borderColor: ['#34D399', '#FDE047', '#F97316', '#EF4444', '#B91C1C'],
-      borderWidth: 1
-    }]
-  };
-
-  // Agrupación de IMC
-  const imcCategorias = ['<18.5', '18.5-24.9', '25-29.9', '30-34.9', '35-39.9', '40+'];
-  const conteoIMC = imcCategorias.reduce((acc, categoria) => {
-    acc[categoria] = pacientesFiltrados.filter(paciente => {
-      const imc = paciente.imc;
-      if (imc === undefined || isNaN(imc)) return false;
-      const categoriaIMC = imc < 18.5 ? '<18.5' :
-                           (imc >= 18.5 && imc <= 24.9) ? '18.5-24.9' :
-                           (imc >= 25 && imc <= 29.9) ? '25-29.9' :
-                           (imc >= 30 && imc <= 34.9) ? '30-34.9' :
-                           (imc >= 35 && imc <= 39.9) ? '35-39.9' : '40+';
-      return categoriaIMC === categoria;
-    }).length;
-    return acc;
-  }, {});
-
-  const dataIMC = {
-    labels: imcCategorias,
-    datasets: [{
-      label: 'Número de Pacientes',
-      data: imcCategorias.map(categoria => conteoIMC[categoria] || 0),
-      backgroundColor: ['#34D399', '#FDE047', '#F97316', '#EF4444', '#B91C1C'],
-      borderColor: ['#34D399', '#FDE047', '#F97316', '#EF4444', '#B91C1C'],
+      backgroundColor: [
+        '#34D399', // bg-green-500
+        '#FDE047', // bg-yellow-500
+        '#F97316', // bg-orange-500
+        '#EF4444',  // bg-red-500
+        '#B91C1C'  // bg-red-800
+      ],
+      borderColor: [
+        '#34D399', // bg-green-500
+        '#FDE047', // bg-yellow-500
+        '#F97316', // bg-orange-500
+        '#EF4444',  // bg-red-500
+        '#B91C1C'  // bg-red-800
+      ],
       borderWidth: 1
     }]
   };
@@ -289,10 +338,6 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
             tooltip: { callbacks: { label: (tooltipItem) => `${tooltipItem.label}: ${tooltipItem.raw} (${calcularPorcentajes(ubicaciones)[tooltipItem.label]}%)` } }
           }
         }} />
-      </div>
-      <div>
-          <h2 className="text-xl font-semibold mb-4">Distribución de IMC</h2>
-          <Bar data={dataIMC} />
       </div>
     </div>
   );
