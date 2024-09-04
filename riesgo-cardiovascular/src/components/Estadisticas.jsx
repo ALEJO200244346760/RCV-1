@@ -15,17 +15,32 @@ function Estadisticas() {
     colesterol: '',
     nivelColesterol: '', // Campo para el nivel específico de colesterol
     nivelRiesgo: '',
-    ubicacion: '', // Nuevo campo para la ubicación
+    ubicacion: '',
+    imc: '',
   });
   const [nivelColesterolConocido, setNivelColesterolConocido] = useState('todos'); // Estado para el conocimiento del nivel de colesterol
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Configuración de la URL base para la API
+  const apiBaseURL = 'https://rcv-production.up.railway.app';
+
+  // Hook useEffect para obtener datos de pacientes desde la API
   useEffect(() => {
-    axios.get('/api/pacientes')
+    axios.get(`${apiBaseURL}/api/pacientes`)
       .then(response => {
-        setPacientes(response.data);
-        setPacientesFiltrados(response.data);
+        console.log('Datos de respuesta:', response.data); // Verifica la estructura de los datos
+        const data = response.data;
+
+        // Verifica el tipo de datos
+        console.log('Es un arreglo:', Array.isArray(data));
+
+        if (Array.isArray(data)) {
+          setPacientes(data);
+          setPacientesFiltrados(data);
+        } else {
+          console.error('La respuesta de la API no es un arreglo');
+        }
         setLoading(false);
       })
       .catch(error => {
@@ -34,10 +49,12 @@ function Estadisticas() {
       });
   }, []);
 
+  // Hook useEffect para aplicar filtros cada vez que cambian
   useEffect(() => {
     aplicarFiltros(); // Aplica filtros cada vez que cambian
   }, [filtros, nivelColesterolConocido]);
 
+  // Función para manejar el cambio en el filtro de colesterol
   const manejarSeleccionColesterol = (e) => {
     const valor = e.target.value;
     setNivelColesterolConocido(valor);
@@ -49,6 +66,7 @@ function Estadisticas() {
     }
   };
 
+  // Función para manejar cambios en los filtros
   const manejarCambio = (e) => {
     const { name, value } = e.target;
     setFiltros(prev => ({
@@ -57,6 +75,7 @@ function Estadisticas() {
     }));
   };
 
+  // Función para obtener el nivel de colesterol basado en el valor
   const obtenerNivelColesterol = (valor) => {
     if (valor < 154) return 4;
     if (valor >= 155 && valor <= 192) return 5;
@@ -65,22 +84,15 @@ function Estadisticas() {
     return 8;
   };
 
+  // Función para aplicar filtros a la lista de pacientes
   const aplicarFiltros = () => {
     const filtrados = pacientes.filter(paciente => {
       const edadFiltro = filtros.edad === '' ? null : filtros.edad;
       const presionArterialFiltro = filtros.presionArterial === '' ? null : filtros.presionArterial;
       const nivelColesterolFiltro = filtros.nivelColesterol === '' ? null : Number(filtros.nivelColesterol);
-  
+
       const nivelColesterolPaciente = paciente.colesterol ? obtenerNivelColesterol(Number(paciente.colesterol)) : null;
-  
-      // Determinar categoría de IMC usando el valor calculado
-      const imc = paciente.imc;
-      const categoriaIMC = imc < 18.5 ? '<18.5' :
-                           (imc >= 18.5 && imc <= 24.9) ? '18.5-24.9' :
-                           (imc >= 25 && imc <= 29.9) ? '25-29.9' :
-                           (imc >= 30 && imc <= 34.9) ? '30-34.9' :
-                           (imc >= 35 && imc <= 39.9) ? '35-39.9' : '40+';
-  
+
       return (
         (edadFiltro === null || paciente.edad.toString() === edadFiltro) &&
         (filtros.genero === '' || paciente.genero.toLowerCase() === filtros.genero.toLowerCase()) &&
@@ -89,19 +101,20 @@ function Estadisticas() {
         (presionArterialFiltro === null || paciente.presionArterial.toString() === presionArterialFiltro) &&
         (
           nivelColesterolConocido === 'todos' || 
-          (nivelColesterolConocido === 'no' && (paciente.colesterol === 'No' || paciente.colesterol === null)) ||
-          (nivelColesterolConocido === 'si' && paciente.colesterol !== null && paciente.colesterol !== 'No' && (filtros.nivelColesterol === '' || nivelColesterolPaciente === nivelColesterolFiltro))
+          (nivelColesterolConocido === 'no' && (paciente.colesterol === 'No' || paciente.colesterol === null)) || // Si el nivel de colesterol es "no", solo mostrar pacientes con colesterol "No" o null
+          (nivelColesterolConocido === 'si' && paciente.colesterol !== null && paciente.colesterol !== 'No' && (filtros.nivelColesterol === '' || nivelColesterolPaciente === nivelColesterolFiltro)) // Si se conoce el colesterol, filtrar por nivel
         ) &&
-        (filtros.nivelRiesgo === '' || (paciente.nivelRiesgo && paciente.nivelRiesgo.toLowerCase() === filtros.nivelRiesgo.toLowerCase())) &&
-        (filtros.ubicacion === '' || (paciente.ubicacion && paciente.ubicacion.toLowerCase() === filtros.ubicacion.toLowerCase())) &&
-        (filtros.imc === '' || filtros.imc === categoriaIMC)
-      );
+        (filtros.nivelRiesgo === '' || paciente.nivelRiesgo.toLowerCase() === filtros.nivelRiesgo.toLowerCase()) &&
+        (filtros.ubicacion === '' || (paciente.ubicacion && paciente.ubicacion.toLowerCase() === filtros.ubicacion.toLowerCase())) // Filtrar por ubicación
+    );
     });
-    setPacientesFiltrados(filtrados);
-  };  
 
+    setPacientesFiltrados(filtrados);
+  };
+
+  // Función para eliminar un paciente
   const eliminarPaciente = (id) => {
-    axios.delete(`/api/pacientes/${id}`)
+    axios.delete(`${apiBaseURL}/api/pacientes/${id}`)
       .then(() => {
         setPacientes(pacientes.filter(paciente => paciente.id !== id));
         setPacientesFiltrados(pacientesFiltrados.filter(paciente => paciente.id !== id));
@@ -109,10 +122,12 @@ function Estadisticas() {
       .catch(error => console.error('Error al eliminar el paciente:', error));
   };
 
+  // Función para redirigir al usuario a la página de edición de un paciente
   const editarPaciente = (id) => {
     navigate(`/editar-paciente/${id}`);
   };
 
+  // Función para obtener el color de riesgo basado en el nivel
   const obtenerColorRiesgo = (nivel) => {
     switch (nivel) {
       case 'Poco':
@@ -220,7 +235,7 @@ function Estadisticas() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Presión Arterial (mmHg)</label>
+              <label className="block text-sm font-medium text-gray-700">Presión Arterial</label>
               <select
                 name="presionArterial"
                 value={filtros.presionArterial || ''}
@@ -273,7 +288,7 @@ function Estadisticas() {
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               >
                 <option value="">Todos</option>
-                <option value="<10% Bajo">Bajo</option>
+                <option value="<10% Poco">Bajo</option>
                 <option value=">10% <20% Moderado">Moderado</option>
                 <option value=">20% <30% Alto">Alto</option>
                 <option value=">30% <40% Muy Alto">Muy Alto</option>
@@ -334,136 +349,65 @@ function Estadisticas() {
         <h2 className="text-xl font-semibold">Total de Personas que Coinciden con los Filtros: {pacientesFiltrados.length}</h2>
       </div>
 
-      <div className="mt-6">
-  <div className="hidden lg:block overflow-x-auto">
-    <table className="min-w-full divide-y divide-gray-200">
-      <thead className="bg-gray-50">
-        <tr>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Edad</th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Género</th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Diabetes</th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fumador</th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Presión Arterial</th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Colesterol</th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nivel de Riesgo</th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ubicación</th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-        </tr>
-      </thead>
-      <tbody className="bg-white divide-y divide-gray-200">
-        {pacientesFiltrados.map(paciente => (
-          <tr key={paciente.id}>
-            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{paciente.id}</td>
-            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.edad}</td>
-            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.genero}</td>
-            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.diabetes}</td>
-            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.fumador}</td>
-            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.presionArterial}</td>
-            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.colesterol}</td>
-            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-              <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${obtenerColorRiesgo(paciente.nivelRiesgo)}`}>
-                {paciente.nivelRiesgo}
-              </span>
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.ubicacion}</td>
-            <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-              <button
-                onClick={() => editarPaciente(paciente.id)}
-                className="text-indigo-600 hover:text-indigo-900"
-              >
-                Editar
-              </button>
-              <button
-                onClick={() => eliminarPaciente(paciente.id)}
-                className="ml-4 text-red-600 hover:text-red-900"
-              >
-                Eliminar
-              </button>
-              <button
-                onClick={() => copiarDatos(paciente)}
-                className="ml-4 text-blue-600 hover:text-blue-900"
-              >
-                Copiar
-              </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-
-  {/* Modo móvil */}
-  <div className="lg:hidden">
-    {pacientesFiltrados.map(paciente => (
-      <div key={paciente.id} className="bg-white shadow-md rounded-lg p-4 mb-4">
-        <div className="flex justify-between items-start mb-2">
-          <div className="text-sm font-medium text-gray-900">ID:</div>
-          <div className="text-sm text-gray-500">{paciente.id}</div>
-        </div>
-        <div className="flex justify-between items-start mb-2">
-          <div className="text-sm font-medium text-gray-900">Edad:</div>
-          <div className="text-sm text-gray-500">{paciente.edad}</div>
-        </div>
-        <div className="flex justify-between items-start mb-2">
-          <div className="text-sm font-medium text-gray-900">Género:</div>
-          <div className="text-sm text-gray-500">{paciente.genero}</div>
-        </div>
-        <div className="flex justify-between items-start mb-2">
-          <div className="text-sm font-medium text-gray-900">Diabetes:</div>
-          <div className="text-sm text-gray-500">{paciente.diabetes}</div>
-        </div>
-        <div className="flex justify-between items-start mb-2">
-          <div className="text-sm font-medium text-gray-900">Fumador:</div>
-          <div className="text-sm text-gray-500">{paciente.fumador}</div>
-        </div>
-        <div className="flex justify-between items-start mb-2">
-          <div className="text-sm font-medium text-gray-900">Presión Arterial:</div>
-          <div className="text-sm text-gray-500">{paciente.presionArterial}</div>
-        </div>
-        <div className="flex justify-between items-start mb-2">
-          <div className="text-sm font-medium text-gray-900">Colesterol:</div>
-          <div className="text-sm text-gray-500">{paciente.colesterol}</div>
-        </div>
-        <div className="flex justify-between items-start mb-2">
-          <div className="text-sm font-medium text-gray-900">Nivel de Riesgo:</div>
-          <div className="text-sm text-gray-500">
-            <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${obtenerColorRiesgo(paciente.nivelRiesgo)}`}>
-              {paciente.nivelRiesgo}
-            </span>
-          </div>
-        </div>
-        <div className="flex justify-between items-start mb-2">
-          <div className="text-sm font-medium text-gray-900">Ubicación:</div>
-          <div className="text-sm text-gray-500">{paciente.ubicacion}</div>
-        </div>
-        <div className="flex justify-end mt-4">
-          <button
-            onClick={() => editarPaciente(paciente.id)}
-            className="text-indigo-600 hover:text-indigo-900 mr-4"
-          >
-            Editar
-          </button>
-          <button
-            onClick={() => eliminarPaciente(paciente.id)}
-            className="text-red-600 hover:text-red-900 mr-4"
-          >
-            Eliminar
-          </button>
-          <button
-            onClick={() => copiarDatos(paciente)}
-            className="text-blue-600 hover:text-blue-900"
-          >
-            Copiar
-          </button>
-        </div>
+      <div className="overflow-x-auto mt-6">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Edad</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Género</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Diabetes</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fumador</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Presión Arterial</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Colesterol</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nivel de Riesgo</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ubicación</th> {/* Nueva columna */}
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {pacientesFiltrados.map(paciente => (
+              <tr key={paciente.id}>
+                <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{paciente.id}</td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.edad}</td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.genero}</td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.diabetes}</td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.fumador}</td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.presionArterial}</td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.colesterol}</td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${obtenerColorRiesgo(paciente.nivelRiesgo)}`}>
+                    {paciente.nivelRiesgo}
+                  </span>
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.ubicacion}</td> {/* Nueva celda */}
+                <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <button
+                    onClick={() => editarPaciente(paciente.id)}
+                    className="text-indigo-600 hover:text-indigo-900"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => eliminarPaciente(paciente.id)}
+                    className="ml-4 text-red-600 hover:text-red-900"
+                  >
+                    Eliminar
+                  </button>
+                  <button
+                        onClick={() => copiarDatos(paciente)}
+                        className="ml-4 text-blue-600 hover:text-blue-900"
+                      >
+                        Copiar
+                </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-    ))}
-  </div>
-</div>
-
-  </div>
-);
+    </div>
+  );
 }
 
 export default Estadisticas;
