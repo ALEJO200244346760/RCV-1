@@ -289,6 +289,24 @@ function Estadisticas() {
             </div>
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700">IMC</label>
+            <select
+              name="imc"
+              value={filtros.imc || ''}
+              onChange={manejarCambio}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            >
+              <option value="">Todos</option>
+              <option value="<18.5">Menor a 18.5</option>
+              <option value="18.5-24.9">Saludable (18.5 - 24.9)</option>
+              <option value="25-29.9">Sobrepeso (25 - 29.9)</option>
+              <option value="30-34.9">Obesidad 1 (30 - 34.9)</option>
+              <option value="35-39.9">Obesidad 2 (35 - 39.9)</option>
+              <option value="40+">Obesidad 3 (40+)</option>
+            </select>
+          </div>
+
           <button
             onClick={aplicarFiltros}
             className="mt-4 px-4 py-2 bg-indigo-600 text-white font-bold rounded-md shadow-sm hover:bg-indigo-700"
