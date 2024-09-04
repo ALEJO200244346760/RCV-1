@@ -15,7 +15,8 @@ function Estadisticas() {
     colesterol: '',
     nivelColesterol: '', // Campo para el nivel específico de colesterol
     nivelRiesgo: '',
-    ubicacion: '', // Nuevo campo para la ubicación
+    ubicacion: '',
+    imc: '',
   });
   const [nivelColesterolConocido, setNivelColesterolConocido] = useState('todos'); // Estado para el conocimiento del nivel de colesterol
   const [loading, setLoading] = useState(true);
