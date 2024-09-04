@@ -145,6 +145,31 @@ function Estadisticas() {
     }
   };
 
+  const copiarDatos = (paciente) => {
+    const datos = `
+      ID: ${paciente.id}
+      Edad: ${paciente.edad}
+      Género: ${paciente.genero}
+      Diabetes: ${paciente.diabetes}
+      Fumador: ${paciente.fumador}
+      Presión Arterial: ${paciente.presionArterial}
+      Colesterol: ${paciente.colesterol}
+      Nivel de Riesgo: ${paciente.nivelRiesgo}
+      Ubicación: ${paciente.ubicacion}
+      IMC: ${paciente.imc}
+      PESO: ${paciente.peso}
+      TALLA: ${paciente.talla}
+      FECHA DE REGISTRO: ${paciente.fechaRegistro}
+      MEDICAMENTOS: ${paciente.medicamentos}
+      HIPERTENSO: ${paciente.hipertenso}
+      ACV: ${paciente.acv}
+      INFARTO: ${paciente.infarto}
+    `;
+    navigator.clipboard.writeText(datos)
+      .then(() => alert('Datos copiados al portapapeles'))
+      .catch(err => console.error('Error al copiar los datos:', err));
+  };
+
   if (loading) return <p>Cargando...</p>;
 
   return (
@@ -369,6 +394,12 @@ function Estadisticas() {
                   >
                     Eliminar
                   </button>
+                  <button
+                        onClick={() => copiarDatos(paciente)}
+                        className="ml-4 text-blue-600 hover:text-blue-900"
+                      >
+                        Copiar
+                </button>
                 </td>
               </tr>
             ))}
