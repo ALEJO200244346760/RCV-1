@@ -95,22 +95,27 @@ const Formulario = () => {
 
     const guardarPaciente = async () => {
         try {
-            // Convertir la lista de medicamentos a un string
-            const medicamentosString = datosPaciente.medicamentos.join('\n');  // o usa ',' para separarlos por comas
-    
-            // Realizar la solicitud POST
+            const medicamentosString = datosPaciente.medicamentos.join(';');  // Convierte array a string
+            
             await axiosInstance.post('/api/pacientes', {
                 ...datosPaciente,
-                medicamentos: medicamentosString,  // Agregar los medicamentos como string
-                nivelRiesgo,  // Incluye el nivel de riesgo calculado
+                medicamentos: medicamentosString,  // Asegúrate de enviar como string
+                nivelRiesgo,
             });
             console.log('Datos guardados exitosamente');
+    
+            // Reinicia el mensaje de éxito después de 3 segundos
+            setMensajeExito('Medicamentos guardados con éxito');
+            setTimeout(() => setMensajeExito(''), 3000); // Apaga el mensaje de éxito después de 3 segundos
+    
         } catch (error) {
             console.error('Error al guardar los datos:', error);
             setModalAdvertencia('Ocurrió un error al guardar los datos. Por favor, inténtelo de nuevo.');
             setMostrarModal(true);
         }
     };
+    
+    
     
     
     const guardarMedicamentos = () => {
@@ -127,9 +132,12 @@ const Formulario = () => {
     const abrirModalAdvertencia = (nivel) => {
         setModalAdvertencia(Advertencia[nivel]);
     };
-    
-    const toggleModalMedicamentos = () => setMostrarModalMedicamentos(!mostrarModalMedicamentos);
-    
+
+    const toggleModalMedicamentos = () => {
+        setMedicamentosSeleccionados([]);  // Reiniciar los medicamentos seleccionados
+        setMostrarModalMedicamentos(!mostrarModalMedicamentos);
+    };    
+        
     const handleMedicamentoChange = (event) => {
         const { value, checked } = event.target;
         setDatosPaciente((prevDatos) => {
@@ -142,12 +150,11 @@ const Formulario = () => {
                 medicamentos: nuevosMedicamentos
             };
         });
-    };
-    
+    };    
 
     const renderRiesgoGrid = (riesgo) => {
         const riesgos = [
-            '<10% Poco',
+            '<10% Bajo',
             '>10% <20% Moderado',
             '>20% <30% Alto',
             '>30% <40% Muy Alto',
