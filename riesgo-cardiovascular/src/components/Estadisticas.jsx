@@ -290,7 +290,7 @@ function Estadisticas() {
             </div>
           </div>
 
-          <div>
+          <div className="w-full md:w-1/4">
             <label className="block text-sm font-medium text-gray-700">IMC</label>
             <select
               name="imc"
