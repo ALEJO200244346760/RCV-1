@@ -111,7 +111,7 @@ const Formulario = () => {
             setTimeout(() => setMensajeExito(''), 3000);
         } catch (error) {
             console.error('Error al guardar los datos:', error);
-            setModalAdvertencia('Ocurrió un error al guardar los datos. Por favor, inténtelo de nuevo.');
+            setModalAdvertencia('Ocurrió un error al guardar los datos. Por favor, vuelva a cargar la página.');
             setMostrarModal(true);
         }
     };    
