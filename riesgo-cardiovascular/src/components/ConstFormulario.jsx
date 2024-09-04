@@ -18,7 +18,7 @@ export const DatosPacienteInicial = {
 }
 
 export const Advertencia = {
-            '<10% Poco': `-No significa no tener riesgos.
+            '<10% Bajo': `-No significa no tener riesgos.
 -Se recomienda intervenciones como un estilo de vida más saludable.
 -Mejorar la calidad del sueño logrando al menos siete horas continuas.
 -Actividad física que incluya ejercicios aeróbicos (como caminata bicicleta baile natación) y otros ejercicios aeróbicos (como levantamiento de pesas en tren superior o brazos y espalda y tren inferior como piernas y muslos, comenzando con cargas de menor a mayor peso gradualmente)
