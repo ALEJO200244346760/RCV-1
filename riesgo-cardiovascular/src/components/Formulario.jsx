@@ -113,10 +113,7 @@ const Formulario = () => {
             setModalAdvertencia('Ocurrió un error al guardar los datos. Por favor, inténtelo de nuevo.');
             setMostrarModal(true);
         }
-    };
-    
-    
-    
+    };    
     
     const guardarMedicamentos = () => {
         setMensajeExito('Medicamentos guardados con éxito');
@@ -385,54 +382,54 @@ const Formulario = () => {
             </form>
             {/* Modal Resultados */}
             {mostrarModal && !modalAdvertencia && (
-                <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-4">
-                    <div className="bg-white p-6 rounded-md shadow-lg w-full max-w-lg max-h-screen overflow-y-auto">
-                    
-                    <div className="flex justify-between mb-4">
-                        {/* Botón Agregar Medicamento */}
-                        <button
-                        onClick={toggleModalMedicamentos}
-                        className="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
-                        >
-                        Agregar Medicamento
-                        </button>
-
-                        {/* Botón Guardar Paciente */}
-                        <button
-                        onClick={guardarPaciente}
-                        className="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
-                        >
-                        Guardar Paciente
-                        </button>
-                    </div>
-                    
-                    <p><strong>Edad:</strong> {datosPaciente.edad}</p>
-                    <p><strong>Género:</strong> {datosPaciente.genero}</p>
-                    <p><strong>Diabetes:</strong> {datosPaciente.diabetes}</p>
-                    <p><strong>Fumador:</strong> {datosPaciente.fumador}</p>
-                    <p><strong>Presión Arterial:</strong> {datosPaciente.presionArterial}</p>
-                    <p><strong>Colesterol:</strong> {datosPaciente.colesterol || 'No especificado'}</p>
-                    <p><strong>Peso:</strong> {datosPaciente.peso || 'No especificado'}</p>
-                    <p><strong>Talla:</strong> {datosPaciente.talla || 'No especificada'} cm</p>
-                    <p><strong>IMC:</strong> {datosPaciente.imc || 'No calculado'}</p>
-                    <p><strong>Ubicación:</strong> {datosPaciente.ubicacion}</p>
-                    <p><strong>Fecha de Registro:</strong> {datosPaciente.fechaRegistro}</p>
-                    <p><strong>Hipertenso:</strong> {datosPaciente.hipertenso}</p>
-                    <p><strong>Infarto:</strong> {datosPaciente.infarto}</p>
-                    <p><strong>ACV:</strong> {datosPaciente.acv}</p>
-                    <p><strong>Nivel de Riesgo:</strong></p>
-                    <div className="mb-4">
-                        {renderRiesgoGrid(nivelRiesgo)}
-                    </div>
-
+            <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-4">
+                <div className="bg-white p-6 rounded-md shadow-lg w-full max-w-lg max-h-screen overflow-y-auto">
+                
+                <div className="flex justify-between mb-4">
+                    {/* Botón Agregar Medicamento */}
                     <button
-                        onClick={cerrarModal}
-                        className="absolute top-4 right-4 py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                    onClick={toggleModalMedicamentos}
+                    className="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
                     >
-                        Cerrar
+                    Agregar Medicamento
                     </button>
-                    </div>
+
+                    {/* Botón Guardar Paciente */}
+                    <button
+                    onClick={guardarPaciente}
+                    className="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                    >
+                    Guardar Paciente
+                    </button>
                 </div>
+                
+                <p><strong>Edad:</strong> {datosPaciente.edad}</p>
+                <p><strong>Género:</strong> {datosPaciente.genero}</p>
+                <p><strong>Diabetes:</strong> {datosPaciente.diabetes}</p>
+                <p><strong>Fumador:</strong> {datosPaciente.fumador}</p>
+                <p><strong>Presión Arterial:</strong> {datosPaciente.presionArterial}</p>
+                <p><strong>Colesterol:</strong> {datosPaciente.colesterol || 'No especificado'}</p>
+                <p><strong>Peso:</strong> {datosPaciente.peso || 'No especificado'}</p>
+                <p><strong>Talla:</strong> {datosPaciente.talla || 'No especificada'} cm</p>
+                <p><strong>IMC:</strong> {datosPaciente.imc || 'No calculado'}</p>
+                <p><strong>Ubicación:</strong> {datosPaciente.ubicacion}</p>
+                <p><strong>Fecha de Registro:</strong> {datosPaciente.fechaRegistro}</p>
+                <p><strong>Hipertenso:</strong> {datosPaciente.hipertenso}</p>
+                <p><strong>Infarto:</strong> {datosPaciente.infarto}</p>
+                <p><strong>ACV:</strong> {datosPaciente.acv}</p>
+                <p><strong>Nivel de Riesgo:</strong></p>
+                <div className="mb-4">
+                    {renderRiesgoGrid(nivelRiesgo)}
+                </div>
+
+                <button
+                    onClick={cerrarModal}
+                    className="absolute top-4 right-4 py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                >
+                    Cerrar
+                </button>
+                </div>
+            </div>
             )}
             {/* Modal para agregar medicamentos */}
             {mostrarModalMedicamentos && (
