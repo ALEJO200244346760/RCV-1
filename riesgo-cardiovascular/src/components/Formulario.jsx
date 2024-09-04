@@ -1,10 +1,26 @@
 import React, { useState } from 'react';
 import { calcularRiesgoCardiovascular } from './Calculadora';
-import { Advertencia, DatosPacienteInicial, listaMedicamentos, obtenerColorRiesgo, obtenerTextoRiesgo } from './ConstFormulario';
 import axiosInstance from '../axiosConfig';
 
 const Formulario = () => {
-    const [datosPaciente, setDatosPaciente] = useState(DatosPacienteInicial);
+    const [datosPaciente, setDatosPaciente] = useState({
+        edad: '',
+        genero: '',
+        diabetes: '',
+        fumador: '',
+        presionArterial: '',
+        colesterol: '',
+        peso: '',
+        talla: '', // Talla en centímetros
+        ubicacion: '',
+        fechaRegistro: new Date().toISOString().split('T')[0],
+        imc: '',
+        hipertenso: '',
+        infarto: '',
+        acv:'',
+        medicamentos:''
+    });
+
     const [nivelRiesgo, setNivelRiesgo] = useState(null);
     const [nivelColesterolConocido, setNivelColesterolConocido] = useState(false);
     const [mostrarModal, setMostrarModal] = useState(false);
@@ -95,34 +111,40 @@ const Formulario = () => {
 
     const guardarPaciente = async () => {
         try {
-            const medicamentosString = datosPaciente.medicamentos.join(';');  // Convierte array a string
-            
-            await axiosInstance.post('/api/pacientes', {
-                ...datosPaciente,
-                medicamentos: medicamentosString,  // Asegúrate de enviar como string
-                nivelRiesgo,
-            });
-            console.log('Datos guardados exitosamente');
-    
-            // Reinicia el mensaje de éxito después de 3 segundos
-            setMensajeExito('Medicamentos guardados con éxito');
-            setTimeout(() => setMensajeExito(''), 3000); // Apaga el mensaje de éxito después de 3 segundos
-    
+            // Hacer la solicitud PUT para guardar todos los datos del paciente, incluidos los medicamentos
+            await axiosInstance.put(`/api/pacientes/`, datosPaciente);
+            console.log('Paciente guardado exitosamente');
+            setMensajeExito('Paciente guardado con éxito');
         } catch (error) {
-            console.error('Error al guardar los datos:', error);
-            setModalAdvertencia('Ocurrió un error al guardar los datos. Por favor, inténtelo de nuevo.');
-            setMostrarModal(true);
+            console.error('Error al guardar el paciente:', error);
         }
     };
     
+    const guardarMedicamentos = async () => {
+        try {
+            // Verifica que datosPaciente.id esté definido
+            if (!datosPaciente.id) {
+                console.error('El ID del paciente no está definido');
+                return;
+            }
     
+            // Filtra los medicamentos seleccionados y únelos en un solo string, separados por saltos de línea
+            const medicamentosSeleccionados = medicamentosSeleccionados.split('\n').filter(Boolean).join('\n');
+            
+            // Hacer la solicitud PUT para guardar el string de medicamentos en el paciente
+            await axiosInstance.put(`/api/pacientes/${datosPaciente.id}/medicamentos`, {
+                medicamentos: medicamentosSeleccionados
+            });
     
-    
-    const guardarMedicamentos = () => {
-        setMensajeExito('Medicamentos guardados con éxito');
-        toggleModalMedicamentos(); // Cerrar el modal de medicamentos
-    };
-    
+            console.log('Medicamentos guardados exitosamente');
+            
+            // Mostrar un mensaje de éxito y cerrar el modal
+            setMensajeExito('Medicamentos guardados con éxito');
+            toggleModalMedicamentos(); // Cerrar el modal de medicamentos
+        } catch (error) {
+            console.error('Error al guardar los medicamentos:', error);
+        }
+    };    
     
     const cerrarModal = () => {
         setMostrarModal(false);
@@ -130,31 +152,138 @@ const Formulario = () => {
     };
 
     const abrirModalAdvertencia = (nivel) => {
-        setModalAdvertencia(Advertencia[nivel]);
+        const advertencias = {
+            '<10% Poco': `-No significa no tener riesgos.
+-Se recomienda intervenciones como un estilo de vida más saludable.
+-Mejorar la calidad del sueño logrando al menos siete horas continuas.
+-Actividad física que incluya ejercicios aeróbicos (como caminata bicicleta baile natación) y otros ejercicios aeróbicos (como levantamiento de pesas en tren superior o brazos y espalda y tren inferior como piernas y muslos, comenzando con cargas de menor a mayor peso gradualmente)
+-Estos tipos de ejercicios recomiendan al menos tres veces por semana, o bien 150 minutos semanales.
+-Vigilar el perfil del riesgo con el control de la presión arterial y un análisis de laboratorio de colesterol y glucemia.
+-Alimentación saludable recomendada en lo posible por un nutricionista o profesional de la salud.
+-Evitar hábitos tóxicos.
+-Realizar el cálculo de riesgo cardiovascular cada 12 meses.
+            `,
+            '>10% <20% Moderado': `-Significa tener riesgo moderado de sufrir un episodio vascular en los próximos 10 año-Se recomienda intervenciones como un estilo de vida más saludable.
+-Mayor adherencia y cumplimiento a los tratamientos y medicamentos indicados.
+-Realización de estudios complementarios indicados por el profesional de la salud.
+-Mejorar la calidad del sueño logrando al menos siete horas continuas.
+-Actividad física que incluya ejercicios aeróbicos (como caminata bicicleta baile natación) y otros ejercicios aeróbicos (como levantamiento de pesas en tren superior o brazos y espalda y tren inferior como piernas y muslos, comenzando con cargas de menor a mayor peso gradualmente)
+-Estos tipos de ejercicios recomiendan al menos tres veces por semana, o bien 150 minutos semanales, siempre controlando la presión arterial antes de iniciar la actividad física de mayor intensidad.
+-Vigilar el perfil del riesgo con un análisis de laboratorio de colesterol y glucemia.
+-Alimentación saludable recomendada en lo posible por un nutricionista o profesional de la salud.
+-Evitar hábitos tóxicos.
+-Realizar el cálculo de riesgo cardiovascular cada 6 meses.
+            `,
+            '>20% <30% Alto': `-Significa tener riesgo elevado de sufrir un episodio vascular en los próximos 10 años.
+-Se recomienda intervenciones como un estilo de vida más saludable.
+-Mayor adherencia y cumplimiento a los tratamientos y medicamentos indicados.
+-Realización de estudios complementarios indicados por el profesional de la salud.
+-Mejorar la calidad del sueño logrando al menos siete horas continuas.
+-Actividad física controlada y monitorizada idealmente en un centro de rehabilitación que incluya ejercicios aeróbicos (como caminata bicicleta baile natación) y otros ejercicios aeróbicos (como levantamiento de pesas en tren superior o brazos y espalda y tren inferior como piernas y muslos, comenzando con cargas de menor a mayor peso gradualmente)
+-Estos tipos de ejercicios recomiendan al menos tres veces por semana, o bien 150 minutos semanales, siempre controlando la presión arterial antes de iniciar la actividad física de mayor intensidad.
+-Vigilar el perfil del riesgo con un análisis de laboratorio de colesterol y glucemia.
+-Alimentación saludable recomendada en lo posible por un nutricionista o profesional de la salud.
+-Evitar hábitos tóxicos.
+-Realizar el cálculo de riesgo cardiovascular cada 3 meses.
+-Revisar el calendario de vacunas.
+            `,
+            '>30% <40% Muy Alto': `-Significa tener riesgo elevado de sufrir un episodio vascular en los próximos 10 años.
+-Se recomienda intervenciones como un estilo de vida más saludable.
+-Mayor adherencia y cumplimiento a los tratamientos y medicamentos indicados.
+-Realización de estudios complementarios indicados por el profesional de la salud.
+-Mejorar la calidad del sueño logrando al menos siete horas continuas.
+-Actividad física controlada y monitorizada idealmente en un centro de rehabilitación que incluya ejercicios aeróbicos (como caminata bicicleta baile natación) y otros ejercicios aeróbicos (como levantamiento de pesas en tren superior o brazos y espalda y tren inferior como piernas y muslos, comenzando con cargas de menor a mayor peso gradualmente)
+-Estos tipos de ejercicios recomiendan al menos tres veces por semana, o bien 150 minutos semanales, siempre controlando la presión arterial antes de iniciar la actividad física de mayor intensidad.
+-Vigilar el perfil del riesgo con un análisis de laboratorio de colesterol y glucemia.
+-Alimentación saludable recomendada en lo posible por un nutricionista o profesional de la salud.
+-Evitar hábitos tóxicos.
+-Realizar el cálculo de riesgo cardiovascular cada 3 meses.
+-Revisar el calendario de vacunas.
+            `,
+            '>40% Crítico': `-Significa tener riesgo elevado de sufrir un episodio vascular en los próximos 10 años.
+-Se recomienda intervenciones como un estilo de vida más saludable.
+-Mayor adherencia y cumplimiento a los tratamientos y medicamentos indicados.
+-Realización de estudios complementarios indicados por el profesional de la salud.
+-Mejorar la calidad del sueño logrando al menos siete horas continuas.
+-Actividad física controlada y monitorizada idealmente en un centro de rehabilitación que incluya ejercicios aeróbicos (como caminata bicicleta baile natación) y otros ejercicios aeróbicos (como levantamiento de pesas en tren superior o brazos y espalda y tren inferior como piernas y muslos, comenzando con cargas de menor a mayor peso gradualmente)
+-Estos tipos de ejercicios recomiendan al menos tres veces por semana, o bien 150 minutos semanales, siempre controlando la presión arterial antes de iniciar la actividad física de mayor intensidad.
+-Vigilar el perfil del riesgo con un análisis de laboratorio de colesterol y glucemia.
+-Alimentación saludable recomendada en lo posible por un nutricionista o profesional de la salud.
+-Evitar hábitos tóxicos.
+-Realizar el cálculo de riesgo cardiovascular cada 3 meses.
+-Revisar el calendario de vacunas.
+            `
+        };
+        setModalAdvertencia(advertencias[nivel]);
     };
 
-    const toggleModalMedicamentos = () => {
-        setMedicamentosSeleccionados([]);  // Reiniciar los medicamentos seleccionados
-        setMostrarModalMedicamentos(!mostrarModalMedicamentos);
-    };    
-        
+    const listaMedicamentos = [
+        "1800*Consulta de detección y/o seguimiento de HTA CTC074K86",
+        "270*Notificación de riesgo cardiovascular < 10% (a partir de 18 años) NTN007K22",
+        "270*Notificación de riesgo cardiovascular 10% ≤ 20% (a partir de 18 años) NTN008K22",
+        "270*Notificación de riesgo cardiovascular 20% ≤ 30% (a partir de 18 años) NTN009K22",
+        "270*Notificación de riesgo cardiovascular ≥ 30% (a partir de 18 años) NTN010K22",
+        "936*Consejería Consejo conductual breve de cese de tabaquismo COT023P22",                              
+        "180*Glucemia LBL045VMD",
+        "180*Perfil lipídico LBL073VMD",
+        "180*Albuminuria LBL137VMD",
+        "180*Creatinina sérica LBL022VMD",
+        "180*IFGe LBL140VMD",
+        "504*Notificación de persona con hipertensión en tratamiento farmacológico NTN030K86",
+        "558**Prescripción de enalapril P052 M07",
+        "558*Prescripción de losartán P052 M08",
+        "558*Prescripción de hidroclorotiazida P052 M09",
+        "558*Prescripción de amlodipina P052 M10",
+        "612*Dispensa de enalapril P053 M07",
+        "612*Dispensa de losartán P053 M08",
+        "612*Dispensa de hidroclorotiazida P053 M09",
+        "612*Dispensa de amlodipina P053 M10",
+        "936*Consulta para la evaluación de riesgo cardiovascular CTC048K22",
+        "702*Consulta de seguimiento de persona con riesgo cardiovascular CTC049K22",
+        "936*Consulta con cardiología en persona con alto RCV CTC044K22",
+        "468*Consejeria abandono de tabaquismo",
+        "936*Consulta para cesación tabáquica (personas adultas y mayores) CTC075A98",
+    ];
+    
+    const toggleModalMedicamentos = () => setMostrarModalMedicamentos(!mostrarModalMedicamentos);
+    
     const handleMedicamentoChange = (event) => {
         const { value, checked } = event.target;
-        setDatosPaciente((prevDatos) => {
-            const nuevosMedicamentos = checked 
-                ? [...prevDatos.medicamentos, value]
-                : prevDatos.medicamentos.filter((med) => med !== value);
-            
-            return {
-                ...prevDatos,
-                medicamentos: nuevosMedicamentos
-            };
-        });
-    };    
+        if (checked) {
+            setMedicamentosSeleccionados([...medicamentosSeleccionados, value]);
+        } else {
+            setMedicamentosSeleccionados(
+                medicamentosSeleccionados.filter((med) => med !== value)
+            );
+        }
+    };
+    
+
+    const obtenerColorRiesgo = (riesgo) => {
+        switch (riesgo) {
+            case '<10% Poco': return 'bg-green-500';
+            case '>10% <20% Moderado': return 'bg-yellow-500';
+            case '>20% <30% Alto': return 'bg-orange-500';
+            case '>30% <40% Muy Alto': return 'bg-red-500';
+            case '>40% Crítico': return 'bg-red-800';
+            default: return 'bg-gray-200';
+        }
+    };
+
+    const obtenerTextoRiesgo = (riesgo) => {
+        switch (riesgo) {
+            case '<10% Poco': return '<10% Poco';
+            case '>10% <20% Moderado': return '>10% <20% Moderado';
+            case '>20% <30% Alto': return '>20% <30% Alto';
+            case '>30% <40% Muy Alto': return '>30% <40% Muy Alto';
+            case '>40% Crítico': return '>40% Crítico';
+            default: return 'Desconocido';
+        }
+    };
 
     const renderRiesgoGrid = (riesgo) => {
         const riesgos = [
-            '<10% Bajo',
+            '<10% Poco',
             '>10% <20% Moderado',
             '>20% <30% Alto',
             '>30% <40% Muy Alto',
@@ -349,6 +478,7 @@ const Formulario = () => {
                     ))}
                 </div>
             </div>
+
                 {/* Colesterol */}
                 <div className="flex flex-col">
                     <label className="text-sm font-medium text-gray-700">¿Conoce su nivel de colesterol?</label>
@@ -375,6 +505,9 @@ const Formulario = () => {
                         />
                     )}
                 </div>
+
+                
+
                 <button
                     type="button"
                     onClick={calcularRiesgo}
@@ -383,57 +516,57 @@ const Formulario = () => {
                     Calcular Riesgo
                 </button>
             </form>
+
             {/* Modal Resultados */}
             {mostrarModal && !modalAdvertencia && (
-                <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-4">
-                    <div className="bg-white p-6 rounded-md shadow-lg w-full max-w-lg max-h-screen overflow-y-auto">
-                    
-                    <div className="flex justify-between mb-4">
+                <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+                    <div className="bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg">
                         {/* Botón Agregar Medicamento */}
                         <button
-                        onClick={toggleModalMedicamentos}
-                        className="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                            onClick={toggleModalMedicamentos}
+                            className="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
                         >
-                        Agregar Medicamento
+                            Agregar Medicamento
                         </button>
 
-                        {/* Botón Guardar Paciente */}
+                        {/* Botón Agregar Medicamento */}
                         <button
-                        onClick={guardarPaciente}
-                        className="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                            onClick={guardarPaciente}
+                            className="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600 items-end"
                         >
-                        Guardar Paciente
+                            Guardar paciente
                         </button>
-                    </div>
-                    
-                    <p><strong>Edad:</strong> {datosPaciente.edad}</p>
-                    <p><strong>Género:</strong> {datosPaciente.genero}</p>
-                    <p><strong>Diabetes:</strong> {datosPaciente.diabetes}</p>
-                    <p><strong>Fumador:</strong> {datosPaciente.fumador}</p>
-                    <p><strong>Presión Arterial:</strong> {datosPaciente.presionArterial}</p>
-                    <p><strong>Colesterol:</strong> {datosPaciente.colesterol || 'No especificado'}</p>
-                    <p><strong>Peso:</strong> {datosPaciente.peso || 'No especificado'}</p>
-                    <p><strong>Talla:</strong> {datosPaciente.talla || 'No especificada'} cm</p>
-                    <p><strong>IMC:</strong> {datosPaciente.imc || 'No calculado'}</p>
-                    <p><strong>Ubicación:</strong> {datosPaciente.ubicacion}</p>
-                    <p><strong>Fecha de Registro:</strong> {datosPaciente.fechaRegistro}</p>
-                    <p><strong>Hipertenso:</strong> {datosPaciente.hipertenso}</p>
-                    <p><strong>Infarto:</strong> {datosPaciente.infarto}</p>
-                    <p><strong>ACV:</strong> {datosPaciente.acv}</p>
-                    <p><strong>Nivel de Riesgo:</strong></p>
-                    <div className="mb-4">
-                        {renderRiesgoGrid(nivelRiesgo)}
-                    </div>
 
-                    <button
-                        onClick={cerrarModal}
-                        className="absolute top-4 right-4 py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
-                    >
-                        Cerrar
-                    </button>
+                        <h2 className="text-lg font-semibold mb-4">Resultados</h2>
+                        <p><strong>Edad:</strong> {datosPaciente.edad}</p>
+                        <p><strong>Género:</strong> {datosPaciente.genero}</p>
+                        <p><strong>Diabetes:</strong> {datosPaciente.diabetes}</p>
+                        <p><strong>Fumador:</strong> {datosPaciente.fumador}</p>
+                        <p><strong>Presión Arterial:</strong> {datosPaciente.presionArterial}</p>
+                        <p><strong>Colesterol:</strong> {datosPaciente.colesterol || 'No especificado'}</p>
+                        <p><strong>Peso:</strong> {datosPaciente.peso || 'No especificado'}</p>
+                        <p><strong>Talla:</strong> {datosPaciente.talla || 'No especificada'} cm</p>
+                        <p><strong>IMC:</strong> {datosPaciente.imc || 'No calculado'}</p>
+                        <p><strong>Ubicación:</strong> {datosPaciente.ubicacion}</p>
+                        <p><strong>Fecha de Registro:</strong> {datosPaciente.fechaRegistro}</p>
+                        <p><strong>Hipertenso:</strong> {datosPaciente.hipertenso}</p>
+                        <p><strong>Infarto:</strong> {datosPaciente.infarto}</p>
+                        <p><strong>ACV:</strong> {datosPaciente.acv}</p>
+                        <p><strong>Nivel de Riesgo:</strong></p>
+                        <div className="mb-4">
+                            {renderRiesgoGrid(nivelRiesgo)}
+                        </div>
+
+                        <button
+                            onClick={cerrarModal}
+                            className="mt-4 py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                        >
+                            Cerrar
+                        </button>
                     </div>
                 </div>
             )}
+
             {/* Modal para agregar medicamentos */}
             {mostrarModalMedicamentos && (
                 <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
