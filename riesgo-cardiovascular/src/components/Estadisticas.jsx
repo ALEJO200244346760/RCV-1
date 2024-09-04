@@ -349,64 +349,135 @@ function Estadisticas() {
         <h2 className="text-xl font-semibold">Total de Personas que Coinciden con los Filtros: {pacientesFiltrados.length}</h2>
       </div>
 
-      <div className="overflow-x-auto mt-6">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Edad</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Género</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Diabetes</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fumador</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Presión Arterial</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Colesterol</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nivel de Riesgo</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ubicación</th> {/* Nueva columna */}
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+      <div className="mt-6">
+        <div className="hidden lg:block overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Edad</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Género</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Diabetes</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fumador</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Presión Arterial</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Colesterol</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nivel de Riesgo</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ubicación</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {pacientesFiltrados.map(paciente => (
+                <tr key={paciente.id}>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{paciente.id}</td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.edad}</td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.genero}</td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.diabetes}</td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.fumador}</td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.presionArterial}</td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.colesterol}</td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${obtenerColorRiesgo(paciente.nivelRiesgo)}`}>
+                      {paciente.nivelRiesgo}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.ubicacion}</td>
+                  <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button
+                      onClick={() => editarPaciente(paciente.id)}
+                      className="text-indigo-600 hover:text-indigo-900"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => eliminarPaciente(paciente.id)}
+                      className="ml-4 text-red-600 hover:text-red-900"
+                    >
+                      Eliminar
+                    </button>
+                    <button
+                      onClick={() => copiarDatos(paciente)}
+                      className="ml-4 text-blue-600 hover:text-blue-900"
+                    >
+                      Copiar
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+          {/* Modo móvil */}
+        <div className="lg:hidden">
             {pacientesFiltrados.map(paciente => (
-              <tr key={paciente.id}>
-                <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{paciente.id}</td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.edad}</td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.genero}</td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.diabetes}</td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.fumador}</td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.presionArterial}</td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.colesterol}</td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${obtenerColorRiesgo(paciente.nivelRiesgo)}`}>
-                    {paciente.nivelRiesgo}
-                  </span>
-                </td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.ubicacion}</td> {/* Nueva celda */}
-                <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <div key={paciente.id} className="bg-white shadow-md rounded-lg p-4 mb-4">
+                <div className="flex justify-between items-start mb-2">
+                  <div className="text-sm font-medium text-gray-900">ID:</div>
+                  <div className="text-sm text-gray-500">{paciente.id}</div>
+                </div>
+                <div className="flex justify-between items-start mb-2">
+                  <div className="text-sm font-medium text-gray-900">Edad:</div>
+                  <div className="text-sm text-gray-500">{paciente.edad}</div>
+                </div>
+                <div className="flex justify-between items-start mb-2">
+                  <div className="text-sm font-medium text-gray-900">Género:</div>
+                  <div className="text-sm text-gray-500">{paciente.genero}</div>
+                </div>
+                <div className="flex justify-between items-start mb-2">
+                  <div className="text-sm font-medium text-gray-900">Diabetes:</div>
+                  <div className="text-sm text-gray-500">{paciente.diabetes}</div>
+                </div>
+                <div className="flex justify-between items-start mb-2">
+                  <div className="text-sm font-medium text-gray-900">Fumador:</div>
+                  <div className="text-sm text-gray-500">{paciente.fumador}</div>
+                </div>
+                <div className="flex justify-between items-start mb-2">
+                  <div className="text-sm font-medium text-gray-900">Presión Arterial:</div>
+                  <div className="text-sm text-gray-500">{paciente.presionArterial}</div>
+                </div>
+                <div className="flex justify-between items-start mb-2">
+                  <div className="text-sm font-medium text-gray-900">Colesterol:</div>
+                  <div className="text-sm text-gray-500">{paciente.colesterol}</div>
+                </div>
+                <div className="flex justify-between items-start mb-2">
+                  <div className="text-sm font-medium text-gray-900">Nivel de Riesgo:</div>
+                  <div className="text-sm text-gray-500">
+                    <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${obtenerColorRiesgo(paciente.nivelRiesgo)}`}>
+                      {paciente.nivelRiesgo}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-start mb-2">
+                  <div className="text-sm font-medium text-gray-900">Ubicación:</div>
+                  <div className="text-sm text-gray-500">{paciente.ubicacion}</div>
+                </div>
+                <div className="flex justify-end mt-4">
                   <button
                     onClick={() => editarPaciente(paciente.id)}
-                    className="text-indigo-600 hover:text-indigo-900"
+                    className="text-indigo-600 hover:text-indigo-900 mr-4"
                   >
                     Editar
                   </button>
                   <button
                     onClick={() => eliminarPaciente(paciente.id)}
-                    className="ml-4 text-red-600 hover:text-red-900"
+                    className="text-red-600 hover:text-red-900 mr-4"
                   >
                     Eliminar
                   </button>
                   <button
-                        onClick={() => copiarDatos(paciente)}
-                        className="ml-4 text-blue-600 hover:text-blue-900"
-                      >
-                        Copiar
-                </button>
-                </td>
-              </tr>
+                    onClick={() => copiarDatos(paciente)}
+                    className="text-blue-600 hover:text-blue-900"
+                  >
+                    Copiar
+                  </button>
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+          </div>
+        </div>
+
+  </div>
   );
 }
 
