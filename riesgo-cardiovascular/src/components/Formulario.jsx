@@ -107,14 +107,17 @@ const Formulario = () => {
             });
     
             console.log('Datos guardados exitosamente');
-            setMensajeExito('Medicamentos guardados con éxito');
+            setMensajeExito('Paciente guardado con éxito');
             setTimeout(() => setMensajeExito(''), 3000);
+            setTimeout(() => {
+                window.location.href = '/Formulario'; // Redirigir a la página deseada
+            }, 1000);
         } catch (error) {
             console.error('Error al guardar los datos:', error);
             setModalAdvertencia('Ocurrió un error al guardar los datos. Por favor, vuelva a cargar la página.');
             setMostrarModal(true);
         }
-    };    
+    };
     
     const guardarMedicamentos = () => {
         setMensajeExito('Medicamentos guardados con éxito');
