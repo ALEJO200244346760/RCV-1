@@ -383,6 +383,7 @@ function Estadisticas() {
                     </span>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.ubicacion}</td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.imc}</td>
                   <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
                       onClick={() => editarPaciente(paciente.id)}
