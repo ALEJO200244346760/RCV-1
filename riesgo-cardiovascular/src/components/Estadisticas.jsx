@@ -93,6 +93,13 @@ function Estadisticas() {
 
       const nivelColesterolPaciente = paciente.colesterol ? obtenerNivelColesterol(Number(paciente.colesterol)) : null;
 
+      const imc = paciente.imc;
+      const categoriaIMC = imc < 18.5 ? '<18.5' :
+                           (imc >= 18.5 && imc <= 24.9) ? '18.5-24.9' :
+                           (imc >= 25 && imc <= 29.9) ? '25-29.9' :
+                           (imc >= 30 && imc <= 34.9) ? '30-34.9' :
+                           (imc >= 35 && imc <= 39.9) ? '35-39.9' : '40+';
+
       return (
         (edadFiltro === null || paciente.edad.toString() === edadFiltro) &&
         (filtros.genero === '' || paciente.genero.toLowerCase() === filtros.genero.toLowerCase()) &&
