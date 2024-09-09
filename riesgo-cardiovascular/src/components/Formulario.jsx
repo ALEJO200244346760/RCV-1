@@ -5,8 +5,8 @@ import axiosInstance from '../axiosConfig';
 
 const Formulario = () => {
     const [datosPaciente, setDatosPaciente] = useState(DatosPacienteInicial);
+    const [nivelColesterolConocido, setNivelColesterolConocido] = useState(null);
     const [nivelRiesgo, setNivelRiesgo] = useState(null);
-    const [nivelColesterolConocido, setNivelColesterolConocido] = useState(false);
     const [mostrarModal, setMostrarModal] = useState(false);
     const [modalAdvertencia, setModalAdvertencia] = useState(null);
     const [mostrarModalMedicamentos, setMostrarModalMedicamentos] = useState(false);
@@ -56,8 +56,8 @@ const Formulario = () => {
     };
 
     const validarCampos = () => {
-        const { edad, genero, diabetes, fumador, presionArterial, ubicacion } = datosPaciente;
-        return edad && genero && diabetes && fumador && presionArterial && ubicacion;
+        const { edad, genero, diabetes, fumador, presionArterial, ubicacion, colesterol, hipertenso, acv, infarto, peso, talla } = datosPaciente;
+        return edad && genero && diabetes && fumador && presionArterial && ubicacion && colesterol && hipertenso && acv && infarto && peso && talla;
     };
 
     const calcularRiesgo = async () => {
@@ -123,7 +123,6 @@ const Formulario = () => {
         setMensajeExito('Medicamentos guardados con éxito');
         toggleModalMedicamentos(); // Cerrar el modal de medicamentos
     };
-    
     
     const cerrarModal = () => {
         setMostrarModal(false);
@@ -301,55 +300,55 @@ const Formulario = () => {
                 </div>
 
                 {/* Hipertenso */}
-            <div className="flex flex-col">
-                <label className="text-sm font-medium text-gray-700">¿Es hipertenso?</label>
-                <div className="flex space-x-2 mb-2">
-                    {['Sí', 'No'].map(option => (
-                        <button
-                            key={option}
-                            type="button"
-                            onClick={() => setDatosPaciente({ ...datosPaciente, hipertenso: option })}
-                            className={`p-2 border rounded-md ${datosPaciente.hipertenso === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
-                        >
-                            {option}
-                        </button>
-                    ))}
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium text-gray-700">¿Es hipertenso?</label>
+                    <div className="flex space-x-2 mb-2">
+                        {['Sí', 'No'].map(option => (
+                            <button
+                                key={option}
+                                type="button"
+                                onClick={() => setDatosPaciente({ ...datosPaciente, hipertenso: option })}
+                                className={`p-2 border rounded-md ${datosPaciente.hipertenso === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
+                            >
+                                {option}
+                            </button>
+                        ))}
+                    </div>
                 </div>
-            </div>
 
-            {/* Infarto */}
-            <div className="flex flex-col">
-                <label className="text-sm font-medium text-gray-700">¿Ha tenido un infarto?</label>
-                <div className="flex space-x-2 mb-2">
-                    {['Sí', 'No'].map(option => (
-                        <button
-                            key={option}
-                            type="button"
-                            onClick={() => setDatosPaciente({ ...datosPaciente, infarto: option })}
-                            className={`p-2 border rounded-md ${datosPaciente.infarto === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
-                        >
-                            {option}
-                        </button>
-                    ))}
+                {/* Infarto */}
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium text-gray-700">¿Ha tenido un infarto?</label>
+                    <div className="flex space-x-2 mb-2">
+                        {['Sí', 'No'].map(option => (
+                            <button
+                                key={option}
+                                type="button"
+                                onClick={() => setDatosPaciente({ ...datosPaciente, infarto: option })}
+                                className={`p-2 border rounded-md ${datosPaciente.infarto === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
+                            >
+                                {option}
+                            </button>
+                        ))}
+                    </div>
                 </div>
-            </div>
 
-            {/* ACV */}
-            <div className="flex flex-col">
-                <label className="text-sm font-medium text-gray-700">¿Ha tenido un ACV?</label>
-                <div className="flex space-x-2 mb-2">
-                    {['Sí', 'No'].map(option => (
-                        <button
-                            key={option}
-                            type="button"
-                            onClick={() => setDatosPaciente({ ...datosPaciente, acv: option })}
-                            className={`p-2 border rounded-md ${datosPaciente.acv === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
-                        >
-                            {option}
-                        </button>
-                    ))}
+                {/* ACV */}
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium text-gray-700">¿Ha tenido un ACV?</label>
+                    <div className="flex space-x-2 mb-2">
+                        {['Sí', 'No'].map(option => (
+                            <button
+                                key={option}
+                                type="button"
+                                onClick={() => setDatosPaciente({ ...datosPaciente, acv: option })}
+                                className={`p-2 border rounded-md ${datosPaciente.acv === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
+                            >
+                                {option}
+                            </button>
+                        ))}
+                    </div>
                 </div>
-            </div>
                 {/* Colesterol */}
                 <div className="flex flex-col">
                     <label className="text-sm font-medium text-gray-700">¿Conoce su nivel de colesterol?</label>
@@ -365,7 +364,7 @@ const Formulario = () => {
                             </button>
                         ))}
                     </div>
-                    {nivelColesterolConocido && (
+                    {nivelColesterolConocido === true && (
                         <input
                             type="number"
                             name="colesterol"
