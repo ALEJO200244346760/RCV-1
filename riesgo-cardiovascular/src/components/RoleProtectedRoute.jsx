@@ -1,19 +1,19 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-function RoleProtectedRoute({ element, allowedRoles }) {
-  const token = localStorage.getItem('token');
-  const userRole = localStorage.getItem('role'); // Asume que el rol se guarda en localStorage al iniciar sesión
+const RoleProtectedRoute = ({ element, allowedRoles }) => {
+  const { roles } = useAuth();
 
-  if (!token) {
-    return <Navigate to="/login" />;
+  // Verifica que roles sea un array
+  if (!Array.isArray(roles)) {
+    return <Navigate to="/" />;
   }
 
-  if (!allowedRoles.includes(userRole)) {
-    return <Navigate to="/" />; // Redirige si el rol no está permitido
-  }
+  // Check if user has at least one of the allowed roles
+  const hasAccess = roles.some(role => allowedRoles.includes(role));
 
-  return element;
-}
+  return hasAccess ? element : <Navigate to="/" />;
+};
 
 export default RoleProtectedRoute;

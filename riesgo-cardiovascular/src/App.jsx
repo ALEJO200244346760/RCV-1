@@ -6,7 +6,8 @@ import Formulario from './components/Formulario';
 import EditarPaciente from './components/EditarPaciente';
 import TomarPresion from './components/tomarPresion';
 import Login from './components/Login';
-import Register from './components/Register'; // Importa el componente Register
+import Register from './components/Register';
+import AdminPanel from './components/AdminPanel'; // Verifica la importación
 import RoleProtectedRoute from './components/RoleProtectedRoute';
 
 function App() {
@@ -16,22 +17,27 @@ function App() {
       <Routes>
         <Route path="/" element={<Formulario />} />
         <Route path="/tomarPresion" element={<TomarPresion />} />
-        <Route
-          path="/estadisticas"
-          element={<Estadisticas />}
-              allowedRoles={['CARDIOLOGO']}
-            />
+        <Route path="/estadisticas" element={<Estadisticas />} />
         <Route
           path="/editar-paciente/:id"
           element={
             <RoleProtectedRoute
               element={<EditarPaciente />}
-              allowedRoles={['CARDIOLOGO']}
+              allowedRoles={['ROLE_CARDIOLOGO']}
+            />
+          }
+        />
+        <Route
+          path="/admin-panel"
+          element={
+            <RoleProtectedRoute
+              element={<AdminPanel />}
+              allowedRoles={['ROLE_CARDIOLOGO']}
             />
           }
         />
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} /> {/* Añade la ruta para el registro */}
+        <Route path="/register" element={<Register />} />
         <Route path="*" element={<Navigate to="/" />} /> {/* Ruta 404 */}
       </Routes>
     </Router>
