@@ -3,30 +3,29 @@ import { useAuth } from '../context/AuthContext';
 import { getUsers, updateUserRoleAndLocation } from '../services/userService';
 
 const AdminPanel = () => {
-  const { roles } = useAuth(); // Obtener roles del contexto
+  const { roles } = useAuth(); // Obtener roles desde el contexto
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+  const [error, setError] = useState(null); // Manejo de errores
+
   // Roles y ubicaciones disponibles
   const rolesDisponibles = ['CARDIOLOGO', 'ENFERMERO'];
   const ubicacionesDisponibles = ['DEM NORTE', 'DEM CENTRO', 'DEM OESTE', 'DAPS', 'HPA', 'HU'];
 
   useEffect(() => {
-    // Solo cargar usuarios si el usuario tiene el rol 'ROLE_CARDIOLOGO'
-    if (roles.includes('ROLE_CARDIOLOGO')) {
+    if (roles.includes('ADMIN')) {
       cargarUsuarios();
-    } else {
-      console.error('Acceso denegado: Rol insuficiente.');
     }
   }, [roles]);
 
   const cargarUsuarios = async () => {
     try {
-      const data = await getUsers(); // Obtener lista de usuarios desde la API
+      const data = await getUsers();
       setUsuarios(data);
-      setLoading(false);
     } catch (error) {
-      console.error('Error cargando usuarios:', error);
+      setError('Error cargando usuarios');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -35,7 +34,7 @@ const AdminPanel = () => {
       await updateUserRoleAndLocation(usuarioId, { rol: nuevoRol });
       cargarUsuarios(); // Volver a cargar la lista de usuarios
     } catch (error) {
-      console.error('Error actualizando rol:', error);
+      setError('Error actualizando rol');
     }
   };
 
@@ -44,12 +43,16 @@ const AdminPanel = () => {
       await updateUserRoleAndLocation(usuarioId, { ubicacion: nuevaUbicacion });
       cargarUsuarios();
     } catch (error) {
-      console.error('Error actualizando ubicación:', error);
+      setError('Error actualizando ubicación');
     }
   };
 
   if (loading) {
     return <div>Cargando usuarios...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
   }
 
   return (
