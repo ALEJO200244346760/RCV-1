@@ -1,43 +1,35 @@
-// userService.js
+// src/services/userService.js
+
+const API_BASE_URL = 'https://rcv-production.up.railway.app'; // Actualiza con tu URL base de producción
+
 export const getUsers = async () => {
   try {
-    const response = await fetch('https://rcv-production.up.railway.app/usuario'); // Actualiza con tu URL
+    const response = await fetch(`${API_BASE_URL}/usuario`);
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error('Error al obtener usuarios');
     }
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      const data = await response.json();
-      return data;
-    } else {
-      throw new Error('Expected JSON response');
-    }
+    return response.json();
   } catch (error) {
-    console.error('Error fetching users:', error);
-    throw error; // Lanzar error para que pueda ser manejado por el componente
+    console.error('Error en getUsers:', error);
+    throw error;
   }
 };
 
 export const updateUserRoleAndLocation = async (userId, updates) => {
   try {
-    const response = await fetch(`https://rcv-production.up.railway.app/usuario/${userId}`, { // Actualiza con tu URL
-      method: 'PUT',
+    const response = await fetch(`${API_BASE_URL}/usuario/${userId}`, {
+      method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(updates),
     });
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error('Error al actualizar usuario');
     }
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      return await response.json();
-    } else {
-      throw new Error('Expected JSON response');
-    }
+    return response.json();
   } catch (error) {
-    console.error('Error updating user role and location:', error);
-    throw error; // Lanzar error para que pueda ser manejado por el componente
+    console.error('Error en updateUserRoleAndLocation:', error);
+    throw error;
   }
 };

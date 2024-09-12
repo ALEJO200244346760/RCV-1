@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { getUsers, updateUserRoleAndLocation } from '../services/userService';
 
 const AdminPanel = () => {
-  const { roles } = useAuth(); // Obtener roles desde el contexto
+  const { roles } = useAuth(); // Obtener roles del contexto
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null); // Manejo de errores
@@ -13,19 +13,23 @@ const AdminPanel = () => {
   const ubicacionesDisponibles = ['DEM NORTE', 'DEM CENTRO', 'DEM OESTE', 'DAPS', 'HPA', 'HU'];
 
   useEffect(() => {
-    if (roles.includes('ADMIN')) {
+    // Solo cargar usuarios si el usuario tiene el rol 'ROLE_CARDIOLOGO'
+    if (roles.includes('ROLE_CARDIOLOGO')) {
       cargarUsuarios();
+    } else {
+      console.error('Acceso denegado: Rol insuficiente.');
     }
   }, [roles]);
 
   const cargarUsuarios = async () => {
     try {
-      const data = await getUsers();
+      const data = await getUsers(); // Obtener lista de usuarios desde la API
       setUsuarios(data);
-    } catch (error) {
-      setError('Error cargando usuarios');
-    } finally {
       setLoading(false);
+    } catch (error) {
+      setError('Error cargando usuarios'); // Mostrar mensaje de error
+      console.error('Error cargando usuarios:', error);
+      setLoading(false); // Dejar de cargar
     }
   };
 
@@ -34,7 +38,8 @@ const AdminPanel = () => {
       await updateUserRoleAndLocation(usuarioId, { rol: nuevoRol });
       cargarUsuarios(); // Volver a cargar la lista de usuarios
     } catch (error) {
-      setError('Error actualizando rol');
+      setError('Error actualizando rol'); // Mostrar mensaje de error
+      console.error('Error actualizando rol:', error);
     }
   };
 
@@ -43,7 +48,8 @@ const AdminPanel = () => {
       await updateUserRoleAndLocation(usuarioId, { ubicacion: nuevaUbicacion });
       cargarUsuarios();
     } catch (error) {
-      setError('Error actualizando ubicación');
+      setError('Error actualizando ubicación'); // Mostrar mensaje de error
+      console.error('Error actualizando ubicación:', error);
     }
   };
 
