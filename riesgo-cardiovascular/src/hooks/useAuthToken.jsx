@@ -1,7 +1,9 @@
-import { useAuth } from '../context/AuthContext';
+// src/hooks/useAuthToken.js
+import { useContext } from 'react';
+import AuthContext from '../context/AuthContext';
 
 const useAuthToken = () => {
-    const { token } = useAuth();
+    const { token } = useContext(AuthContext);
     return token;
 };
 

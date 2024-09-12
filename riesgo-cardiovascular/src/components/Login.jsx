@@ -1,27 +1,32 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // Asegúrate de que la ruta sea correcta
+import axios from '../axiosConfig'; // Usa tu configuración de Axios
+import { Link, useNavigate } from 'react-router-dom'; 
+import { useAuth } from '../context/AuthContext'; // Importa el hook useAuth
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
-  const navigate = useNavigate(); // Para redirigir al usuario después del login
+  const navigate = useNavigate();
+  const { login } = useAuth(); // Extrae la función login del contexto
 
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      await login(email, password);
-      console.log('Login exitoso');
-      navigate('/'); // Redirige a la página principal o a donde necesites
+      const response = await axios.post('/login', {
+        email,
+        password,
+      });
+      
+      const token = response.data.token;
+      
+      // En lugar de solo guardar en localStorage, llama al método login de AuthContext
+      login(token);
+      
+      console.log('Login exitoso:', response.data);
+      navigate('/formulario'); // Redirige a la página principal
     } catch (error) {
-      console.error('Error en el login:', error.response?.data || error.message);
-      if (error.response) {
-        // Dependiendo del error puedes dar mensajes más específicos
-        alert(`Error: ${error.response.data.message || 'Error desconocido'}`);
-      } else {
-        alert('Error de red o servidor');
-      }
+      console.error('Error en el login:', error.response?.data);
+      alert('Error en el inicio de sesión. Verifica tus credenciales.');
     }
   };
 

@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../axiosConfig'; // Usa tu configuración de Axios
 
 function Register() {
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
   const [email, setEmail] = useState('');
-  const [rol, setRol] = useState('ENFERMERO'); // Por defecto
   const [ubicacionId, setUbicacion] = useState('');
   const [password, setPassword] = useState('');
   const [ubicaciones, setUbicaciones] = useState([]);
@@ -31,7 +30,6 @@ function Register() {
         nombre,
         apellido,
         email,
-        rol,
         ubicacionId,
         password,
       });

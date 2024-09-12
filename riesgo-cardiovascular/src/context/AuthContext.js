@@ -1,9 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
 
 const AuthContext = createContext();
 
-// Decodificar el token JWT para obtener la carga útil
 const decodeToken = (token) => {
   try {
     const payload = token.split('.')[1];
@@ -15,7 +13,6 @@ const decodeToken = (token) => {
   }
 };
 
-// Proveedor del contexto de autenticación
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token') || null);
   const [roles, setRoles] = useState([]);
@@ -35,27 +32,17 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
-  // Función de inicio de sesión
-  const login = async (email, password) => {
-    try {
-      const response = await axios.post('/login', { email, password });
-      const { token } = response.data;
-      localStorage.setItem('token', token);
-      setToken(token);
-
-      const decodedToken = decodeToken(token);
-      setRoles(decodedToken?.roles || []);
-      setUser({
-        nombre: decodedToken?.nombre || '',
-        apellido: decodedToken?.apellido || ''
-      });
-    } catch (error) {
-      console.error('Error during login:', error);
-      throw error; // Re-lanzar el error para manejarlo en el componente de inicio de sesión
-    }
+  const login = (token) => {
+    localStorage.setItem('token', token); // Save token in localStorage
+    setToken(token); // Update token state
+    const decodedToken = decodeToken(token);
+    setRoles(decodedToken?.roles || []);
+    setUser({
+      nombre: decodedToken?.nombre || '',
+      apellido: decodedToken?.apellido || ''
+    });
   };
 
-  // Función de cierre de sesión
   const logout = () => {
     localStorage.removeItem('token');
     setToken(null);
@@ -70,7 +57,5 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Hook personalizado para usar el contexto
+export { AuthContext };
 export const useAuth = () => useContext(AuthContext);
-
-export default AuthContext;

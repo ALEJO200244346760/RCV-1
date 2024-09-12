@@ -1,9 +1,27 @@
+// src/axiosConfig.js
 import axios from 'axios';
 
-const axiosInstance = axios.create({
-    baseURL: 'https://rcv-production.up.railway.app',
-    timeout: 5000,
-    headers: {'Content-Type': 'application/json'}
+const getToken = () => {
+    return localStorage.getItem('token');
+};
+
+// Crear una instancia de Axios con la configuración base
+const instance = axios.create({
+  baseURL: 'https://rcv-production.up.railway.app', // URL base del backend de Spring Boot
 });
 
-export default axiosInstance;
+// Agregar un interceptor para las solicitudes
+instance.interceptors.request.use(
+    (config) => {
+        const token = getToken();
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
+export default instance;
