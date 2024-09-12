@@ -16,30 +16,32 @@ const decodeToken = (token) => {
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token') || null);
   const [roles, setRoles] = useState([]);
-  const [user, setUser] = useState({ nombre: '', apellido: '' });
+  const [user, setUser] = useState({ nombre: '', apellido: '', role: '' });
 
   useEffect(() => {
     if (token) {
       const decodedToken = decodeToken(token);
-      setRoles(decodedToken?.roles || []);
+      setRoles(decodedToken?.roles || []);  // Asegúrate de que roles siempre sea un array
       setUser({
         nombre: decodedToken?.nombre || '',
-        apellido: decodedToken?.apellido || ''
+        apellido: decodedToken?.apellido || '',
+        role: decodedToken?.role || '',
       });
     } else {
       setRoles([]);
-      setUser({ nombre: '', apellido: '' });
+      setUser({ nombre: '', apellido: '', role: '' });
     }
   }, [token]);
 
   const login = (token) => {
-    localStorage.setItem('token', token); // Save token in localStorage
-    setToken(token); // Update token state
+    localStorage.setItem('token', token);
+    setToken(token);
     const decodedToken = decodeToken(token);
     setRoles(decodedToken?.roles || []);
     setUser({
       nombre: decodedToken?.nombre || '',
-      apellido: decodedToken?.apellido || ''
+      apellido: decodedToken?.apellido || '',
+      role: decodedToken?.role || '',
     });
   };
 
@@ -47,7 +49,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     setToken(null);
     setRoles([]);
-    setUser({ nombre: '', apellido: '' });
+    setUser({ nombre: '', apellido: '', role: '' });
   };
 
   return (
