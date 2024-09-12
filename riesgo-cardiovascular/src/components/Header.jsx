@@ -53,7 +53,7 @@ const Header = () => {
         {token ? (
           <div className="flex items-center space-x-4">
             {/* User initials circle */}
-            <div className="user-initials-circle bg-gray-300 rounded-full w-8 h-8 flex items-center justify-center">
+            <div className="user-initials-circle bg-white text-red-600 rounded-full w-8 h-8 flex items-center justify-center">
               {userInitials}
             </div>
             <button 
