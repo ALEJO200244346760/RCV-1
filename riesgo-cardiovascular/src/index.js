@@ -1,14 +1,15 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client'; // Actualiza la importación
+import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
+import { AuthProvider } from './context/AuthContext'; // Asegúrate de importar correctamente
 
-// Crear la raíz del DOM
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
-// Renderizar la aplicación
 root.render(
   <React.StrictMode>
-    <App />
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   </React.StrictMode>
 );
