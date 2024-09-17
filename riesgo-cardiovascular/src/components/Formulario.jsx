@@ -387,8 +387,6 @@ const Formulario = () => {
             {mostrarModal && !modalAdvertencia && (
             <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-4">
                 <div className="bg-white p-6 rounded-md shadow-lg w-full max-w-lg max-h-screen overflow-y-auto">
-
-                
                 <div className="flex justify-between mb-4">
                     {/* Botón Agregar Medicamento */}
                     <button
@@ -397,7 +395,6 @@ const Formulario = () => {
                     >
                     SIGIPSA
                     </button>
-
                     {/* Botón Guardar Paciente */}
                     <button
                     onClick={guardarPaciente}
