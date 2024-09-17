@@ -395,7 +395,7 @@ const Formulario = () => {
                     onClick={toggleModalMedicamentos}
                     className="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
                     >
-                    Agregar Medicamento
+                    SIGIPSA
                     </button>
 
                     {/* Botón Guardar Paciente */}
@@ -440,18 +440,41 @@ const Formulario = () => {
             {mostrarModalMedicamentos && (
                 <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg">
-                        <h2 className="text-lg font-semibold mb-4">Seleccionar Medicamentos</h2>
+                        <h2 className="text-lg font-semibold mb-4">SIGIPSA</h2>
                         <div className="mb-4 max-h-60 overflow-y-auto">
-                            {listaMedicamentos.map((medicamento, index) => (
-                                <div key={index}>
-                                    <input
-                                        type="checkbox"
-                                        value={medicamento}
-                                        onChange={handleMedicamentoChange}
-                                    />
-                                    <label className="ml-2">{medicamento}</label>
-                                </div>
-                            ))}
+                            {listaMedicamentos.map((medicamento, index) => {
+                                let title = '';
+                                if (medicamento.includes('270*Notificación de riesgo cardiovascular < 10% (a partir de 18 años) NTN007K22')) {
+                                    title = 'NOTIFICACION DE RIESGO';
+                                } else if (medicamento.includes('504*Notificación de persona con hipertensión')) {
+                                    title = 'HIPERTENSION ARTERIAL';
+                                } else if (medicamento.includes('558**Prescripción de enalapril P052 M07')) {
+                                    title = 'MEDICACION PRESCRIPCION';
+                                } else if (medicamento.includes('612*Dispensa de enalapril P053 M07')) {
+                                    title = 'MEDICACION DISPENSA';
+                                } else if (medicamento.includes('468*Consejeria abandono de tabaquismo')) {
+                                    title = 'TABAQUISMO';
+                                } else if (medicamento.includes('180*Glucemia LBL045VMD')) {
+                                    title = 'LABORATORIO';
+                                }
+
+                                return (
+                                    <div key={index}>
+                                        {title && (
+                                            <>
+                                                <h3 className="text-lg font-semibold mt-4 mb-2">{title}</h3>
+                                                {title = ''} {/* Resetea el título para evitar que se repita */}
+                                            </>
+                                        )}
+                                        <input
+                                            type="checkbox"
+                                            value={medicamento}
+                                            onChange={handleMedicamentoChange}
+                                        />
+                                        <label className="ml-2">{medicamento}</label>
+                                    </div>
+                                );
+                            })}
                         </div>
                         <button
                             onClick={guardarMedicamentos}
