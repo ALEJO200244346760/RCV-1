@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { calcularRiesgoCardiovascular } from './Calculadora';
-import { Advertencia, DatosPacienteInicial, listaMedicamentos, obtenerColorRiesgo, obtenerTextoRiesgo } from './ConstFormulario';
+import { Advertencia, DatosPacienteInicial, obtenerColorRiesgo, obtenerTextoRiesgo,listaNotificacionRiesgo, listaHipertensionArterial, listaMedicacionPrescripcion, listaMedicacionDispensa, listaTabaquismo, listaLaboratorio } from './ConstFormulario';
 import axiosInstance from '../axiosConfig';
 
 const Formulario = () => {
@@ -10,9 +10,23 @@ const Formulario = () => {
     const [mostrarModal, setMostrarModal] = useState(false);
     const [modalAdvertencia, setModalAdvertencia] = useState(null);
     const [mostrarModalMedicamentos, setMostrarModalMedicamentos] = useState(false);
-    const [medicamentosSeleccionados, setMedicamentosSeleccionados] = useState('');
+    const [medicamentosSeleccionados, setMedicamentosSeleccionados] = useState({
+        notificacionRiesgo: [],
+        hipertensionArterial: [],
+        medicacionPrescripcion: [],
+        medicacionDispensa: [],
+        tabaquismo: [],
+        laboratorio: [],
+    });
     const [medicamentos, setMedicamentos] = useState('');
     const [mensajeExito, setMensajeExito] = useState('');
+    const [medicamentosNotificacionRiesgo, setMedicamentosNotificacionRiesgo] = useState([]);
+    const [medicamentosHipertensionArterial, setMedicamentosHipertensionArterial] = useState([]);
+    const [medicamentosPrescripcion, setMedicamentosPrescripcion] = useState([]);
+    const [medicamentosDispensa, setMedicamentosDispensa] = useState([]);
+    const [medicamentosTabaquismo, setMedicamentosTabaquismo] = useState([]);
+    const [medicamentosLaboratorio, setMedicamentosLaboratorio] = useState([]);
+
 
     const manejarCambio = (e) => {
         const { name, value } = e.target;
@@ -119,37 +133,46 @@ const Formulario = () => {
         }
     };
     
+    const toggleModalMedicamentos = () => {
+        setMostrarModalMedicamentos(!mostrarModalMedicamentos);
+    };
+
+    const handleMedicamentoChange = (categoria, evento) => {
+        const { value, checked } = evento.target;
+        setMedicamentosSeleccionados((prevSeleccionados) => {
+            const nuevosSeleccionados = checked
+                ? [...prevSeleccionados[categoria], value]
+                : prevSeleccionados[categoria].filter((med) => med !== value);
+            return {
+                ...prevSeleccionados,
+                [categoria]: nuevosSeleccionados,
+            };
+        });
+    };
+
     const guardarMedicamentos = () => {
+        const nuevosDatosPaciente = {
+            ...datosPaciente,
+            notificacionRiesgo: medicamentosSeleccionados.notificacionRiesgo.length > 0 ? medicamentosSeleccionados.notificacionRiesgo.join(';') : '',
+            hipertensionArterial: medicamentosSeleccionados.hipertensionArterial.length > 0 ? medicamentosSeleccionados.hipertensionArterial.join(';') : '',
+            medicacionPrescripcion: medicamentosSeleccionados.medicacionPrescripcion.length > 0 ? medicamentosSeleccionados.medicacionPrescripcion.join(';') : '',
+            medicacionDispensa: medicamentosSeleccionados.medicacionDispensa.length > 0 ? medicamentosSeleccionados.medicacionDispensa.join(';') : '',
+            tabaquismo: medicamentosSeleccionados.tabaquismo.length > 0 ? medicamentosSeleccionados.tabaquismo.join(';') : '',
+            laboratorio: medicamentosSeleccionados.laboratorio.length > 0 ? medicamentosSeleccionados.laboratorio.join(';') : '',
+        };
+        setDatosPaciente(nuevosDatosPaciente);
         setMensajeExito('Medicamentos guardados con éxito');
-        toggleModalMedicamentos(); // Cerrar el modal de medicamentos
+        toggleModalMedicamentos(); // Cerrar el modal
     };
     
+
     const cerrarModal = () => {
-        setMostrarModal(false);
+        setMostrarModalMedicamentos(false);
         setModalAdvertencia(null);
     };
 
     const abrirModalAdvertencia = (nivel) => {
         setModalAdvertencia(Advertencia[nivel]);
-    };
-
-    const toggleModalMedicamentos = () => {
-        setMedicamentosSeleccionados([]);  // Reiniciar los medicamentos seleccionados
-        setMostrarModalMedicamentos(!mostrarModalMedicamentos);
-    };    
-        
-    const handleMedicamentoChange = (event) => {
-        const { value, checked } = event.target;
-        setDatosPaciente((prevDatos) => {
-            const nuevosMedicamentos = checked 
-                ? [...new Set([...prevDatos.medicamentos, value])]
-                : prevDatos.medicamentos.filter((med) => med !== value);
-            
-            return {
-                ...prevDatos,
-                medicamentos: nuevosMedicamentos
-            };
-        });
     };
     
     const renderRiesgoGrid = (riesgo) => {
@@ -383,6 +406,7 @@ const Formulario = () => {
                     Calcular Riesgo
                 </button>
             </form>
+
             {/* Modal Resultados */}
             {mostrarModal && !modalAdvertencia && (
             <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-4">
@@ -439,39 +463,77 @@ const Formulario = () => {
                     <div className="bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg">
                         <h2 className="text-lg font-semibold mb-4">SIGIPSA</h2>
                         <div className="mb-4 max-h-60 overflow-y-auto">
-                            {listaMedicamentos.map((medicamento, index) => {
-                                let title = '';
-                                if (medicamento.includes('270*Notificación de riesgo cardiovascular < 10% (a partir de 18 años) NTN007K22')) {
-                                    title = 'NOTIFICACION DE RIESGO';
-                                } else if (medicamento.includes('504*Notificación de persona con hipertensión')) {
-                                    title = 'HIPERTENSION ARTERIAL';
-                                } else if (medicamento.includes('558**Prescripción de enalapril P052 M07')) {
-                                    title = 'MEDICACION PRESCRIPCION';
-                                } else if (medicamento.includes('612*Dispensa de enalapril P053 M07')) {
-                                    title = 'MEDICACION DISPENSA';
-                                } else if (medicamento.includes('468*Consejeria abandono de tabaquismo')) {
-                                    title = 'TABAQUISMO';
-                                } else if (medicamento.includes('180*Glucemia LBL045VMD')) {
-                                    title = 'LABORATORIO';
-                                }
+                            <h3 className="text-lg font-semibold mt-4 mb-2">NOTIFICACION DE RIESGO</h3>
+                            {listaNotificacionRiesgo.map((medicamento, index) => (
+                                <div key={index}>
+                                    <input
+                                        type="checkbox"
+                                        value={medicamento}
+                                        onChange={(e) => handleMedicamentoChange('notificacionRiesgo', e)}
+                                    />
+                                    <label className="ml-2">{medicamento}</label>
+                                </div>
+                            ))}
+                            
+                            <h3 className="text-lg font-semibold mt-4 mb-2">HIPERTENSION ARTERIAL</h3>
+                            {listaHipertensionArterial.map((medicamento, index) => (
+                                <div key={index}>
+                                    <input
+                                        type="checkbox"
+                                        value={medicamento}
+                                        onChange={(e) => handleMedicamentoChange('hipertensionArterial', e)}
+                                    />
+                                    <label className="ml-2">{medicamento}</label>
+                                </div>
+                            ))}
+                            
+                            <h3 className="text-lg font-semibold mt-4 mb-2">MEDICACION PRESCRIPCION</h3>
+                            {listaMedicacionPrescripcion.map((medicamento, index) => (
+                                <div key={index}>
+                                    <input
+                                        type="checkbox"
+                                        value={medicamento}
+                                        onChange={(e) => handleMedicamentoChange('medicacionPrescripcion', e)}
+                                    />
+                                    <label className="ml-2">{medicamento}</label>
+                                </div>
+                            ))}
 
-                                return (
-                                    <div key={index}>
-                                        {title && (
-                                            <>
-                                                <h3 className="text-lg font-semibold mt-4 mb-2">{title}</h3>
-                                                {title = ''} {/* Resetea el título para evitar que se repita */}
-                                            </>
-                                        )}
-                                        <input
-                                            type="checkbox"
-                                            value={medicamento}
-                                            onChange={handleMedicamentoChange}
-                                        />
-                                        <label className="ml-2">{medicamento}</label>
-                                    </div>
-                                );
-                            })}
+                            <h3 className="text-lg font-semibold mt-4 mb-2">MEDICACION DISPENSA</h3>
+                            {listaMedicacionDispensa.map((medicamento, index) => (
+                                <div key={index}>
+                                    <input
+                                        type="checkbox"
+                                        value={medicamento}
+                                        onChange={(e) => handleMedicamentoChange('medicacionDispensa', e)}
+                                    />
+                                    <label className="ml-2">{medicamento}</label>
+                                </div>
+                            ))}
+
+                            <h3 className="text-lg font-semibold mt-4 mb-2">TABAQUISMO</h3>
+                            {listaTabaquismo.map((medicamento, index) => (
+                                <div key={index}>
+                                    <input
+                                        type="checkbox"
+                                        value={medicamento}
+                                        onChange={(e) => handleMedicamentoChange('tabaquismo', e)}
+                                    />
+                                    <label className="ml-2">{medicamento}</label>
+                                </div>
+                            ))}
+
+                            <h3 className="text-lg font-semibold mt-4 mb-2">LABORATORIO</h3>
+                            {listaLaboratorio.map((medicamento, index) => (
+                                <div key={index}>
+                                    <input
+                                        type="checkbox"
+                                        value={medicamento}
+                                        onChange={(e) => handleMedicamentoChange('laboratorio', e)}
+                                    />
+                                    <label className="ml-2">{medicamento}</label>
+                                </div>
+                            ))}
                         </div>
                         <button
                             onClick={guardarMedicamentos}
@@ -480,7 +542,7 @@ const Formulario = () => {
                             Guardar
                         </button>
                         <button
-                            onClick={toggleModalMedicamentos}
+                            onClick={cerrarModal}
                             className="mt-4 py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
                         >
                             Cerrar
