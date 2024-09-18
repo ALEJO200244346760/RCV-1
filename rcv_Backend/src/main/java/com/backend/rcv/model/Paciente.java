@@ -40,7 +40,16 @@ public class Paciente {
     private String infarto;
     @Column
     private String acv;
-    @Column
-    private String medicamentos;
-
+    @Column(name = "medicamentos_notificacion_riesgo", columnDefinition = "LONGTEXT")
+    private String notificacionRiesgo;
+    @Column(name = "medicamentos_hipertension_arterial", columnDefinition = "LONGTEXT")
+    private String hipertensionArterial;
+    @Column(name = "medicamentos_prescripcion", columnDefinition = "LONGTEXT")
+    private String medicacionPrescripcion;
+    @Column(name = "medicamentos_dispensa", columnDefinition = "LONGTEXT")
+    private String medicacionDispensa;
+    @Column(name = "medicamentos_tabaquismo", columnDefinition = "LONGTEXT")
+    private String tabaquismo;
+    @Column(name = "medicamentos_laboratorio", columnDefinition = "LONGTEXT")
+    private String laboratorio;
 }
