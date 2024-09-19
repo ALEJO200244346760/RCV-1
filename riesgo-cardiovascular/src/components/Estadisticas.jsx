@@ -168,10 +168,15 @@ function Estadisticas() {
       PESO: ${paciente.peso}
       TALLA: ${paciente.talla}
       FECHA DE REGISTRO: ${paciente.fechaRegistro}
-      MEDICAMENTOS: ${paciente.medicamentos}
       HIPERTENSO: ${paciente.hipertenso}
       ACV: ${paciente.acv}
       INFARTO: ${paciente.infarto}
+      NOTIFICACION DE RIESGO: ${paciente.notificacionRiesgo}
+      HIPERTENCION ARTERIAL: ${paciente.hipertensionArterial}
+      MEDICACION PRESCRIPCION: ${paciente.medicacionPrescripcion}
+      MEDICACION DISPENSA: ${paciente.medicacionDispensa}
+      TABAQUISMO: ${paciente.tabaquismo}
+      LABORATORIO: ${paciente.laboratorio}
     `;
     navigator.clipboard.writeText(datos)
       .then(() => alert('Datos copiados al portapapeles'))
