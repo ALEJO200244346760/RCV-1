@@ -13,16 +13,24 @@ const handleErrorResponse = async (response) => {
 
 // Obtener todos los usuarios
 export const getUsers = async () => {
-  const response = await fetch('/usuario', {
-    headers: {
-      'Authorization': `Bearer ${getToken()}`,
-    },
-  });
-  if (!response.ok) {
-    await handleErrorResponse(response);
+  try {
+    const response = await fetch('/usuario', {
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+      },
+    });
+
+    if (!response.ok) {
+      await handleErrorResponse(response);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error al obtener usuarios:', error);
+    throw error;
   }
-  return response.json();
 };
+
 
 // Actualizar rol y/o ubicación de un usuario
 export const updateUserRoleAndLocation = async (userId, roleName) => {
