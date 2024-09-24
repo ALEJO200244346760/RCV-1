@@ -30,13 +30,9 @@ const handleAxiosError = (error) => {
 export const updateUserRoleAndLocation = async (userId, roleName, locationName) => {
   try {
     const response = await axios.put(`/administracion/users/${userId}/roles`, {
-      rol: {
-        nombre: roleName, // Asegúrate de incluir el nombre del rol
-        ubicacion: {
-          nombre: locationName
-        }
-      }
-    });
+      rol: roleName,
+      ubicacionId: locationId,
+      });
     return response.data;
   } catch (error) {
     handleAxiosError(error);
