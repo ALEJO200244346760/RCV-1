@@ -3,7 +3,6 @@ package com.backend.rcv.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
-
 @Entity
 @Data
 public class Paciente {
