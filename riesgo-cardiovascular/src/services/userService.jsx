@@ -1,5 +1,6 @@
 // src/services/userService.js
 import axios from '../axiosConfig'; // Importa la instancia de Axios
+import { handleAxiosError } from './errorHandler'; // Asegúrate de que esto esté importado correctamente
 
 // Obtener todos los usuarios
 export const getUsers = async () => {
@@ -26,17 +27,22 @@ const handleAxiosError = (error) => {
 };
 
 // Actualizar rol y/o ubicación de un usuario
-export const updateUserRoleAndLocation = async (userId, roleName, locationId) => {
+export const updateUserRoleAndLocation = async (userId, roleName, locationName) => {
   try {
     const response = await axios.put(`/administracion/users/${userId}/roles`, {
-      rol: roleName,
-      ubicacionId: locationId, // Agregar la ubicación
+      rol: {
+        ubicacion: {
+          nombre: locationName // Cambiado a 'locationName'
+        }
+      },
+      roleName // Incluyendo el roleName
     });
     return response.data;
   } catch (error) {
     handleAxiosError(error);
   }
 };
+
 
 // Eliminar un usuario
 export const deleteUser = async (userId) => {
