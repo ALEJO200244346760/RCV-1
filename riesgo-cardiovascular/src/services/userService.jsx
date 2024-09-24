@@ -130,7 +130,7 @@ export const updateRole = async (roleId, roleName) => {
   }
 
   try {
-    const response = await axios.patch(`/administracion/roles/${roleId}`, {
+    const response = await axios.put(`/administracion/roles/${roleId}`, {
       nombre: roleName,
     });
     return response.data;
