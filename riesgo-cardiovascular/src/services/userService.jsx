@@ -1,7 +1,6 @@
 // src/services/userService.js
 import axios from '../axiosConfig'; // Importa la instancia de Axios
 
-
 // Obtener todos los usuarios
 export const getUsers = async () => {
   try {
