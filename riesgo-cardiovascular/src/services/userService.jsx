@@ -123,14 +123,13 @@ export const addRole = async (roleName) => {
   }
 };
 
-// Actualizar un rol existente
 export const updateRole = async (roleId, roleName) => {
   if (!roleName || typeof roleName !== 'string') {
     throw new Error('El nombre del rol debe ser un string válido');
   }
 
   try {
-    const response = await axios.patch(`/administracion/roles/${roleId}`, {
+    const response = await axios.put(`/administracion/roles/${roleId}`, {
       nombre: roleName,
     });
     return response.data;
