@@ -31,18 +31,17 @@ export const updateUserRoleAndLocation = async (userId, roleName, locationName) 
   try {
     const response = await axios.put(`/administracion/users/${userId}/roles`, {
       rol: {
+        nombre: roleName, // Asegúrate de incluir el nombre del rol
         ubicacion: {
-          nombre: locationName // Cambiado a 'locationName'
+          nombre: locationName
         }
-      },
-      roleName // Incluyendo el roleName
+      }
     });
     return response.data;
   } catch (error) {
     handleAxiosError(error);
   }
 };
-
 
 // Eliminar un usuario
 export const deleteUser = async (userId) => {
