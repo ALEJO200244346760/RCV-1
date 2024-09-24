@@ -1,7 +1,6 @@
 // src/services/userService.js
 
-const token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsInJvbGVzIjpbIlJPTEVfQ0FSRElPTE9HTyJdLCJhcGVsbGlkbyI6ImFkbWluIiwiZXhwIjoxNzI3MTQ0Njk2LCJub21icmUiOiJhZG1pbiIsImlhdCI6MTcyNzEyNjY5Nn0.HtxLP86pZfvwnMHfoyvMehcEsOasICIgRv9TG4yQipw"
-
+const token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsInJvbGVzIjpbIlJPTEVfQ0FSRElPTE9HTyJdLCJhcGVsbGlkbyI6ImFkbWluIiwiZXhwIjoxNzI3MjIxMTM2LCJub21icmUiOiJhZG1pbiIsImlhdCI6MTcyNzIwMzEzNn0.5l-DFRT6wiXNAKIkqU_3SndMuug9PO0Qgg5rJmvig4E"
 // Obtener el token
 const getToken = () => localStorage.getItem('token');
 
