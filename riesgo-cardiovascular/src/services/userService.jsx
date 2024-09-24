@@ -26,10 +26,11 @@ const handleAxiosError = (error) => {
 };
 
 // Actualizar rol y/o ubicación de un usuario
-export const updateUserRoleAndLocation = async (userId, roleName) => {
+export const updateUserRoleAndLocation = async (userId, roleName, locationId) => {
   try {
     const response = await axios.put(`/administracion/users/${userId}/roles`, {
       rol: roleName,
+      ubicacionId: locationId, // Agregar la ubicación
     });
     return response.data;
   } catch (error) {

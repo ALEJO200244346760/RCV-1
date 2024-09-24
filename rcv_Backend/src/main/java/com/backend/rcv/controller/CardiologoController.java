@@ -60,11 +60,12 @@ public class CardiologoController {
 
     // User Role Management
     @PutMapping("/users/{userId}/roles")
-    public ResponseEntity<Map<String, String>> addRoleToUser(@PathVariable Long userId, @RequestBody Map<String, String> body) {
-        String roleName = body.get("rol"); // o roleName, dependiendo de tu elección anterior
+    public ResponseEntity<Map<String, String>> addRoleToUser(@PathVariable Long userId, @RequestBody Map<String, Object> body) {
+        String roleName = (String) body.get("rol");
+        Long locationId = (Long) body.get("ubicacionId"); // Obtener la ubicación
         try {
-            usuarioService.addRoleToUser(userId, roleName);
-            return ResponseEntity.ok(Map.of("message", "Rol asignado exitosamente"));
+            usuarioService.addRoleToUser(userId, roleName, locationId); // Actualizar el método en el servicio
+            return ResponseEntity.ok(Map.of("message", "Rol y ubicación asignados exitosamente"));
         } catch (Exception e) {
             System.err.println("Error al asignar rol: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
