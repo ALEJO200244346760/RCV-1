@@ -1,6 +1,7 @@
 package com.backend.rcv.controller;
 
 import com.backend.rcv.model.Rol;
+import com.backend.rcv.model.Ubicacion;
 import com.backend.rcv.model.Usuario;
 import com.backend.rcv.service.RolService;
 import com.backend.rcv.service.UsuarioService;
@@ -60,16 +61,17 @@ public class CardiologoController {
 
     // User Role Management
     @PutMapping("/users/{userId}/roles")
-    public ResponseEntity<Map<String, String>> addRoleToUser(@PathVariable Long userId, @RequestBody Map<String, Object> body) {
-        String roleName = (String) body.get("rol");
-        Long locationId = (Long) body.get("ubicacionId"); // Obtener la ubicación
+    public ResponseEntity<Map<String, String>> addRoleToUser(
+            @PathVariable Long userId, 
+            @RequestParam String roleName, 
+            @RequestParam Long locationId) {
+        
         try {
-            usuarioService.addRoleToUser(userId, roleName, locationId); // Actualizar el método en el servicio
+            usuarioService.addRoleToUser(userId, roleName, locationId);
             return ResponseEntity.ok(Map.of("message", "Rol y ubicación asignados exitosamente"));
-        } catch (Exception e) {
-            System.err.println("Error al asignar rol: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Error al asignar rol: " + e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 
