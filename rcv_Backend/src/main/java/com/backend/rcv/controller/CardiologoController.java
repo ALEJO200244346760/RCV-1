@@ -63,9 +63,11 @@ public class CardiologoController {
     @PutMapping("/users/{userId}/roles")
     public ResponseEntity<Map<String, String>> addRoleToUser(
             @PathVariable Long userId, 
-            @RequestParam String roleName, 
-            @RequestParam Long locationId) {
+            @RequestBody Map<String, Object> roleData) {
         
+        String roleName = (String) roleData.get("rol");
+        Long locationId = ((Number) roleData.get("ubicacionId")).longValue(); // Asegúrate de que 'ubicacionId' esté presente
+
         try {
             usuarioService.addRoleToUser(userId, roleName, locationId);
             return ResponseEntity.ok(Map.of("message", "Rol y ubicación asignados exitosamente"));
