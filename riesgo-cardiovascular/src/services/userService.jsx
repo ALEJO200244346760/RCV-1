@@ -6,7 +6,12 @@ const getToken = () => localStorage.getItem('token');
 
 // Manejo de errores genérico
 const handleErrorResponse = async (response) => {
-  const errorDetail = await response.json();
+  let errorDetail;
+  try {
+    errorDetail = await response.json();
+  } catch (e) {
+    errorDetail = await response.text(); // Si no es JSON, capturar como texto
+  }
   console.error('Error:', errorDetail);
   throw new Error(JSON.stringify(errorDetail));
 };
