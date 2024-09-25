@@ -11,7 +11,8 @@ import {
   deleteRole,
   deleteUser,
   getRoles,
-  getLocations
+  getLocations,
+  updateUserLocation
 } from '../services/userService';
 
 // Componente para la tabla de ubicaciones
