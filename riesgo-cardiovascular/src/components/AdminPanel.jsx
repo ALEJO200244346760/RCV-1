@@ -385,10 +385,22 @@ const AdminPanel = () => {
     }
 };
   
-  const handleLocationChange = async (userId, newLocation) => {
-    await updateUserRoleAndLocation(userId, { ubicacion: { nombre: newLocation } });
-    cargarDatos();
-  };
+const handleLocationChange = async (userId, locationName) => {
+  try {
+    // Encuentra la ubicación en el array de locationsData usando el nombre
+    const location = locationsData.find(loc => loc.nombre === locationName);
+    
+    if (!location) {
+      throw new Error('Ubicación no encontrada');
+    }
+
+    const locationToUpdate = { id: location.id }; // Asegúrate de que estás pasando solo la ID de la ubicación
+    await updateUserLocation(userId, locationToUpdate);
+    cargarDatos(); // Cargar datos después de actualizar
+  } catch (error) {
+    console.error('Error al cambiar ubicación:', error.message);
+  }
+};  
   
 
   const handleDeleteUser = async (userId) => {
