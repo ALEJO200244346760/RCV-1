@@ -400,8 +400,7 @@ const handleLocationChange = async (userId, locationName) => {
   } catch (error) {
     console.error('Error al cambiar ubicación:', error.message);
   }
-};  
-  
+  };  
 
   const handleDeleteUser = async (userId) => {
     await deleteUser(userId);
