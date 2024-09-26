@@ -17,6 +17,9 @@ function Estadisticas() {
     nivelRiesgo: '',
     ubicacion: '',
     imc: '',
+    infarto: '',
+    acv: '',
+    hipertenso: '',
   });
   const [nivelColesterolConocido, setNivelColesterolConocido] = useState('todos'); // Estado para el conocimiento del nivel de colesterol
   const [loading, setLoading] = useState(true);
@@ -113,7 +116,10 @@ function Estadisticas() {
         ) &&
         (filtros.nivelRiesgo === '' || paciente.nivelRiesgo.toLowerCase() === filtros.nivelRiesgo.toLowerCase()) &&
         (filtros.ubicacion === '' || (paciente.ubicacion && paciente.ubicacion.toLowerCase() === filtros.ubicacion.toLowerCase())) &&
-        (filtros.imc === '' || filtros.imc === categoriaIMC)
+        (filtros.imc === '' || filtros.imc === categoriaIMC)&&
+        (filtros.infarto === '' || paciente.infarto.toLowerCase() === filtros.infarto.toLowerCase()) &&
+        (filtros.acv === '' || paciente.acv.toLowerCase() === filtros.acv.toLowerCase()) &&
+        (filtros.hipertenso === '' || paciente.hipertenso.toLowerCase() === filtros.hipertenso.toLowerCase())
     );
     });
 
@@ -328,22 +334,67 @@ function Estadisticas() {
             </div>
           </div>
 
-          <div className="w-full md:w-1/4">
-            <label className="block text-sm font-medium text-gray-700">IMC</label>
-            <select
-              name="imc"
-              value={filtros.imc || ''}
-              onChange={manejarCambio}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            >
-              <option value="">Todos</option>
-              <option value="<18.5">Menor a 18.5</option>
-              <option value="18.5-24.9">Saludable (18.5 - 24.9)</option>
-              <option value="25-29.9">Sobrepeso (25 - 29.9)</option>
-              <option value="30-34.9">Obesidad 1 (30 - 34.9)</option>
-              <option value="35-39.9">Obesidad 2 (35 - 39.9)</option>
-              <option value="40+">Obesidad 3 (40+)</option>
-            </select>
+          <div className="mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">IMC</label>
+              <select
+                name="imc"
+                value={filtros.imc || ''}
+                onChange={manejarCambio}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              >
+                <option value="">Todos</option>
+                <option value="<18.5">Menor a 18.5</option>
+                <option value="18.5-24.9">Saludable (18.5 - 24.9)</option>
+                <option value="25-29.9">Sobrepeso (25 - 29.9)</option>
+                <option value="30-34.9">Obesidad 1 (30 - 34.9)</option>
+                <option value="35-39.9">Obesidad 2 (35 - 39.9)</option>
+                <option value="40+">Obesidad 3 (40+)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">¿Infarto?</label>
+              <select
+                name="infarto"
+                value={filtros.infarto || ''}
+                onChange={manejarCambio}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              >
+                <option value="">Todos</option>
+                <option value="Sí">Sí</option>
+                <option value="No">No</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">¿ACV?</label>
+              <select
+                name="acv"
+                value={filtros.acv || ''}
+                onChange={manejarCambio}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              >
+                <option value="">Todos</option>
+                <option value="Sí">Sí</option>
+                <option value="No">No</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">¿Hipertenso?</label>
+              <select
+                name="hipertenso"
+                value={filtros.hipertenso || ''}
+                onChange={manejarCambio}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              >
+                <option value="">Todos</option>
+                <option value="Sí">Sí</option>
+                <option value="No">No</option>
+              </select>
+
+            </div>
           </div>
 
           <button
