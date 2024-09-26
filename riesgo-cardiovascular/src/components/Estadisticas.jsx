@@ -15,32 +15,20 @@ function Estadisticas() {
     colesterol: '',
     nivelColesterol: '', // Campo para el nivel específico de colesterol
     nivelRiesgo: '',
-    ubicacion: '',
-    imc: '',
+    ubicacion: '', // Nuevo campo para la ubicación
+    infarto: '',
+    acv: '',
+    hipertenso: '',
   });
   const [nivelColesterolConocido, setNivelColesterolConocido] = useState('todos'); // Estado para el conocimiento del nivel de colesterol
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Configuración de la URL base para la API
-  const apiBaseURL = 'https://rcv-production.up.railway.app';
-
-  // Hook useEffect para obtener datos de pacientes desde la API
   useEffect(() => {
-    axios.get(`${apiBaseURL}/api/pacientes`)
+    axios.get('/api/pacientes')
       .then(response => {
-        console.log('Datos de respuesta:', response.data); // Verifica la estructura de los datos
-        const data = response.data;
-
-        // Verifica el tipo de datos
-        console.log('Es un arreglo:', Array.isArray(data));
-
-        if (Array.isArray(data)) {
-          setPacientes(data);
-          setPacientesFiltrados(data);
-        } else {
-          console.error('La respuesta de la API no es un arreglo');
-        }
+        setPacientes(response.data);
+        setPacientesFiltrados(response.data);
         setLoading(false);
       })
       .catch(error => {
@@ -49,12 +37,10 @@ function Estadisticas() {
       });
   }, []);
 
-  // Hook useEffect para aplicar filtros cada vez que cambian
   useEffect(() => {
     aplicarFiltros(); // Aplica filtros cada vez que cambian
   }, [filtros, nivelColesterolConocido]);
 
-  // Función para manejar el cambio en el filtro de colesterol
   const manejarSeleccionColesterol = (e) => {
     const valor = e.target.value;
     setNivelColesterolConocido(valor);
@@ -66,7 +52,6 @@ function Estadisticas() {
     }
   };
 
-  // Función para manejar cambios en los filtros
   const manejarCambio = (e) => {
     const { name, value } = e.target;
     setFiltros(prev => ({
@@ -75,7 +60,6 @@ function Estadisticas() {
     }));
   };
 
-  // Función para obtener el nivel de colesterol basado en el valor
   const obtenerNivelColesterol = (valor) => {
     if (valor < 154) return 4;
     if (valor >= 155 && valor <= 192) return 5;
@@ -84,22 +68,22 @@ function Estadisticas() {
     return 8;
   };
 
-  // Función para aplicar filtros a la lista de pacientes
   const aplicarFiltros = () => {
     const filtrados = pacientes.filter(paciente => {
       const edadFiltro = filtros.edad === '' ? null : filtros.edad;
       const presionArterialFiltro = filtros.presionArterial === '' ? null : filtros.presionArterial;
       const nivelColesterolFiltro = filtros.nivelColesterol === '' ? null : Number(filtros.nivelColesterol);
-
+  
       const nivelColesterolPaciente = paciente.colesterol ? obtenerNivelColesterol(Number(paciente.colesterol)) : null;
-
+  
+      // Determinar categoría de IMC usando el valor calculado
       const imc = paciente.imc;
       const categoriaIMC = imc < 18.5 ? '<18.5' :
                            (imc >= 18.5 && imc <= 24.9) ? '18.5-24.9' :
                            (imc >= 25 && imc <= 29.9) ? '25-29.9' :
                            (imc >= 30 && imc <= 34.9) ? '30-34.9' :
                            (imc >= 35 && imc <= 39.9) ? '35-39.9' : '40+';
-
+  
       return (
         (edadFiltro === null || paciente.edad.toString() === edadFiltro) &&
         (filtros.genero === '' || paciente.genero.toLowerCase() === filtros.genero.toLowerCase()) &&
@@ -108,21 +92,22 @@ function Estadisticas() {
         (presionArterialFiltro === null || paciente.presionArterial.toString() === presionArterialFiltro) &&
         (
           nivelColesterolConocido === 'todos' || 
-          (nivelColesterolConocido === 'no' && (paciente.colesterol === 'No' || paciente.colesterol === null)) || // Si el nivel de colesterol es "no", solo mostrar pacientes con colesterol "No" o null
-          (nivelColesterolConocido === 'si' && paciente.colesterol !== null && paciente.colesterol !== 'No' && (filtros.nivelColesterol === '' || nivelColesterolPaciente === nivelColesterolFiltro)) // Si se conoce el colesterol, filtrar por nivel
+          (nivelColesterolConocido === 'no' && (paciente.colesterol === 'No' || paciente.colesterol === null)) ||
+          (nivelColesterolConocido === 'si' && paciente.colesterol !== null && paciente.colesterol !== 'No' && (filtros.nivelColesterol === '' || nivelColesterolPaciente === nivelColesterolFiltro))
         ) &&
-        (filtros.nivelRiesgo === '' || paciente.nivelRiesgo.toLowerCase() === filtros.nivelRiesgo.toLowerCase()) &&
+        (filtros.nivelRiesgo === '' || (paciente.nivelRiesgo && paciente.nivelRiesgo.toLowerCase() === filtros.nivelRiesgo.toLowerCase())) &&
         (filtros.ubicacion === '' || (paciente.ubicacion && paciente.ubicacion.toLowerCase() === filtros.ubicacion.toLowerCase())) &&
-        (filtros.imc === '' || filtros.imc === categoriaIMC)
-    );
+        (filtros.imc === '' || filtros.imc === categoriaIMC)&&
+        (filtros.infarto === '' || paciente.infarto.toLowerCase() === filtros.infarto.toLowerCase()) &&
+        (filtros.acv === '' || paciente.acv.toLowerCase() === filtros.acv.toLowerCase()) &&
+        (filtros.hipertenso === '' || paciente.hipertenso.toLowerCase() === filtros.hipertenso.toLowerCase())
+        );
     });
-
     setPacientesFiltrados(filtrados);
-  };
+  };  
 
-  // Función para eliminar un paciente
   const eliminarPaciente = (id) => {
-    axios.delete(`${apiBaseURL}/api/pacientes/${id}`)
+    axios.delete(`/api/pacientes/${id}`)
       .then(() => {
         setPacientes(pacientes.filter(paciente => paciente.id !== id));
         setPacientesFiltrados(pacientesFiltrados.filter(paciente => paciente.id !== id));
@@ -130,12 +115,10 @@ function Estadisticas() {
       .catch(error => console.error('Error al eliminar el paciente:', error));
   };
 
-  // Función para redirigir al usuario a la página de edición de un paciente
   const editarPaciente = (id) => {
     navigate(`/editar-paciente/${id}`);
   };
 
-  // Función para obtener el color de riesgo basado en el nivel
   const obtenerColorRiesgo = (nivel) => {
     switch (nivel) {
       case 'Poco':
@@ -248,7 +231,7 @@ function Estadisticas() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Presión Arterial</label>
+              <label className="block text-sm font-medium text-gray-700">Presión Arterial (mmHg)</label>
               <select
                 name="presionArterial"
                 value={filtros.presionArterial || ''}
@@ -301,7 +284,7 @@ function Estadisticas() {
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               >
                 <option value="">Todos</option>
-                <option value="<10% Poco">Bajo</option>
+                <option value="<10% Bajo">Bajo</option>
                 <option value=">10% <20% Moderado">Moderado</option>
                 <option value=">20% <30% Alto">Alto</option>
                 <option value=">30% <40% Muy Alto">Muy Alto</option>
@@ -328,7 +311,8 @@ function Estadisticas() {
             </div>
           </div>
 
-          <div className="w-full md:w-1/4">
+          <div className="mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
             <label className="block text-sm font-medium text-gray-700">IMC</label>
             <select
               name="imc"
@@ -345,6 +329,50 @@ function Estadisticas() {
               <option value="40+">Obesidad 3 (40+)</option>
             </select>
           </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">¿Infarto?</label>
+            <select
+              name="infarto"
+              value={filtros.infarto || ''}
+              onChange={manejarCambio}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            >
+              <option value="">Todos</option>
+              <option value="Sí">Sí</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">¿ACV?</label>
+            <select
+              name="acv"
+              value={filtros.acv || ''}
+              onChange={manejarCambio}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            >
+              <option value="">Todos</option>
+              <option value="Sí">Sí</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">¿Hipertenso?</label>
+            <select
+              name="hipertenso"
+              value={filtros.hipertenso || ''}
+              onChange={manejarCambio}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            >
+              <option value="">Todos</option>
+              <option value="Sí">Sí</option>
+              <option value="No">No</option>
+            </select>
+
+          </div>
+        </div>
 
           <button
             onClick={aplicarFiltros}
@@ -421,77 +449,77 @@ function Estadisticas() {
           </table>
         </div>
 
-          {/* Modo móvil */}
+      {/* Modo móvil */}
         <div className="lg:hidden">
-            {pacientesFiltrados.map(paciente => (
-              <div key={paciente.id} className="bg-white shadow-md rounded-lg p-4 mb-4">
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">ID:</div>
-                  <div className="text-sm text-gray-500">{paciente.id}</div>
-                </div>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Edad:</div>
-                  <div className="text-sm text-gray-500">{paciente.edad}</div>
-                </div>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Género:</div>
-                  <div className="text-sm text-gray-500">{paciente.genero}</div>
-                </div>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Diabetes:</div>
-                  <div className="text-sm text-gray-500">{paciente.diabetes}</div>
-                </div>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Fumador:</div>
-                  <div className="text-sm text-gray-500">{paciente.fumador}</div>
-                </div>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Presión Arterial:</div>
-                  <div className="text-sm text-gray-500">{paciente.presionArterial}</div>
-                </div>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Colesterol:</div>
-                  <div className="text-sm text-gray-500">{paciente.colesterol}</div>
-                </div>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Nivel de Riesgo:</div>
-                  <div className="text-sm text-gray-500">
-                    <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${obtenerColorRiesgo(paciente.nivelRiesgo)}`}>
-                      {paciente.nivelRiesgo}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Ubicación:</div>
-                  <div className="text-sm text-gray-500">{paciente.ubicacion}</div>
-                </div>
-                <div className="flex justify-end mt-4">
-                  <button
-                    onClick={() => editarPaciente(paciente.id)}
-                    className="text-indigo-600 hover:text-indigo-900 mr-4"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => eliminarPaciente(paciente.id)}
-                    className="text-red-600 hover:text-red-900 mr-4"
-                  >
-                    Eliminar
-                  </button>
-                  <button
-                    onClick={() => copiarDatos(paciente)}
-                    className="text-blue-600 hover:text-blue-900"
-                  >
-                    Copiar
-                  </button>
+          {pacientesFiltrados.map(paciente => (
+            <div key={paciente.id} className="bg-white shadow-md rounded-lg p-4 mb-4">
+              <div className="flex justify-between items-start mb-2">
+                <div className="text-sm font-medium text-gray-900">ID:</div>
+                <div className="text-sm text-gray-500">{paciente.id}</div>
+              </div>
+              <div className="flex justify-between items-start mb-2">
+                <div className="text-sm font-medium text-gray-900">Edad:</div>
+                <div className="text-sm text-gray-500">{paciente.edad}</div>
+              </div>
+              <div className="flex justify-between items-start mb-2">
+                <div className="text-sm font-medium text-gray-900">Género:</div>
+                <div className="text-sm text-gray-500">{paciente.genero}</div>
+              </div>
+              <div className="flex justify-between items-start mb-2">
+                <div className="text-sm font-medium text-gray-900">Diabetes:</div>
+                <div className="text-sm text-gray-500">{paciente.diabetes}</div>
+              </div>
+              <div className="flex justify-between items-start mb-2">
+                <div className="text-sm font-medium text-gray-900">Fumador:</div>
+                <div className="text-sm text-gray-500">{paciente.fumador}</div>
+              </div>
+              <div className="flex justify-between items-start mb-2">
+                <div className="text-sm font-medium text-gray-900">Presión Arterial:</div>
+                <div className="text-sm text-gray-500">{paciente.presionArterial}</div>
+              </div>
+              <div className="flex justify-between items-start mb-2">
+                <div className="text-sm font-medium text-gray-900">Colesterol:</div>
+                <div className="text-sm text-gray-500">{paciente.colesterol}</div>
+              </div>
+              <div className="flex justify-between items-start mb-2">
+                <div className="text-sm font-medium text-gray-900">Nivel de Riesgo:</div>
+                <div className="text-sm text-gray-500">
+                  <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${obtenerColorRiesgo(paciente.nivelRiesgo)}`}>
+                    {paciente.nivelRiesgo}
+                  </span>
                 </div>
               </div>
-            ))}
+              <div className="flex justify-between items-start mb-2">
+                <div className="text-sm font-medium text-gray-900">Ubicación:</div>
+                <div className="text-sm text-gray-500">{paciente.ubicacion}</div>
+              </div>
+              <div className="flex justify-end mt-4">
+                <button
+                  onClick={() => editarPaciente(paciente.id)}
+                  className="text-indigo-600 hover:text-indigo-900 mr-4"
+                >
+                  Editar
+                </button>
+                <button
+                  onClick={() => eliminarPaciente(paciente.id)}
+                  className="text-red-600 hover:text-red-900 mr-4"
+                >
+                  Eliminar
+                </button>
+                <button
+                  onClick={() => copiarDatos(paciente)}
+                  className="text-blue-600 hover:text-blue-900"
+                >
+                  Copiar
+                </button>
+              </div>
+            </div>
+          ))}
           </div>
-        </div>
+      </div>
 
   </div>
-  );
+);
 }
 
 export default Estadisticas;
