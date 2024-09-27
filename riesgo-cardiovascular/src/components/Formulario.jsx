@@ -245,17 +245,24 @@ const Formulario = () => {
     return (
         <div className="flex flex-col items-center p-6 max-w-2xl mx-auto">
         {esPrimeraVisita === null ? (
-            <div className="mb-6">
-                <h2 className="text-lg font-bold">¿Es la primera visita?</h2>
-                <div className="flex space-x-4">
-                    <button onClick={() => setEsPrimeraVisita(true)} className="btn">
-                        Sí
-                    </button>
-                    <button onClick={() => setEsPrimeraVisita(false)} className="btn">
-                        No
-                    </button>
-                </div>
+            <div className="mb-6 p-4 bg-gray-100 rounded-lg shadow-md">
+            <h2 className="text-lg font-bold text-gray-800 mb-4">¿Es la primera visita?</h2>
+            <div className="flex justify-center space-x-4">
+                <button 
+                    onClick={() => setEsPrimeraVisita(true)} 
+                    className="btn bg-blue-500 text-white hover:bg-blue-600 rounded-lg px-4 py-2 transition duration-200"
+                >
+                    Sí
+                </button>
+                <button 
+                    onClick={() => setEsPrimeraVisita(false)} 
+                    className="btn bg-red-500 text-white hover:bg-red-600 rounded-lg px-4 py-2 transition duration-200"
+                >
+                    No
+                </button>
             </div>
+        </div>
+        
         ) : esPrimeraVisita ? (
             <form className="w-full space-y-6">
                 <h1 className="text-3xl font-bold mb-6">Formulario de Evaluación de Riesgo Cardiovascular</h1>
@@ -275,6 +282,20 @@ const Formulario = () => {
                         ))}
                     </select>
                 </div>
+
+                {/* Cuil */}
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium text-gray-700">CUIL o DNI:</label>
+                    <input
+                        type="number"
+                        name="cuil"
+                        value={datosPaciente.cuil}
+                        onChange={manejarCambio}
+                        className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                        style={{ appearance: 'none' }}
+                    />
+                </div>
+
                 {/* Edad */}
                 <div className="flex flex-col">
                     <label className="text-sm font-medium text-gray-700">Edad:</label>
@@ -284,19 +305,6 @@ const Formulario = () => {
                         value={datosPaciente.edad}
                         onChange={manejarCambio}
                         className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                </div>
-
-                {/* Cuil */}
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">CUIL:</label>
-                    <input
-                        type="number"
-                        name="cuil"
-                        value={datosPaciente.cuil}
-                        onChange={manejarCambio}
-                        className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                        style={{ appearance: 'none' }}
                     />
                 </div>
 
@@ -539,6 +547,19 @@ const Formulario = () => {
                                     ))}
                                 </select>
                             </div>
+                            {/* Cuil */}
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium text-gray-700">CUIL o DNI:</label>
+                                <input
+                                    type="number"
+                                    name="cuil"
+                                    value={datosPaciente.cuil}
+                                    onChange={manejarCambio}
+                                    className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                    style={{ appearance: 'none' }}
+                                />
+                            </div>
+
                             {/* Edad */}
                             <div className="flex flex-col">
                                 <label className="text-sm font-medium text-gray-700">Edad:</label>
@@ -548,19 +569,6 @@ const Formulario = () => {
                                     value={datosPaciente.edad}
                                     onChange={manejarCambio}
                                     className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                                />
-                            </div>
-
-                            {/* Cuil */}
-                            <div className="flex flex-col">
-                                <label className="text-sm font-medium text-gray-700">CUIL:</label>
-                                <input
-                                    type="number"
-                                    name="cuil"
-                                    value={datosPaciente.cuil}
-                                    onChange={manejarCambio}
-                                    className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                                    style={{ appearance: 'none' }}
                                 />
                             </div>
 
