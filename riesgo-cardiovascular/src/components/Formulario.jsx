@@ -87,7 +87,14 @@ const Formulario = () => {
             return;
         }
     
-        const { edad, genero, diabetes, fumador, presionArterial, colesterol, ubicacion, fechaRegistro, infarto, acv } = datosPaciente;
+        const { edad, genero, diabetes, fumador, presionArterial, colesterol, infarto, acv } = datosPaciente;
+    
+        // Verificar si infarto o acv son "Sí"
+        if (infarto === "Sí" || acv === "Sí") {
+            setNivelRiesgo(">20% <30% Alto");
+            setMostrarModal(true);
+            return;
+        }
     
         // Ajustar la edad y la presión arterial
         const edadAjustada = ajustarEdad(parseInt(edad, 10));
@@ -104,8 +111,8 @@ const Formulario = () => {
     
         // Incluir los medicamentos seleccionados
         const { medicamentos } = datosPaciente;
-    
     };
+    
 
     const guardarPaciente = async () => {
         try {
@@ -167,9 +174,10 @@ const Formulario = () => {
     
 
     const cerrarModal = () => {
-        setMostrarModalMedicamentos(false);
-        setModalAdvertencia(null);
-    };
+        setMostrarModal(false); // Cierra el modal principal
+        setMostrarModalMedicamentos(false); // Cierra el modal de medicamentos si está abierto
+        setModalAdvertencia(null); // Resetea la advertencia
+    };    
 
     const abrirModalAdvertencia = (nivel) => {
         setModalAdvertencia(Advertencia[nivel]);

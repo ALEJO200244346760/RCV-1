@@ -668,13 +668,9 @@ function riesgoTablaSinColesterolMascNoDiabetesNoFumador70(presion) {
 
 // Función principal para calcular el riesgo cardiovascular
 // Calculadora.jsx
-export function calcularRiesgoCardiovascular(edad, genero, diabetes, fuma, presion, colesterol = "No", infarto, acv) {
+export function calcularRiesgoCardiovascular(edad, genero, diabetes, fuma, presion, colesterol = "No") {
     // Redondea la presión usando la nueva función
     presion = redondearPresion(presion);
-
-    if (infarto === "Sí" || acv === "Sí") {
-        return "naranja"; // O el valor que quieras para indicar riesgo alto
-    }
 
     let colRango = null;
     let color = "desconocido"; // Inicializar color con un valor por defecto
