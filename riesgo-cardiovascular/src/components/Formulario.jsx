@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { calcularRiesgoCardiovascular } from './Calculadora';
 import { Advertencia, DatosPacienteInicial, obtenerColorRiesgo, obtenerTextoRiesgo,listaNotificacionRiesgo, listaHipertensionArterial, listaMedicacionPrescripcion, listaMedicacionDispensa, listaTabaquismo, listaLaboratorio } from './ConstFormulario';
 import axiosInstance from '../axiosConfig';
 
+
 const Formulario = () => {
+    // Verifica si ya hay una declaración de pacientes aquí
     const [datosPaciente, setDatosPaciente] = useState(DatosPacienteInicial);
     const [nivelColesterolConocido, setNivelColesterolConocido] = useState(null);
     const [nivelRiesgo, setNivelRiesgo] = useState(null);
@@ -27,30 +29,41 @@ const Formulario = () => {
     const [medicamentosTabaquismo, setMedicamentosTabaquismo] = useState([]);
     const [medicamentosLaboratorio, setMedicamentosLaboratorio] = useState([]);
     const [esPrimeraVisita, setEsPrimeraVisita] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [cuil, setCuil] = useState('');
     const [pacienteEncontrado, setPacienteEncontrado] = useState(null);
+    const [pacientes, setPacientes] = useState([]);
+
+    useEffect(() => {
+        axiosInstance.get('/api/pacientes')
+            .then(response => {
+                const data = response.data;
+                if (Array.isArray(data)) {
+                    setPacientes(data);
+                } else {
+                    console.error('La respuesta de la API no es un arreglo');
+                }
+            })
+            .catch(error => {
+                console.error('Error al obtener los pacientes:', error);
+            })
+            .finally(() => setLoading(false));
+    }, []);
 
     const buscarPaciente = () => {
-        // Lógica para buscar paciente por CUIL
-        // Suponiendo que tienes una función `getPacienteByCuil(cuil)`
-        const paciente = getPacienteByCuil(cuil);
+        const paciente = pacientes.find(paciente => paciente.cuil === cuil);
         if (paciente) {
             setPacienteEncontrado(paciente);
         } else {
             alert('Paciente no encontrado');
         }
     };
+
     const getPacienteByCuil = (cuil) => {
-        // Aquí puedes implementar la lógica para buscar el paciente en un array de pacientes o hacer una llamada a una API
-        const pacientes = [
-            { cuil: '20-12345678-9', edad: 30, genero: 'Masculino' },
-            // Otros pacientes...
-        ];
-    
+        // Busca en el array de pacientes que se pasa como prop
         return pacientes.find(paciente => paciente.cuil === cuil);
     };
     
-
     const manejarCambio = (e) => {
         const { name, value } = e.target;
         setDatosPaciente({
@@ -274,6 +287,19 @@ const Formulario = () => {
                     />
                 </div>
 
+                {/* Cuil */}
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium text-gray-700">CUIL:</label>
+                    <input
+                        type="number"
+                        name="cuil"
+                        value={datosPaciente.cuil}
+                        onChange={manejarCambio}
+                        className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                        style={{ appearance: 'none' }}
+                    />
+                </div>
+
                 {/* Género */}
                 <div className="flex flex-col">
                     <label className="text-sm font-medium text-gray-700">Género:</label>
@@ -466,7 +492,28 @@ const Formulario = () => {
                         {pacienteEncontrado ? (
                             <>
                                 <p><strong>Edad:</strong> {pacienteEncontrado.edad}</p>
+                                <p><strong>CUIL:</strong> {pacienteEncontrado.cuil}</p>
+                                <p><strong>Ubicación:</strong> {pacienteEncontrado.ubicacion}</p>
+                                <p><strong>Fecha registro:</strong> {pacienteEncontrado.fechaRegistro}</p>
                                 <p><strong>Género:</strong> {pacienteEncontrado.genero}</p>
+                                <p><strong>Diabetes:</strong> {pacienteEncontrado.diabetes}</p>
+                                <p><strong>Fumador:</strong> {pacienteEncontrado.fumador}</p>
+                                <p><strong>Presión:</strong> {pacienteEncontrado.presionArterial}</p>
+                                <p><strong>Colesterol:</strong> {pacienteEncontrado.colesterol}</p>
+                                <p><strong>Peso:</strong> {pacienteEncontrado.peso}</p>
+                                <p><strong>Talla:</strong> {pacienteEncontrado.talla}</p>
+                                <p><strong>IMC:</strong> {pacienteEncontrado.imc}</p>
+                                <p><strong>Hipertenso:</strong> {pacienteEncontrado.hipertenso}</p>
+                                <p><strong>Infarto:</strong> {pacienteEncontrado.infarto}</p>
+                                <p><strong>ACV:</strong> {pacienteEncontrado.acv}</p>
+                                <p><strong>Notificacion de riesgo:</strong> {pacienteEncontrado.notificacionRiesgo}</p>
+                                <p><strong>Hipertension Arterial:</strong> {pacienteEncontrado.hipertensionArterial}</p>
+                                <p><strong>Medicacion Prescripción:</strong> {pacienteEncontrado.medicacionPrescripcion}</p>
+                                <p><strong>Medicacion Dispensa:</strong> {pacienteEncontrado.medicacionDispensa}</p>
+                                <p><strong>Tabaquismo:</strong> {pacienteEncontrado.tabaquismo}</p>
+                                <p><strong>Laboratorio:</strong> {pacienteEncontrado.laboratorio}</p>
+
+
                                 {/* Resto de datos del paciente... */}
                             </>
                         ) : (
@@ -501,6 +548,19 @@ const Formulario = () => {
                                     value={datosPaciente.edad}
                                     onChange={manejarCambio}
                                     className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                />
+                            </div>
+
+                            {/* Cuil */}
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium text-gray-700">CUIL:</label>
+                                <input
+                                    type="number"
+                                    name="cuil"
+                                    value={datosPaciente.cuil}
+                                    onChange={manejarCambio}
+                                    className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                    style={{ appearance: 'none' }}
                                 />
                             </div>
 
