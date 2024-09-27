@@ -35,7 +35,7 @@ function Estadisticas() {
 
   // Configuración de la URL base para la API
   const apiBaseURL = 'https://rcv-production.up.railway.app';
-
+  
   // Hook useEffect para obtener datos de pacientes desde la API
   useEffect(() => {
     axios.get(`${apiBaseURL}/api/pacientes`)
@@ -110,9 +110,21 @@ function Estadisticas() {
                            (imc >= 25 && imc <= 29.9) ? '25-29.9' :
                            (imc >= 30 && imc <= 34.9) ? '30-34.9' :
                            (imc >= 35 && imc <= 39.9) ? '35-39.9' : '40+';
+        // Filtrado por edad
+        let edadValida = true;
+        if (edadFiltro) {
+          const [min, max] = edadFiltro.split('-').map(Number);
+          if (isNaN(max)) {
+            // Si max es NaN, significa que es el rango "71+"
+            edadValida = paciente.edad > 71;
+          } else {
+            edadValida = paciente.edad >= min && paciente.edad <= (max || Number.MAX_VALUE);
+          }
+        }
 
-      return (
-        (edadFiltro === null || paciente.edad.toString() === edadFiltro) &&
+        // Restante lógica de filtrado
+        return (
+          edadValida &&
         (filtros.genero === '' || paciente.genero.toLowerCase() === filtros.genero.toLowerCase()) &&
         (filtros.diabetes === '' || paciente.diabetes.toLowerCase() === filtros.diabetes.toLowerCase()) &&
         (filtros.fumador === '' || paciente.fumador.toLowerCase() === filtros.fumador.toLowerCase()) &&
@@ -216,10 +228,11 @@ function Estadisticas() {
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               >
                 <option value="">Todos</option>
-                <option value="40">40</option>
-                <option value="50">50</option>
-                <option value="60">60</option>
-                <option value="70">70</option>
+                <option value="0-40">Menor o igual a 40</option>
+                <option value="41-50">Entre 41 y 50</option>
+                <option value="51-60">Entre 51 y 60</option>
+                <option value="61-70">Entre 61 y 70</option>
+                <option value="71+">Mayores de 71</option>
               </select>
             </div>
             <div>
