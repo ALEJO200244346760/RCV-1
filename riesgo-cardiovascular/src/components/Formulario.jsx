@@ -87,7 +87,7 @@ const Formulario = () => {
             return;
         }
     
-        const { edad, genero, diabetes, fumador, presionArterial, colesterol, ubicacion, fechaRegistro } = datosPaciente;
+        const { edad, genero, diabetes, fumador, presionArterial, colesterol, ubicacion, fechaRegistro, infarto, acv } = datosPaciente;
     
         // Ajustar la edad y la presión arterial
         const edadAjustada = ajustarEdad(parseInt(edad, 10));
