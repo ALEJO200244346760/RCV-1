@@ -153,12 +153,12 @@ const Formulario = () => {
     const guardarMedicamentos = () => {
         const nuevosDatosPaciente = {
             ...datosPaciente,
-            notificacionRiesgo: medicamentosSeleccionados.notificacionRiesgo.length > 0 ? medicamentosSeleccionados.notificacionRiesgo.join(';') : '',
-            hipertensionArterial: medicamentosSeleccionados.hipertensionArterial.length > 0 ? medicamentosSeleccionados.hipertensionArterial.join(';') : '',
-            medicacionPrescripcion: medicamentosSeleccionados.medicacionPrescripcion.length > 0 ? medicamentosSeleccionados.medicacionPrescripcion.join(';') : '',
-            medicacionDispensa: medicamentosSeleccionados.medicacionDispensa.length > 0 ? medicamentosSeleccionados.medicacionDispensa.join(';') : '',
-            tabaquismo: medicamentosSeleccionados.tabaquismo.length > 0 ? medicamentosSeleccionados.tabaquismo.join(';') : '',
-            laboratorio: medicamentosSeleccionados.laboratorio.length > 0 ? medicamentosSeleccionados.laboratorio.join(';') : '',
+            notificacionRiesgo: medicamentosSeleccionados.notificacionRiesgo.length > 0 ? medicamentosSeleccionados.notificacionRiesgo.join('; ') : '',
+            hipertensionArterial: medicamentosSeleccionados.hipertensionArterial.length > 0 ? medicamentosSeleccionados.hipertensionArterial.join('; ') : '',
+            medicacionPrescripcion: medicamentosSeleccionados.medicacionPrescripcion.length > 0 ? medicamentosSeleccionados.medicacionPrescripcion.join('; ') : '',
+            medicacionDispensa: medicamentosSeleccionados.medicacionDispensa.length > 0 ? medicamentosSeleccionados.medicacionDispensa.join('; ') : '',
+            tabaquismo: medicamentosSeleccionados.tabaquismo.length > 0 ? medicamentosSeleccionados.tabaquismo.join('; ') : '',
+            laboratorio: medicamentosSeleccionados.laboratorio.length > 0 ? medicamentosSeleccionados.laboratorio.join('; ') : '',
         };
         setDatosPaciente(nuevosDatosPaciente);
         setMensajeExito('Medicamentos guardados con éxito');

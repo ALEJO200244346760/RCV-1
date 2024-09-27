@@ -459,71 +459,27 @@ function Estadisticas() {
             {/* Mostrar detalles adicionales solo si están activados */}
             {mostrarDetalles[paciente.id] && (
               <div className="mt-0">
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">IMC:</div>
-                  <div className="text-sm text-gray-500">{paciente.imc}</div>
+              {[
+                { label: "IMC", value: paciente.imc },
+                { label: "Peso", value: paciente.peso },
+                { label: "Talla", value: paciente.talla },
+                { label: "Fecha de Registro", value: paciente.fechaRegistro },
+                { label: "Hipertenso", value: paciente.hipertenso },
+                { label: "ACV", value: paciente.acv },
+                { label: "Infarto", value: paciente.infarto },
+                { label: "Hipertensión Arterial", value: paciente.hipertensionArterial !== null ? paciente.hipertensionArterial : 'N/A' },
+                { label: "Notificación de Riesgo", value: paciente.notificacionRiesgo !== null ? paciente.notificacionRiesgo : 'N/A' },
+                { label: "Medicaciones Dispensa", value: paciente.medicacionDispensa !== null ? paciente.medicacionDispensa : 'N/A' },
+                { label: "Medicaciones Prescripción", value: paciente.medicacionPrescripcion !== null ? paciente.medicacionPrescripcion : 'N/A' },
+                { label: "Tabaquismo", value: paciente.tabaquismo !== null ? paciente.tabaquismo : 'N/A' },
+                { label: "Laboratorio", value: paciente.laboratorio !== null ? paciente.laboratorio : 'N/A' },
+              ].map(({ label, value }) => (
+                <div className="flex justify-between mb-2">
+                  <div className="w-2/5 text-sm font-medium text-gray-900">{label}:</div>
+                  <div className="w-2/5 text-sm text-gray-500 text-right">{value}</div>
                 </div>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Peso:</div>
-                  <div className="text-sm text-gray-500">{paciente.peso}</div>
-                </div>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Talla:</div>
-                  <div className="text-sm text-gray-500">{paciente.talla}</div>
-                </div>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Fecha de Registro:</div>
-                  <div className="text-sm text-gray-500">{paciente.fechaRegistro}</div>
-                </div>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Hipertenso:</div>
-                  <div className="text-sm text-gray-500">{paciente.hipertenso}</div>
-                </div>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">ACV:</div>
-                  <div className="text-sm text-gray-500">{paciente.acv}</div>
-                </div>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Infarto:</div>
-                  <div className="text-sm text-gray-500">{paciente.infarto}</div>
-                </div>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Hipertensión Arterial:</div>
-                  <div className="text-sm text-gray-500">
-                    {paciente.hipertensionArterial !== null ? paciente.hipertensionArterial : 'N/A'}
-                  </div>
-                </div>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Notificación de Riesgo:</div>
-                  <div className="text-sm text-gray-500">
-                    {paciente.notificacionRiesgo !== null ? paciente.notificacionRiesgo : 'N/A'}
-                  </div>
-                </div>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Medicaciones Dispensa:</div>
-                  <div className="text-sm text-gray-500">
-                    {paciente.medicacionDispensa !== null ? paciente.medicacionDispensa : 'N/A'}
-                  </div>
-                </div>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Medicaciones Prescripción:</div>
-                  <div className="text-sm text-gray-500">
-                    {paciente.medicacionPrescripcion !== null ? paciente.medicacionPrescripcion : 'N/A'}
-                  </div>
-                </div>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Tabaquismo:</div>
-                  <div className="text-sm text-gray-500">
-                    {paciente.tabaquismo !== null ? paciente.tabaquismo : 'N/A'}
-                  </div>
-                </div>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Laboratorio:</div>
-                  <div className="text-sm text-gray-500">
-                    {paciente.laboratorio !== null ? paciente.laboratorio : 'N/A'}
-                  </div>
-                </div>
-              </div>
+              ))}
+            </div>
             )}
 
             {/* Botón "Mostrar más" o "Mostrar menos" */}
