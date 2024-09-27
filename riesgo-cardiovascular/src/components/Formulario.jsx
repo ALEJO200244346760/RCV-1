@@ -26,7 +26,30 @@ const Formulario = () => {
     const [medicamentosDispensa, setMedicamentosDispensa] = useState([]);
     const [medicamentosTabaquismo, setMedicamentosTabaquismo] = useState([]);
     const [medicamentosLaboratorio, setMedicamentosLaboratorio] = useState([]);
+    const [esPrimeraVisita, setEsPrimeraVisita] = useState(null);
+    const [cuil, setCuil] = useState('');
+    const [pacienteEncontrado, setPacienteEncontrado] = useState(null);
 
+    const buscarPaciente = () => {
+        // Lógica para buscar paciente por CUIL
+        // Suponiendo que tienes una función `getPacienteByCuil(cuil)`
+        const paciente = getPacienteByCuil(cuil);
+        if (paciente) {
+            setPacienteEncontrado(paciente);
+        } else {
+            alert('Paciente no encontrado');
+        }
+    };
+    const getPacienteByCuil = (cuil) => {
+        // Aquí puedes implementar la lógica para buscar el paciente en un array de pacientes o hacer una llamada a una API
+        const pacientes = [
+            { cuil: '20-12345678-9', edad: 30, genero: 'Masculino' },
+            // Otros pacientes...
+        ];
+    
+        return pacientes.find(paciente => paciente.cuil === cuil);
+    };
+    
 
     const manejarCambio = (e) => {
         const { name, value } = e.target;
@@ -111,8 +134,7 @@ const Formulario = () => {
     
         // Incluir los medicamentos seleccionados
         const { medicamentos } = datosPaciente;
-    };
-    
+    };    
 
     const guardarPaciente = async () => {
         try {
@@ -172,13 +194,12 @@ const Formulario = () => {
         toggleModalMedicamentos(); // Cerrar el modal
     };
     
-
     const cerrarModal = () => {
         setMostrarModal(false); // Cierra el modal principal
         setMostrarModalMedicamentos(false); // Cierra el modal de medicamentos si está abierto
         setModalAdvertencia(null); // Resetea la advertencia
-    };    
-
+    };
+    
     const abrirModalAdvertencia = (nivel) => {
         setModalAdvertencia(Advertencia[nivel]);
     };
@@ -210,9 +231,21 @@ const Formulario = () => {
 
     return (
         <div className="flex flex-col items-center p-6 max-w-2xl mx-auto">
-            <h1 className="text-3xl font-bold mb-6">Formulario de Evaluación de Riesgo Cardiovascular</h1>
+        {esPrimeraVisita === null ? (
+            <div className="mb-6">
+                <h2 className="text-lg font-bold">¿Es la primera visita?</h2>
+                <div className="flex space-x-4">
+                    <button onClick={() => setEsPrimeraVisita(true)} className="btn">
+                        Sí
+                    </button>
+                    <button onClick={() => setEsPrimeraVisita(false)} className="btn">
+                        No
+                    </button>
+                </div>
+            </div>
+        ) : esPrimeraVisita ? (
             <form className="w-full space-y-6">
-                {/* Ubicación */}
+                <h1 className="text-3xl font-bold mb-6">Formulario de Evaluación de Riesgo Cardiovascular</h1>
                 <div className="flex flex-col">
                     <label className="text-sm font-medium text-gray-700">Ubicación:</label>
                     <select
@@ -229,7 +262,6 @@ const Formulario = () => {
                         ))}
                     </select>
                 </div>
-                
                 {/* Edad */}
                 <div className="flex flex-col">
                     <label className="text-sm font-medium text-gray-700">Edad:</label>
@@ -414,9 +446,240 @@ const Formulario = () => {
                     Calcular Riesgo
                 </button>
             </form>
+        ) : (
+            <div className="w-full space-y-6">
+                <h2 className="text-lg font-bold">Ingrese el CUIL del paciente:</h2>
+                <input
+                    type="text"
+                    value={cuil}
+                    onChange={(e) => setCuil(e.target.value)}
+                    className="p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                />
+                <button onClick={buscarPaciente} className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                    Buscar Paciente
+                </button>
 
-            {/* Modal Resultados */}
-            {mostrarModal && !modalAdvertencia && (
+                {pacienteEncontrado && (
+                    <div className="flex w-full space-x-4 mt-6">
+                    <div className="flex-1 bg-gray-100 p-4 rounded-md">
+                        <h2 className="text-lg font-bold">Datos del Paciente:</h2>
+                        {pacienteEncontrado ? (
+                            <>
+                                <p><strong>Edad:</strong> {pacienteEncontrado.edad}</p>
+                                <p><strong>Género:</strong> {pacienteEncontrado.genero}</p>
+                                {/* Resto de datos del paciente... */}
+                            </>
+                        ) : (
+                            <p>No se encontraron datos del paciente.</p>
+                        )}
+                    </div>
+                    <div className="flex-1 bg-gray-100 p-4 rounded-md">
+                        <h3 className="text-lg font-bold">Formulario de Registro:</h3>
+                        <form className="w-full space-y-6">
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium text-gray-700">Ubicación:</label>
+                                <select
+                                    name="ubicacion"
+                                    value={datosPaciente.ubicacion}
+                                    onChange={manejarCambio}
+                                    className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                >
+                                    <option value="">Seleccione una ubicación</option>
+                                    {['DEM NORTE', 'DEM CENTRO', 'DEM OESTE', 'DAPS', 'HPA', 'HU.'].map(option => (
+                                        <option key={option} value={option}>
+                                            {option}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            {/* Edad */}
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium text-gray-700">Edad:</label>
+                                <input
+                                    type="number"
+                                    name="edad"
+                                    value={datosPaciente.edad}
+                                    onChange={manejarCambio}
+                                    className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                />
+                            </div>
+
+                            {/* Género */}
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium text-gray-700">Género:</label>
+                                <div className="flex space-x-2">
+                                    {['masculino', 'femenino'].map(option => (
+                                        <button
+                                            key={option}
+                                            type="button"
+                                            className={`p-2 border rounded ${datosPaciente.genero === option ? 'bg-indigo-500 text-white' : 'bg-white text-gray-700'}`}
+                                            onClick={() => setDatosPaciente(prevDatos => ({ ...prevDatos, genero: option }))}
+                                        >
+                                            {option.charAt(0).toUpperCase() + option.slice(1)}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Diabetes */}
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium text-gray-700">Diabetes:</label>
+                                <div className="flex space-x-2">
+                                    {['Sí', 'No'].map(option => (
+                                        <button
+                                            key={option}
+                                            type="button"
+                                            onClick={() => setDatosPaciente({ ...datosPaciente, diabetes: option })}
+                                            className={`p-2 border rounded-md ${datosPaciente.diabetes === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
+                                        >
+                                            {option.charAt(0).toUpperCase() + option.slice(1)}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Fumador */}
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium text-gray-700">¿Es fumador?</label>
+                                <div className="flex space-x-2 mb-2">
+                                    {['sí', 'no'].map(option => (
+                                        <button
+                                            key={option}
+                                            type="button"
+                                            onClick={() => setDatosPaciente({ ...datosPaciente, fumador: option })}
+                                            className={`p-2 border rounded-md ${datosPaciente.fumador === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
+                                        >
+                                            {option.charAt(0).toUpperCase() + option.slice(1)}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Presión Arterial */}
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium text-gray-700">Presión Arterial:</label>
+                                <input
+                                    type="number"
+                                    name="presionArterial"
+                                    value={datosPaciente.presionArterial}
+                                    onChange={manejarCambio}
+                                    className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                    style={{ appearance: 'none' }}
+                                />
+                            </div>
+
+                            {/* Peso */}
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium text-gray-700">Peso (kg):</label>
+                                <input
+                                    type="number"
+                                    name="peso"
+                                    value={datosPaciente.peso}
+                                    onChange={manejarCambio}
+                                    className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                />
+                            </div>
+
+                            {/* Talla */}
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium text-gray-700">Talla (cm):</label>
+                                <input
+                                    type="number"
+                                    name="talla"
+                                    value={datosPaciente.talla}
+                                    onChange={manejarCambio}
+                                    className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                />
+                            </div>
+
+                            {/* Hipertenso */}
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium text-gray-700">¿Es hipertenso?</label>
+                                <div className="flex space-x-2 mb-2">
+                                    {['Sí', 'No'].map(option => (
+                                        <button
+                                            key={option}
+                                            type="button"
+                                            onClick={() => setDatosPaciente({ ...datosPaciente, hipertenso: option })}
+                                            className={`p-2 border rounded-md ${datosPaciente.hipertenso === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
+                                        >
+                                            {option}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Infarto */}
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium text-gray-700">¿Ha tenido un infarto?</label>
+                                <div className="flex space-x-2 mb-2">
+                                    {['Sí', 'No'].map(option => (
+                                        <button
+                                            key={option}
+                                            type="button"
+                                            onClick={() => setDatosPaciente({ ...datosPaciente, infarto: option })}
+                                            className={`p-2 border rounded-md ${datosPaciente.infarto === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
+                                        >
+                                            {option}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* ACV */}
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium text-gray-700">¿Ha tenido un ACV?</label>
+                                <div className="flex space-x-2 mb-2">
+                                    {['Sí', 'No'].map(option => (
+                                        <button
+                                            key={option}
+                                            type="button"
+                                            onClick={() => setDatosPaciente({ ...datosPaciente, acv: option })}
+                                            className={`p-2 border rounded-md ${datosPaciente.acv === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
+                                        >
+                                            {option}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            {/* Colesterol */}
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium text-gray-700">¿Conoce su nivel de colesterol?</label>
+                                <div className="flex space-x-2 mb-2">
+                                    {['si', 'no'].map(option => (
+                                        <button
+                                            key={option}
+                                            type="button"
+                                            onClick={() => manejarSeleccionColesterol(option)}
+                                            className={`p-2 border rounded-md ${nivelColesterolConocido === (option === 'si') ? 'bg-green-500 text-white' : 'border-gray-300'}`}
+                                        >
+                                            {option.charAt(0).toUpperCase() + option.slice(1)}
+                                        </button>
+                                    ))}
+                                </div>
+                                {nivelColesterolConocido === true && (
+                                    <input
+                                        type="number"
+                                        name="colesterol"
+                                        value={datosPaciente.colesterol === 'No' ? '' : datosPaciente.colesterol}
+                                        onChange={manejarCambio}
+                                        className="p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                        style={{ appearance: 'none' }}
+                                    />
+                                )}
+                            </div>
+                            <button type="button" onClick={calcularRiesgo} className="w-full py-2 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600">
+                                Calcular Riesgo
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                )}
+            </div>
+        )}
+
+        {/* Modal Resultados */}
+        {mostrarModal && !modalAdvertencia && (
             <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-4">
                 <div className="bg-white p-6 rounded-md shadow-lg w-full max-w-lg max-h-screen overflow-y-auto">
                 <div className="flex justify-between mb-4">
@@ -583,7 +846,7 @@ const Formulario = () => {
                     </div>
                 </div>
             )}
-        </div>
+    </div>
     );
 };
 

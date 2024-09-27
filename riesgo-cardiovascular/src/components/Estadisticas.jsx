@@ -35,7 +35,7 @@ function Estadisticas() {
 
   // Configuración de la URL base para la API
   const apiBaseURL = 'https://rcv-production.up.railway.app';
-  
+
   // Hook useEffect para obtener datos de pacientes desde la API
   useEffect(() => {
     axios.get(`${apiBaseURL}/api/pacientes`)
@@ -445,6 +445,10 @@ function Estadisticas() {
             <div className="flex justify-between items-start mb-2">
               <div className="text-sm font-medium text-gray-900">Edad:</div>
               <div className="text-sm text-gray-500">{paciente.edad}</div>
+            </div>
+            <div className="flex justify-between items-start mb-2">
+                  <div className="text-sm font-medium text-gray-900">Presión Arterial:</div>
+                  <div className="text-sm text-gray-500">{paciente.presionArterial}</div>
             </div>
             <div className="flex justify-between items-start mb-2">
               <div className="text-sm font-medium text-gray-900">Peso:</div>
