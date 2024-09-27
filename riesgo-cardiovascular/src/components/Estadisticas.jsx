@@ -24,6 +24,14 @@ function Estadisticas() {
   const [nivelColesterolConocido, setNivelColesterolConocido] = useState('todos'); // Estado para el conocimiento del nivel de colesterol
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [mostrarDetalles, setMostrarDetalles] = useState({}); // Estado para mostrar detalles de cada paciente
+  
+  const toggleDetalles = (id) => {
+    setMostrarDetalles((prev) => ({
+      ...prev,
+      [id]: !prev[id], // Alterna la visibilidad de los detalles
+    }));
+  };
 
   // Configuración de la URL base para la API
   const apiBaseURL = 'https://rcv-production.up.railway.app';
@@ -413,136 +421,132 @@ function Estadisticas() {
         <h2 className="text-xl font-semibold">Total de Personas que Coinciden con los Filtros: {pacientesFiltrados.length}</h2>
       </div>
 
-      <div className="mt-6">
-        <div className="hidden lg:block overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Edad</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Género</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Diabetes</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fumador</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Presión Arterial</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Colesterol</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nivel de Riesgo</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ubicación</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {pacientesFiltrados.map(paciente => (
-                <tr key={paciente.id}>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{paciente.id}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.edad}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.genero}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.diabetes}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.fumador}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.presionArterial}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.colesterol}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${obtenerColorRiesgo(paciente.nivelRiesgo)}`}>
-                      {paciente.nivelRiesgo}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{paciente.ubicacion}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => editarPaciente(paciente.id)}
-                      className="text-indigo-600 hover:text-indigo-900"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => eliminarPaciente(paciente.id)}
-                      className="ml-4 text-red-600 hover:text-red-900"
-                    >
-                      Eliminar
-                    </button>
-                    <button
-                      onClick={() => copiarDatos(paciente)}
-                      className="ml-4 text-blue-600 hover:text-blue-900"
-                    >
-                      Copiar
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {pacientesFiltrados.map(paciente => (
+          <div key={paciente.id} className="bg-white shadow-md rounded-lg p-4">
+            {/* Datos siempre visibles */}
+            <div className="flex justify-between items-start mb-2">
+              <div className="text-sm font-medium text-gray-900">ID:</div>
+              <div className="text-sm text-gray-500">{paciente.id}</div>
+            </div>
+            <div className="flex justify-between items-start mb-2">
+              <div className="text-sm font-medium text-gray-900">Edad:</div>
+              <div className="text-sm text-gray-500">{paciente.edad}</div>
+            </div>
+            <div className="flex justify-between items-start mb-2">
+              <div className="text-sm font-medium text-gray-900">Peso:</div>
+              <div className="text-sm text-gray-500">{paciente.peso}</div>
+            </div>
+            <div className="flex justify-between items-start mb-2">
+              <div className="text-sm font-medium text-gray-900">Talla:</div>
+              <div className="text-sm text-gray-500">{paciente.talla}</div>
+            </div>
+            <div className="flex justify-between items-start mb-2">
+              <div className="text-sm font-medium text-gray-900">Ubicación:</div>
+              <div className="text-sm text-gray-500">{paciente.ubicacion}</div>
+            </div>
+            <div className="flex justify-between items-start mb-1">
+              <div className="text-sm font-medium text-gray-900">Nivel de Riesgo:</div>
+              <div className="text-sm text-gray-500">
+                <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${obtenerColorRiesgo(paciente.nivelRiesgo)}`}>
+                  {paciente.nivelRiesgo}
+                </span>
+              </div>
+            </div>
+            
 
-          {/* Modo móvil */}
-        <div className="lg:hidden">
-            {pacientesFiltrados.map(paciente => (
-              <div key={paciente.id} className="bg-white shadow-md rounded-lg p-4 mb-4">
+
+            {/* Mostrar detalles adicionales solo si están activados */}
+            {mostrarDetalles[paciente.id] && (
+              <div className="mt-0">
                 <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">ID:</div>
-                  <div className="text-sm text-gray-500">{paciente.id}</div>
+                  <div className="text-sm font-medium text-gray-900">IMC:</div>
+                  <div className="text-sm text-gray-500">{paciente.imc}</div>
                 </div>
                 <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Edad:</div>
-                  <div className="text-sm text-gray-500">{paciente.edad}</div>
+                  <div className="text-sm font-medium text-gray-900">Peso:</div>
+                  <div className="text-sm text-gray-500">{paciente.peso}</div>
                 </div>
                 <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Género:</div>
-                  <div className="text-sm text-gray-500">{paciente.genero}</div>
+                  <div className="text-sm font-medium text-gray-900">Talla:</div>
+                  <div className="text-sm text-gray-500">{paciente.talla}</div>
                 </div>
                 <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Diabetes:</div>
-                  <div className="text-sm text-gray-500">{paciente.diabetes}</div>
+                  <div className="text-sm font-medium text-gray-900">Fecha de Registro:</div>
+                  <div className="text-sm text-gray-500">{paciente.fechaRegistro}</div>
                 </div>
                 <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Fumador:</div>
-                  <div className="text-sm text-gray-500">{paciente.fumador}</div>
+                  <div className="text-sm font-medium text-gray-900">Hipertenso:</div>
+                  <div className="text-sm text-gray-500">{paciente.hipertenso}</div>
                 </div>
                 <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Presión Arterial:</div>
-                  <div className="text-sm text-gray-500">{paciente.presionArterial}</div>
+                  <div className="text-sm font-medium text-gray-900">ACV:</div>
+                  <div className="text-sm text-gray-500">{paciente.acv}</div>
                 </div>
                 <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Colesterol:</div>
-                  <div className="text-sm text-gray-500">{paciente.colesterol}</div>
+                  <div className="text-sm font-medium text-gray-900">Infarto:</div>
+                  <div className="text-sm text-gray-500">{paciente.infarto}</div>
                 </div>
                 <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Nivel de Riesgo:</div>
+                  <div className="text-sm font-medium text-gray-900">Hipertensión Arterial:</div>
                   <div className="text-sm text-gray-500">
-                    <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${obtenerColorRiesgo(paciente.nivelRiesgo)}`}>
-                      {paciente.nivelRiesgo}
-                    </span>
+                    {paciente.hipertensionArterial !== null ? paciente.hipertensionArterial : 'N/A'}
                   </div>
                 </div>
                 <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium text-gray-900">Ubicación:</div>
-                  <div className="text-sm text-gray-500">{paciente.ubicacion}</div>
+                  <div className="text-sm font-medium text-gray-900">Notificación de Riesgo:</div>
+                  <div className="text-sm text-gray-500">
+                    {paciente.notificacionRiesgo !== null ? paciente.notificacionRiesgo : 'N/A'}
+                  </div>
                 </div>
-                <div className="flex justify-end mt-4">
-                  <button
-                    onClick={() => editarPaciente(paciente.id)}
-                    className="text-indigo-600 hover:text-indigo-900 mr-4"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => eliminarPaciente(paciente.id)}
-                    className="text-red-600 hover:text-red-900 mr-4"
-                  >
-                    Eliminar
-                  </button>
-                  <button
-                    onClick={() => copiarDatos(paciente)}
-                    className="text-blue-600 hover:text-blue-900"
-                  >
-                    Copiar
-                  </button>
+                <div className="flex justify-between items-start mb-2">
+                  <div className="text-sm font-medium text-gray-900">Medicaciones Dispensa:</div>
+                  <div className="text-sm text-gray-500">
+                    {paciente.medicacionDispensa !== null ? paciente.medicacionDispensa : 'N/A'}
+                  </div>
+                </div>
+                <div className="flex justify-between items-start mb-2">
+                  <div className="text-sm font-medium text-gray-900">Medicaciones Prescripción:</div>
+                  <div className="text-sm text-gray-500">
+                    {paciente.medicacionPrescripcion !== null ? paciente.medicacionPrescripcion : 'N/A'}
+                  </div>
+                </div>
+                <div className="flex justify-between items-start mb-2">
+                  <div className="text-sm font-medium text-gray-900">Tabaquismo:</div>
+                  <div className="text-sm text-gray-500">
+                    {paciente.tabaquismo !== null ? paciente.tabaquismo : 'N/A'}
+                  </div>
+                </div>
+                <div className="flex justify-between items-start mb-2">
+                  <div className="text-sm font-medium text-gray-900">Laboratorio:</div>
+                  <div className="text-sm text-gray-500">
+                    {paciente.laboratorio !== null ? paciente.laboratorio : 'N/A'}
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
+            )}
 
-  </div>
-  );
+            {/* Botón "Mostrar más" o "Mostrar menos" */}
+            <button onClick={() => toggleDetalles(paciente.id)} className="text-indigo-600 hover:text-indigo-900 mt-2">
+              {mostrarDetalles[paciente.id] ? 'Mostrar menos' : 'Mostrar más'}
+            </button>
+
+            <div className="flex justify-end mt-4">
+              <button onClick={() => editarPaciente(paciente.id)} className="text-indigo-600 hover:text-indigo-900 mr-4">
+                Editar
+              </button>
+              <button onClick={() => eliminarPaciente(paciente.id)} className="text-red-600 hover:text-red-900 mr-4">
+                Eliminar
+              </button>
+              <button onClick={() => copiarDatos(paciente)} className="text-blue-600 hover:text-blue-900">
+                Copiar
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+);
 }
 
 export default Estadisticas;
