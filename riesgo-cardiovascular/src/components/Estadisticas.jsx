@@ -443,6 +443,10 @@ function Estadisticas() {
               <div className="text-sm text-gray-500">{paciente.id}</div>
             </div>
             <div className="flex justify-between items-start mb-2">
+                  <div className="text-sm font-medium text-gray-900">CUIL O DNI:</div>
+                  <div className="text-sm text-gray-500">{paciente.cuil}</div>
+            </div>
+            <div className="flex justify-between items-start mb-2">
               <div className="text-sm font-medium text-gray-900">Edad:</div>
               <div className="text-sm text-gray-500">{paciente.edad}</div>
             </div>
