@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { calcularRiesgoCardiovascular } from './Calculadora';
 import { Advertencia, DatosPacienteInicial, obtenerColorRiesgo, obtenerTextoRiesgo,listaNotificacionRiesgo, listaHipertensionArterial, listaMedicacionPrescripcion, listaMedicacionDispensa, listaTabaquismo, listaLaboratorio } from './ConstFormulario';
+import { getLocations } from '../services/userService';
 import axiosInstance from '../axiosConfig';
 
 
@@ -33,6 +34,16 @@ const Formulario = () => {
     const [cuil, setCuil] = useState('');
     const [pacienteEncontrado, setPacienteEncontrado] = useState(null);
     const [pacientes, setPacientes] = useState([]);
+    const [ubicaciones, setUbicaciones] = useState([]);
+
+    useEffect(() => {
+        const fetchUbicaciones = async () => {
+            const ubicacionesData = await getLocations();
+            setUbicaciones(ubicacionesData);
+        };
+
+        fetchUbicaciones();
+    }, []);
 
     useEffect(() => {
         axiosInstance.get('/api/pacientes')
@@ -275,9 +286,9 @@ const Formulario = () => {
                         className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                     >
                         <option value="">Seleccione una ubicación</option>
-                        {['DEM NORTE', 'DEM CENTRO', 'DEM OESTE', 'DAPS', 'HPA', 'HU.'].map(option => (
-                            <option key={option} value={option}>
-                                {option}
+                        {ubicaciones.map(ubicacion => (
+                            <option key={ubicacion.id} value={ubicacion.nombre}>
+                                {ubicacion.nombre}
                             </option>
                         ))}
                     </select>
@@ -540,9 +551,9 @@ const Formulario = () => {
                                     className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                                 >
                                     <option value="">Seleccione una ubicación</option>
-                                    {['DEM NORTE', 'DEM CENTRO', 'DEM OESTE', 'DAPS', 'HPA', 'HU.'].map(option => (
-                                        <option key={option} value={option}>
-                                            {option}
+                                    {ubicaciones.map(ubicacion => (
+                                        <option key={ubicacion.id} value={ubicacion.nombre}>
+                                            {ubicacion.nombre}
                                         </option>
                                     ))}
                                 </select>
