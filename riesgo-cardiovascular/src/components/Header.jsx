@@ -31,12 +31,12 @@ const Header = () => {
     }
   };
 
-  // Verificar si el usuario tiene el rol 'ROLE_CARDIOLOGO'
   const hasCardiologoRole = Array.isArray(roles) && roles.includes('ROLE_CARDIOLOGO');
 
   return (
     <header className="bg-red-600 text-white py-4 px-6 flex justify-between items-center relative">
-      <Link to="/formulario" className="text-2xl font-bold hover:text-gray-300">
+      <Link to="/formulario" className="flex items-center text-2xl font-bold hover:text-gray-300">
+        <img src="/logo192.png" alt="Logo" className="h-8 mr-2" />
         <h1>RCV</h1>
       </Link>
 
@@ -59,7 +59,6 @@ const Header = () => {
             <div className="user-initials-circle bg-white text-red-600 rounded-full w-8 h-8 flex items-center justify-center">
               {userInitials}
             </div>
-
             <button 
               onClick={handleLoginLogout} 
               className="block lg:inline-block hover:text-gray-300"
