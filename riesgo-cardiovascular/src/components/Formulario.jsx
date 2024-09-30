@@ -193,13 +193,12 @@ const Formulario = () => {
     const guardarPaciente = async () => {
         try {
             // Si no hay medicamentos seleccionados, asegurarse de que se envíe una lista vacía o un valor adecuado
-            const medicamentosArray = datosPaciente.medicamentos || [];
+            const medicamentosArray = datosPaciente.medicamentos || [''];
             const medicamentosString = medicamentosArray.join(';');
             
             // Actualizar los datos del paciente para que los medicamentos vacíos no se guarden
             await axiosInstance.post('/api/pacientes', {
                 ...datosPaciente,
-                medicamentos: medicamentosString,
                 nivelRiesgo,
             });
     
