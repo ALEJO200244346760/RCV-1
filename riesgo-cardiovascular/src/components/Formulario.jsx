@@ -50,17 +50,6 @@ const Formulario = () => {
         fetchUbicaciones();
     }, []);
 
-    const validarCuil = (cuil) => {
-        const soloNumeros = /^\d+$/; // Expresión regular para solo números
-
-        // Validar que tenga 7 o más dígitos y que solo contenga números
-        if (cuil.length < 7 || !soloNumeros.test(cuil)) {
-            setError('El CUIL o DNI debe tener al menos 7 dígitos y contener solo números.');
-        } else {
-            setError('');
-        }
-    };
-
     useEffect(() => {
         // Asignar la ubicación del usuario al estado inicial si es un usuario normal
         if (user && user.ubicacion) {
@@ -112,7 +101,22 @@ const Formulario = () => {
             ...datosPaciente,
             [name]: value,
         });
-        validarCuil(value);
+        if (name === 'cuil') {
+            validarCuil(value);
+        }
+    };
+
+    const validarCuil = (cuil) => {
+        const soloNumeros = /^\d+$/; // Expresión regular para solo números
+
+        // Solo validar si tiene al menos 7 dígitos
+        if (cuil.length > 0 && cuil.length < 7) {
+            setError('El CUIL o DNI debe tener al menos 7 dígitos y contener solo números.');
+        } else if (cuil.length >= 7 && !soloNumeros.test(cuil)) {
+            setError('El CUIL o DNI debe contener solo números.');
+        } else {
+            setError('');
+        }
     };
 
     const manejarSeleccionColesterol = (value) => {
