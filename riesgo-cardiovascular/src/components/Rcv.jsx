@@ -45,25 +45,16 @@ const Formulario = () => {
         const {
             edad,
             genero,
-            cuil,
             diabetes,
             fumador,
             presionArterial,
-            ubicacion,
             colesterol,
             hipertenso,
             acv,
             renal,
             infarto,
-            peso,
-            talla
         } = datosPaciente;
     
-        // Verificar que todos los campos obligatorios tengan respuesta
-        if (!cuil || cuil.length < 7) {
-            setError('El CUIL o DNI debe tener al menos 7 dígitos.');
-            return false;
-        }
         if (!edad || edad < 1 || edad > 120) {
             setError('La edad debe estar entre 1 y 120 años.');
             return false;
@@ -78,10 +69,6 @@ const Formulario = () => {
         }
         if (!fumador) {
             setError('Por favor, indique si es fumador.');
-            return false;
-        }
-        if (!ubicacion) {
-            setError('Por favor, seleccione una ubicación.');
             return false;
         }
         if (!presionArterial || presionArterial < 80 || presionArterial > 250) {
@@ -106,14 +93,6 @@ const Formulario = () => {
         }
         if (!infarto) {
             setError('Por favor, indique si ha tenido un infarto.');
-            return false;
-        }
-        if (!peso || peso < 35 || peso > 300) {
-            setError('El peso debe estar entre 35 y 300 kg.');
-            return false;
-        }
-        if (!talla || talla < 130 || talla > 230) {
-            setError('La talla debe estar entre 130 y 230 cm.');
             return false;
         }
     
