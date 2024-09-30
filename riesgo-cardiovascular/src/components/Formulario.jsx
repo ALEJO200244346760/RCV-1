@@ -929,7 +929,7 @@ const Formulario = () => {
                     Guardar Paciente
                     </button>
                 </div>
-                
+                <p><strong>CUIL/DNI:</strong> {datosPaciente.cuil}</p>
                 <p><strong>Edad:</strong> {datosPaciente.edad}</p>
                 <p><strong>Género:</strong> {datosPaciente.genero}</p>
                 <p><strong>Diabetes:</strong> {datosPaciente.diabetes}</p>
