@@ -159,6 +159,16 @@ const Formulario = () => {
             setError('La edad debe estar entre 1 y 120 años.');
             return false;
         }
+        const soloNumeros = /^\d+$/; // Expresión regular para solo números
+
+        // Solo validar si tiene al menos 7 dígitos
+        if (cuil.length > 0 && cuil.length < 7) {
+            setError('El CUIL o DNI debe tener al menos 7 dígitos y contener solo números.');
+        } else if (cuil.length >= 7 && !soloNumeros.test(cuil)) {
+            setError('El CUIL o DNI debe contener solo números.');
+        } else {
+            setError('');
+        }
         if (presionArterial < 80 || presionArterial > 250) {
             setError('La presión arterial debe estar entre 80 y 250.');
             return false;
