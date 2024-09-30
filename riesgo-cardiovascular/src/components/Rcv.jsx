@@ -18,6 +18,16 @@ const Formulario = () => {
             ...datosPaciente,
             [name]: value,
         });
+        if (name === 'edad') {
+            validarCampos(value);
+        }
+        if (name === 'presionArterial') {
+            validarCampos(value);
+        }
+        if (name === 'colesterol') {
+            validarCampos(value);
+        }
+        
     };
 
     const manejarSeleccionColesterol = (value) => {
@@ -57,7 +67,7 @@ const Formulario = () => {
         } = datosPaciente;
     
         if (!edad || edad < 1 || edad > 120) {
-            setError('La edad debe estar entre 1 y 120 años.');
+            setError('Ingrese bien la edad.');
             return false;
         }
         if (!genero) {
@@ -105,7 +115,7 @@ const Formulario = () => {
         
         const esValido = validarCampos(); // Llama a la función de validación
         if (!esValido) {
-            setModalAdvertencia('Revisa los datos.');
+            setModalAdvertencia(error);
             setMostrarModal(true);
             return;
         }
