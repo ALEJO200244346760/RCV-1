@@ -153,8 +153,8 @@ const Formulario = () => {
     };
 
     const validarCampos = () => {
-        const { edad, genero, diabetes, fumador, presionArterial, ubicacion, colesterol, hipertenso, acv, renal, infarto, peso, talla } = datosPaciente;
-        return edad && genero && diabetes && fumador && presionArterial && ubicacion && colesterol && hipertenso && acv && infarto && peso && talla && renal;
+        const { edad, genero, cuil, diabetes, fumador, presionArterial, ubicacion, colesterol, hipertenso, acv, renal, infarto, peso, talla } = datosPaciente;
+        return edad && genero && cuil && diabetes && fumador && presionArterial && ubicacion && colesterol && hipertenso && acv && infarto && peso && talla && renal;
     };
 
     const calcularRiesgo = async () => {
