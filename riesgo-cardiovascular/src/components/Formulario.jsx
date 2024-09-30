@@ -237,11 +237,9 @@ const Formulario = () => {
         
         const esValido = validarCampos(); // Llama a la función de validación
         if (!esValido) {
-            // Si no es válido, muestra el mensaje de error
-            alert('Por favor, valide todos los campos antes de calcular el riesgo.');
-        } else {
-            // Lógica para calcular riesgo aquí
-            console.log('Cálculo del riesgo realizado.');
+            setModalAdvertencia('Todos los campos deben estar completos.');
+            setMostrarModal(true);
+            return;
         }
     
         if (nivelColesterolConocido && !datosPaciente.colesterol) {
