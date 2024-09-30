@@ -417,14 +417,12 @@ const Formulario = () => {
                 <div className="flex flex-col">
                     <label className="text-sm font-medium text-gray-700">CUIL o DNI:</label>
                     <input
-                        type="text" // Cambiado a texto para permitir más de 9 dígitos
+                        type="number"
                         name="cuil"
                         value={datosPaciente.cuil}
                         onChange={manejarCambio}
                         className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                        style={{ appearance: 'none' }}
                     />
-                    {error && <p className="text-red-500 text-sm">{error}</p>}
                 </div>
 
                 {/* Edad */}
@@ -708,14 +706,12 @@ const Formulario = () => {
                             <div className="flex flex-col">
                                 <label className="text-sm font-medium text-gray-700">CUIL o DNI:</label>
                                 <input
-                                    type="text" // Cambiado a texto para permitir más de 9 dígitos
+                                    type="number"
                                     name="cuil"
                                     value={datosPaciente.cuil}
                                     onChange={manejarCambio}
                                     className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                                    style={{ appearance: 'none' }}
                                 />
-                                {error && <p className="text-red-500 text-sm">{error}</p>}
                             </div>
 
                             {/* Edad */}
