@@ -153,8 +153,31 @@ const Formulario = () => {
     };
 
     const validarCampos = () => {
-        const { edad, genero, cuil, diabetes, fumador, presionArterial, ubicacion, colesterol, hipertenso, acv, renal, infarto, peso, talla } = datosPaciente;
-        return edad && genero && cuil && diabetes && fumador && presionArterial && ubicacion && colesterol && hipertenso && acv && infarto && peso && talla && renal;
+        const { edad, cuil, presionArterial, colesterol, peso, talla } = datosPaciente;
+
+        if (edad < 1 || edad > 120) {
+            setError('La edad debe estar entre 1 y 120 años.');
+            return false;
+        }
+        if (presionArterial < 80 || presionArterial > 250) {
+            setError('La presión arterial debe estar entre 80 y 250.');
+            return false;
+        }
+        if (nivelColesterolConocido && (colesterol < 150 || colesterol > 400) && colesterol !== 'No') {
+            setError('El colesterol debe estar entre 150 y 400, o "No".');
+            return false;
+        }
+        if (peso < 35 || peso > 300) {
+            setError('El peso debe estar entre 35 y 300 kg.');
+            return false;
+        }
+        if (talla < 130 || talla > 230) {
+            setError('La talla debe estar entre 130 y 230 cm.');
+            return false;
+        }
+        
+        setError(''); // Limpiar el error si todas las validaciones pasan
+        return true;
     };
 
     const calcularRiesgo = async () => {
