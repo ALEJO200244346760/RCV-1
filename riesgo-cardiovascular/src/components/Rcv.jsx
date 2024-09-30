@@ -42,12 +42,89 @@ const Formulario = () => {
     };
 
     const validarCampos = () => {
-        const { edad, genero, diabetes, fumador, presionArterial, colesterol, hipertenso, acv, infarto, renal} = datosPaciente;
-        return edad && genero && diabetes && fumador && presionArterial && colesterol && hipertenso && acv && infarto && renal;
+        const {
+            edad,
+            genero,
+            cuil,
+            diabetes,
+            fumador,
+            presionArterial,
+            ubicacion,
+            colesterol,
+            hipertenso,
+            acv,
+            renal,
+            infarto,
+            peso,
+            talla
+        } = datosPaciente;
+    
+        // Verificar que todos los campos obligatorios tengan respuesta
+        if (!cuil || cuil.length < 7) {
+            setError('El CUIL o DNI debe tener al menos 7 dígitos.');
+            return false;
+        }
+        if (!edad || edad < 1 || edad > 120) {
+            setError('La edad debe estar entre 1 y 120 años.');
+            return false;
+        }
+        if (!genero) {
+            setError('Por favor, seleccione un género.');
+            return false;
+        }
+        if (!diabetes) {
+            setError('Por favor, indique si tiene diabetes.');
+            return false;
+        }
+        if (!fumador) {
+            setError('Por favor, indique si es fumador.');
+            return false;
+        }
+        if (!ubicacion) {
+            setError('Por favor, seleccione una ubicación.');
+            return false;
+        }
+        if (!presionArterial || presionArterial < 80 || presionArterial > 250) {
+            setError('La presión arterial debe estar entre 80 y 250.');
+            return false;
+        }
+        if (nivelColesterolConocido && (colesterol < 150 || colesterol > 400) && colesterol !== 'No') {
+            setError('El colesterol debe estar entre 150 y 400, o "No".');
+            return false;
+        }
+        if (!hipertenso) {
+            setError('Por favor, indique si es hipertenso.');
+            return false;
+        }
+        if (!acv) {
+            setError('Por favor, indique si ha tenido un ACV.');
+            return false;
+        }
+        if (!renal) {
+            setError('Por favor, indique si tiene enfermedad renal crónica.');
+            return false;
+        }
+        if (!infarto) {
+            setError('Por favor, indique si ha tenido un infarto.');
+            return false;
+        }
+        if (!peso || peso < 35 || peso > 300) {
+            setError('El peso debe estar entre 35 y 300 kg.');
+            return false;
+        }
+        if (!talla || talla < 130 || talla > 230) {
+            setError('La talla debe estar entre 130 y 230 cm.');
+            return false;
+        }
+    
+        setError(''); // Limpiar el error si todas las validaciones pasan
+        return true;
     };
 
     const calcularRiesgo = async () => {
-        if (!validarCampos()) {
+        
+        const esValido = validarCampos(); // Llama a la función de validación
+        if (!esValido) {
             setModalAdvertencia('Todos los campos deben estar completos.');
             setMostrarModal(true);
             return;
@@ -72,14 +149,16 @@ const Formulario = () => {
         const edadAjustada = ajustarEdad(parseInt(edad, 10));
         const presionAjustada = ajustarPresionArterial(parseInt(presionArterial, 10));
     
+        // Calcular el IMC
+        const imc = calcularIMC();
+        setDatosPaciente((prevDatos) => ({ ...prevDatos, imc }));
+    
         // Calcular el riesgo
         const nivelRiesgo = calcularRiesgoCardiovascular(edadAjustada, genero, diabetes, fumador, presionAjustada, colesterol);
         setNivelRiesgo(nivelRiesgo);
         setMostrarModal(true);
     
-        // Incluir los medicamentos seleccionados
-        const { medicamentos } = datosPaciente;
-    };
+    }; 
 
     const cerrarModal = () => {
         setMostrarModal(false); // Cierra el modal principal
