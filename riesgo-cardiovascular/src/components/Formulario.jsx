@@ -153,23 +153,49 @@ const Formulario = () => {
     };
 
     const validarCampos = () => {
-        const { edad, cuil, presionArterial, colesterol, peso, talla } = datosPaciente;
-
-        if (edad < 1 || edad > 120) {
+        const {
+            edad,
+            genero,
+            cuil,
+            diabetes,
+            fumador,
+            presionArterial,
+            ubicacion,
+            colesterol,
+            hipertenso,
+            acv,
+            renal,
+            infarto,
+            peso,
+            talla
+        } = datosPaciente;
+    
+        // Verificar que todos los campos obligatorios tengan respuesta
+        if (!cuil || cuil.length < 7) {
+            setError('El CUIL o DNI debe tener al menos 7 dígitos.');
+            return false;
+        }
+        if (!edad || edad < 1 || edad > 120) {
             setError('La edad debe estar entre 1 y 120 años.');
             return false;
         }
-        const soloNumeros = /^\d+$/; // Expresión regular para solo números
-
-        // Solo validar si tiene al menos 7 dígitos
-        if (cuil.length > 0 && cuil.length < 7) {
-            setError('El CUIL o DNI debe tener al menos 7 dígitos y contener solo números.');
-        } else if (cuil.length >= 7 && !soloNumeros.test(cuil)) {
-            setError('El CUIL o DNI debe contener solo números.');
-        } else {
-            setError('');
+        if (!genero) {
+            setError('Por favor, seleccione un género.');
+            return false;
         }
-        if (presionArterial < 80 || presionArterial > 250) {
+        if (!diabetes) {
+            setError('Por favor, indique si tiene diabetes.');
+            return false;
+        }
+        if (!fumador) {
+            setError('Por favor, indique si es fumador.');
+            return false;
+        }
+        if (!ubicacion) {
+            setError('Por favor, seleccione una ubicación.');
+            return false;
+        }
+        if (!presionArterial || presionArterial < 80 || presionArterial > 250) {
             setError('La presión arterial debe estar entre 80 y 250.');
             return false;
         }
@@ -177,24 +203,45 @@ const Formulario = () => {
             setError('El colesterol debe estar entre 150 y 400, o "No".');
             return false;
         }
-        if (peso < 35 || peso > 300) {
+        if (!hipertenso) {
+            setError('Por favor, indique si es hipertenso.');
+            return false;
+        }
+        if (!acv) {
+            setError('Por favor, indique si ha tenido un ACV.');
+            return false;
+        }
+        if (!renal) {
+            setError('Por favor, indique si tiene enfermedad renal crónica.');
+            return false;
+        }
+        if (!infarto) {
+            setError('Por favor, indique si ha tenido un infarto.');
+            return false;
+        }
+        if (!peso || peso < 35 || peso > 300) {
             setError('El peso debe estar entre 35 y 300 kg.');
             return false;
         }
-        if (talla < 130 || talla > 230) {
+        if (!talla || talla < 130 || talla > 230) {
             setError('La talla debe estar entre 130 y 230 cm.');
             return false;
         }
-        
+    
         setError(''); // Limpiar el error si todas las validaciones pasan
         return true;
     };
+    
 
     const calcularRiesgo = async () => {
-        if (!validarCampos()) {
-            setModalAdvertencia('Todos los campos deben estar completos.');
-            setMostrarModal(true);
-            return;
+        
+        const esValido = validarCampos(); // Llama a la función de validación
+        if (!esValido) {
+            // Si no es válido, muestra el mensaje de error
+            alert('Por favor, valide todos los campos antes de calcular el riesgo.');
+        } else {
+            // Lógica para calcular riesgo aquí
+            console.log('Cálculo del riesgo realizado.');
         }
     
         if (nivelColesterolConocido && !datosPaciente.colesterol) {
