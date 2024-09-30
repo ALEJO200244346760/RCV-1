@@ -113,6 +113,12 @@ const Formulario = () => {
         if (name === 'colesterol') {
             validarCampos(value);
         }
+        if (name === 'peso') {
+            validarCampos(value);
+        }
+        if (name === 'talla') {
+            validarCampos(value);
+        }
     };
 
     const validarCuil = (cuil) => {
