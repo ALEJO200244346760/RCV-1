@@ -12,6 +12,7 @@ const Formulario = () => {
     const [datosPaciente, setDatosPaciente] = useState(DatosPacienteInicial);
     const [nivelColesterolConocido, setNivelColesterolConocido] = useState(null);
     const [nivelRiesgo, setNivelRiesgo] = useState(null);
+    const [error, setError] = useState('');
     const [mostrarModal, setMostrarModal] = useState(false);
     const [modalAdvertencia, setModalAdvertencia] = useState(null);
     const [mostrarModalMedicamentos, setMostrarModalMedicamentos] = useState(false);
@@ -48,6 +49,16 @@ const Formulario = () => {
 
         fetchUbicaciones();
     }, []);
+
+    const validarCuil = (cuil) => {
+        const soloNumeros = /^\d+$/; // Expresión regular para solo números
+
+        if (cuil.length < 9 || !soloNumeros.test(cuil)) {
+            setError('El CUIL o DNI debe tener al menos 9 dígitos y contener solo números.');
+        } else {
+            setError('');
+        }
+    };
 
     useEffect(() => {
         // Asignar la ubicación del usuario al estado inicial si es un usuario normal
@@ -325,13 +336,14 @@ const Formulario = () => {
                 <div className="flex flex-col">
                     <label className="text-sm font-medium text-gray-700">CUIL o DNI:</label>
                     <input
-                        type="number"
+                        type="text" // Cambiado a texto para permitir más de 9 dígitos
                         name="cuil"
                         value={datosPaciente.cuil}
                         onChange={manejarCambio}
                         className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                         style={{ appearance: 'none' }}
                     />
+                    {error && <p className="text-red-500 text-sm">{error}</p>}
                 </div>
 
                 {/* Edad */}
@@ -615,13 +627,14 @@ const Formulario = () => {
                             <div className="flex flex-col">
                                 <label className="text-sm font-medium text-gray-700">CUIL o DNI:</label>
                                 <input
-                                    type="number"
+                                    type="text" // Cambiado a texto para permitir más de 9 dígitos
                                     name="cuil"
                                     value={datosPaciente.cuil}
                                     onChange={manejarCambio}
                                     className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                                     style={{ appearance: 'none' }}
                                 />
+                                {error && <p className="text-red-500 text-sm">{error}</p>}
                             </div>
 
                             {/* Edad */}
