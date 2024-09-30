@@ -1,5 +1,6 @@
 // ConstFormulario.jsx
 export const DatosPacienteInicial = {
+    cuil: '',
     edad: '',
     genero: '',
     diabetes: '',
@@ -14,6 +15,7 @@ export const DatosPacienteInicial = {
     hipertenso: '',
     infarto: '',
     acv: '',
+    renal: '',
     notificacionRiesgo: [],
     hipertensionArterial: [],
     medicacionPrescripcion: [],
@@ -22,8 +24,9 @@ export const DatosPacienteInicial = {
     laboratorio: []
 };
 
+
 export const Advertencia = {
-            '<10% Bajo': `-No significa no tener riesgos.
+            '<10% Bajo': `-Realizar el cálculo de riesgo cardiovascular cada 12 meses.
 -Se recomienda intervenciones como un estilo de vida más saludable.
 -Mejorar la calidad del sueño logrando al menos siete horas continuas.
 -Actividad física que incluya ejercicios aeróbicos (como caminata bicicleta baile natación) y otros ejercicios aeróbicos (como levantamiento de pesas en tren superior o brazos y espalda y tren inferior como piernas y muslos, comenzando con cargas de menor a mayor peso gradualmente)
@@ -31,9 +34,9 @@ export const Advertencia = {
 -Vigilar el perfil del riesgo con el control de la presión arterial y un análisis de laboratorio de colesterol y glucemia.
 -Alimentación saludable recomendada en lo posible por un nutricionista o profesional de la salud.
 -Evitar hábitos tóxicos.
--Realizar el cálculo de riesgo cardiovascular cada 12 meses.
             `,
-            '>10% <20% Moderado': `-Significa tener riesgo moderado de sufrir un episodio vascular en los próximos 10 año-Se recomienda intervenciones como un estilo de vida más saludable.
+            '>10% <20% Moderado': `-Realizar el cálculo de riesgo cardiovascular cada 6 meses.
+-Se recomienda intervenciones como un estilo de vida más saludable.
 -Mayor adherencia y cumplimiento a los tratamientos y medicamentos indicados.
 -Realización de estudios complementarios indicados por el profesional de la salud.
 -Mejorar la calidad del sueño logrando al menos siete horas continuas.
@@ -42,9 +45,8 @@ export const Advertencia = {
 -Vigilar el perfil del riesgo con un análisis de laboratorio de colesterol y glucemia.
 -Alimentación saludable recomendada en lo posible por un nutricionista o profesional de la salud.
 -Evitar hábitos tóxicos.
--Realizar el cálculo de riesgo cardiovascular cada 6 meses.
             `,
-            '>20% <30% Alto': `-Significa tener riesgo elevado de sufrir un episodio vascular en los próximos 10 años.
+            '>20% <30% Alto': `-Realizar el cálculo de riesgo cardiovascular cada 3 meses.
 -Se recomienda intervenciones como un estilo de vida más saludable.
 -Mayor adherencia y cumplimiento a los tratamientos y medicamentos indicados.
 -Realización de estudios complementarios indicados por el profesional de la salud.
@@ -54,10 +56,9 @@ export const Advertencia = {
 -Vigilar el perfil del riesgo con un análisis de laboratorio de colesterol y glucemia.
 -Alimentación saludable recomendada en lo posible por un nutricionista o profesional de la salud.
 -Evitar hábitos tóxicos.
--Realizar el cálculo de riesgo cardiovascular cada 3 meses.
 -Revisar el calendario de vacunas.
             `,
-            '>30% <40% Muy Alto': `-Significa tener riesgo elevado de sufrir un episodio vascular en los próximos 10 años.
+            '>30% <40% Muy Alto': `-Realizar el cálculo de riesgo cardiovascular cada 3 meses.
 -Se recomienda intervenciones como un estilo de vida más saludable.
 -Mayor adherencia y cumplimiento a los tratamientos y medicamentos indicados.
 -Realización de estudios complementarios indicados por el profesional de la salud.
@@ -67,10 +68,9 @@ export const Advertencia = {
 -Vigilar el perfil del riesgo con un análisis de laboratorio de colesterol y glucemia.
 -Alimentación saludable recomendada en lo posible por un nutricionista o profesional de la salud.
 -Evitar hábitos tóxicos.
--Realizar el cálculo de riesgo cardiovascular cada 3 meses.
 -Revisar el calendario de vacunas.
             `,
-            '>40% Crítico': `-Significa tener riesgo elevado de sufrir un episodio vascular en los próximos 10 años.
+            '>40% Crítico': `-Realizar el cálculo de riesgo cardiovascular en menos de un mes.
 -Se recomienda intervenciones como un estilo de vida más saludable.
 -Mayor adherencia y cumplimiento a los tratamientos y medicamentos indicados.
 -Realización de estudios complementarios indicados por el profesional de la salud.
@@ -80,7 +80,6 @@ export const Advertencia = {
 -Vigilar el perfil del riesgo con un análisis de laboratorio de colesterol y glucemia.
 -Alimentación saludable recomendada en lo posible por un nutricionista o profesional de la salud.
 -Evitar hábitos tóxicos.
--Realizar el cálculo de riesgo cardiovascular cada 3 meses.
 -Revisar el calendario de vacunas.
             `
 };
@@ -155,3 +154,4 @@ export const obtenerTextoRiesgo = (riesgo) => {
         default: return 'Desconocido';
     }
 };
+

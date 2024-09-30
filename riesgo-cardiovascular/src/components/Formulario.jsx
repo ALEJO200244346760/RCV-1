@@ -3,6 +3,8 @@ import { calcularRiesgoCardiovascular } from './Calculadora';
 import { Advertencia, DatosPacienteInicial, obtenerColorRiesgo, obtenerTextoRiesgo,listaNotificacionRiesgo, listaHipertensionArterial, listaMedicacionPrescripcion, listaMedicacionDispensa, listaTabaquismo, listaLaboratorio } from './ConstFormulario';
 import { getLocations } from '../services/userService';
 import axiosInstance from '../axiosConfig';
+import { useAuth } from '../context/AuthContext'; // Importa el contexto de autenticación
+
 
 
 const Formulario = () => {
@@ -35,6 +37,8 @@ const Formulario = () => {
     const [pacienteEncontrado, setPacienteEncontrado] = useState(null);
     const [pacientes, setPacientes] = useState([]);
     const [ubicaciones, setUbicaciones] = useState([]);
+    const { user, roles } = useAuth(); // Obtiene el usuario y roles del contexto
+
 
     useEffect(() => {
         const fetchUbicaciones = async () => {
@@ -44,6 +48,21 @@ const Formulario = () => {
 
         fetchUbicaciones();
     }, []);
+
+    useEffect(() => {
+        // Asignar la ubicación del usuario al estado inicial si es un usuario normal
+        if (user && user.ubicacion) {
+            setDatosPaciente(prevState => ({
+                ...prevState,
+                ubicacion: user.ubicacion.nombre // Asegúrate de que esté usando el nombre correcto
+            }));
+        }
+        console.log('Usuario:', user);
+
+    }, [user]);
+
+    const hasCardiologoRole = Array.isArray(roles) && roles.includes('ROLE_CARDIOLOGO');
+
 
     useEffect(() => {
         axiosInstance.get('/api/pacientes')
@@ -117,8 +136,8 @@ const Formulario = () => {
     };
 
     const validarCampos = () => {
-        const { edad, genero, diabetes, fumador, presionArterial, ubicacion, colesterol, hipertenso, acv, infarto, peso, talla } = datosPaciente;
-        return edad && genero && diabetes && fumador && presionArterial && ubicacion && colesterol && hipertenso && acv && infarto && peso && talla;
+        const { edad, genero, diabetes, fumador, presionArterial, ubicacion, colesterol, hipertenso, acv, renal, infarto, peso, talla } = datosPaciente;
+        return edad && genero && diabetes && fumador && presionArterial && ubicacion && colesterol && hipertenso && acv && infarto && peso && talla && renal;
     };
 
     const calcularRiesgo = async () => {
@@ -134,10 +153,10 @@ const Formulario = () => {
             return;
         }
     
-        const { edad, genero, diabetes, fumador, presionArterial, colesterol, infarto, acv } = datosPaciente;
+        const { edad, genero, diabetes, fumador, presionArterial, colesterol, infarto, acv, renal } = datosPaciente;
     
         // Verificar si infarto o acv son "Sí"
-        if (infarto === "Sí" || acv === "Sí") {
+        if (infarto === "Sí" || acv === "Sí" || renal === "Sí") {
             setNivelRiesgo(">20% <30% Alto");
             setMostrarModal(true);
             return;
@@ -286,11 +305,19 @@ const Formulario = () => {
                         className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                     >
                         <option value="">Seleccione una ubicación</option>
-                        {ubicaciones.map(ubicacion => (
-                            <option key={ubicacion.id} value={ubicacion.nombre}>
-                                {ubicacion.nombre}
+                        {hasCardiologoRole ? (
+                            // Mostrar todas las ubicaciones si es administrador
+                            ubicaciones.map(ubicacion => (
+                                <option key={ubicacion.id} value={ubicacion.nombre}>
+                                    {ubicacion.nombre}
+                                </option>
+                            ))
+                        ) : (
+                            // Mostrar solo la ubicación asignada al usuario normal
+                            <option key={user.ubicacion?.id} value={user.ubicacion?.nombre}>
+                                {user.ubicacion?.nombre}
                             </option>
-                        ))}
+                        )}
                     </select>
                 </div>
 
@@ -372,7 +399,7 @@ const Formulario = () => {
 
                 {/* Presión Arterial */}
                 <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">Presión Arterial:</label>
+                    <label className="text-sm font-medium text-gray-700">Presión Arterial sistólica:</label>
                     <input
                         type="number"
                         name="presionArterial"
@@ -457,6 +484,24 @@ const Formulario = () => {
                         ))}
                     </div>
                 </div>
+
+                {/* Enfermedad Renal Cronica */}
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium text-gray-700">¿Tiene enfermedad Renal Crónica?</label>
+                    <div className="flex space-x-2 mb-2">
+                        {['Sí', 'No'].map(option => (
+                        <button
+                        key={option}
+                        type="button"
+                        onClick={() => setDatosPaciente({ ...datosPaciente, renal : option })}
+                        className={`p-2 border rounded-md ${datosPaciente.renal === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
+                        >
+                        {option}
+                        </button>
+                        ))}
+                    </div>
+                </div>
+
                 {/* Colesterol */}
                 <div className="flex flex-col">
                     <label className="text-sm font-medium text-gray-700">¿Conoce su nivel de colesterol?</label>
@@ -542,22 +587,30 @@ const Formulario = () => {
                     <div className="flex-1 bg-gray-100 p-4 rounded-md">
                         <h3 className="text-lg font-bold">Formulario de Registro:</h3>
                         <form className="w-full space-y-6">
-                            <div className="flex flex-col">
-                                <label className="text-sm font-medium text-gray-700">Ubicación:</label>
-                                <select
-                                    name="ubicacion"
-                                    value={datosPaciente.ubicacion}
-                                    onChange={manejarCambio}
-                                    className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                                >
-                                    <option value="">Seleccione una ubicación</option>
-                                    {ubicaciones.map(ubicacion => (
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium text-gray-700">Ubicación:</label>
+                            <select
+                                name="ubicacion"
+                                value={datosPaciente.ubicacion}
+                                onChange={manejarCambio}
+                                className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            >
+                                <option value="">Seleccione una ubicación</option>
+                                {hasCardiologoRole ? (
+                                    // Mostrar todas las ubicaciones si es administrador
+                                    ubicaciones.map(ubicacion => (
                                         <option key={ubicacion.id} value={ubicacion.nombre}>
                                             {ubicacion.nombre}
                                         </option>
-                                    ))}
-                                </select>
-                            </div>
+                                    ))
+                                ) : (
+                                    // Mostrar solo la ubicación asignada al usuario normal
+                                    <option key={user.ubicacion?.id} value={user.ubicacion?.nombre}>
+                                        {user.ubicacion?.nombre}
+                                    </option>
+                                )}
+                            </select>
+                        </div>
                             {/* Cuil */}
                             <div className="flex flex-col">
                                 <label className="text-sm font-medium text-gray-700">CUIL o DNI:</label>
@@ -636,7 +689,7 @@ const Formulario = () => {
 
                             {/* Presión Arterial */}
                             <div className="flex flex-col">
-                                <label className="text-sm font-medium text-gray-700">Presión Arterial:</label>
+                                <label className="text-sm font-medium text-gray-700">Presión Arterial sistólica:</label>
                                 <input
                                     type="number"
                                     name="presionArterial"
@@ -673,7 +726,7 @@ const Formulario = () => {
 
                             {/* Hipertenso */}
                             <div className="flex flex-col">
-                                <label className="text-sm font-medium text-gray-700">¿Es hipertenso?</label>
+                                <label className="text-sm font-medium text-gray-700">¿Es hipertenso o toma medicamentos para la hipertension?</label>
                                 <div className="flex space-x-2 mb-2">
                                     {['Sí', 'No'].map(option => (
                                         <button
@@ -721,6 +774,24 @@ const Formulario = () => {
                                     ))}
                                 </div>
                             </div>
+
+                            {/* Enfermedad Renal Cronica */}
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium text-gray-700">¿Tiene enfermedad Renal Crónica?</label>
+                                <div className="flex space-x-2 mb-2">
+                                    {['Sí', 'No'].map(option => (
+                                        <button
+                                            key={option}
+                                            type="button"
+                                            onClick={() => setDatosPaciente({ ...datosPaciente, renal : option })}
+                                            className={`p-2 border rounded-md ${datosPaciente.renal === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
+                                        >
+                                            {option}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
                             {/* Colesterol */}
                             <div className="flex flex-col">
                                 <label className="text-sm font-medium text-gray-700">¿Conoce su nivel de colesterol?</label>
@@ -912,7 +983,7 @@ const Formulario = () => {
             {modalAdvertencia && (
                 <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg">
-                        <h2 className="text-lg font-semibold mb-4">Advertencias</h2>
+                        <h2 className="text-lg font-semibold mb-4">Recomendaciones</h2>
                         <div className="overflow-y-auto max-h-80">
                             <pre className="whitespace-pre-wrap text-left">{modalAdvertencia}</pre>
                         </div>

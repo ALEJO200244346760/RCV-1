@@ -50,7 +50,9 @@ const Header = () => {
       <nav className={`lg:flex lg:space-x-4 ${isMenuOpen ? 'block' : 'hidden'} lg:block`}>
         <Link to="/tomarPresion" className="block lg:inline-block hover:text-gray-300">Diagnóstico</Link>
         <Link to="/formulario" className="block lg:inline-block hover:text-gray-300">RCV</Link>
-        <Link to="/estadisticas" className="block lg:inline-block hover:text-gray-300">Estadísticas</Link>
+        {hasCardiologoRole && (
+          <Link to="/estadisticas" className="block lg:inline-block hover:text-gray-300">Estadísticas</Link>
+        )}
         {hasCardiologoRole && (
           <Link to="/admin-panel" className="block lg:inline-block hover:text-gray-300">Panel de Admin</Link>
         )}

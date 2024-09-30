@@ -7,25 +7,44 @@ import EditarPaciente from './components/EditarPaciente';
 import TomarPresion from './components/tomarPresion';
 import Login from './components/Login';
 import Register from './components/Register';
-import AdminPanel from './components/AdminPanel'; // Verifica la importación
-import Rcv from './components/Rcv'; // Importa el nuevo componente
+import AdminPanel from './components/AdminPanel';
+import Rcv from './components/Rcv';
 import RoleProtectedRoute from './components/RoleProtectedRoute';
-import { useAuth } from './context/AuthContext'; // Asegúrate de importar useAuth
+import { useAuth } from './context/AuthContext';
 
 function App() {
   const { token, roles } = useAuth();
 
-  // Verificar si el usuario no está autenticado o si tiene rol 'ENFERMERO'
-  const isUnauthenticatedOrNurse = !token || (Array.isArray(roles) && roles.includes('ENFERMERO'));
+  const isCardiologo = Array.isArray(roles) && roles.includes('ROLE_CARDIOLOGO');
+  const isCardiologia = Array.isArray(roles) && roles.includes('ROLE_CARDIOLOGIA');
+  const isNurse = Array.isArray(roles) && roles.includes('ENFERMERO');
 
   return (
     <Router>
       <Header />
       <Routes>
-        <Route path="/" element={isUnauthenticatedOrNurse ? <Navigate to="/rcv" /> : <Formulario />} />
+        <Route 
+          path="/" 
+          element={
+            (token && (isCardiologo || isCardiologia)) 
+              ? <Formulario /> 
+              : <Navigate to="/rcv" />
+          } 
+        />
         <Route path="/rcv" element={<Rcv />} />
         <Route path="/tomarPresion" element={<TomarPresion />} />
-        <Route path="/estadisticas" element={<Estadisticas />} />
+        
+        {/* Permitir acceso solo a CARDIOLOGO para Estadisticas */}
+        <Route 
+          path="/estadisticas" 
+          element={
+            <RoleProtectedRoute 
+              element={<Estadisticas />} 
+              allowedRoles={['ROLE_CARDIOLOGO']} 
+            />
+          } 
+        />
+
         <Route
           path="/editar-paciente/:id"
           element={
@@ -46,7 +65,7 @@ function App() {
         />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="*" element={<Navigate to="/" />} /> {/* Ruta 404 */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
   );

@@ -487,6 +487,7 @@ function Estadisticas() {
                 { label: "Fecha de Registro", value: paciente.fechaRegistro },
                 { label: "Hipertenso", value: paciente.hipertenso },
                 { label: "ACV", value: paciente.acv },
+                { label: "RENAL", value: paciente.renal },
                 { label: "Infarto", value: paciente.infarto },
                 { label: "Hipertensión Arterial", value: paciente.hipertensionArterial !== null ? paciente.hipertensionArterial : 'N/A' },
                 { label: "Notificación de Riesgo", value: paciente.notificacionRiesgo !== null ? paciente.notificacionRiesgo : 'N/A' },

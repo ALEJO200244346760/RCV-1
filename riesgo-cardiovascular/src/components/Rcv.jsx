@@ -42,8 +42,8 @@ const Formulario = () => {
     };
 
     const validarCampos = () => {
-        const { edad, genero, diabetes, fumador, presionArterial, colesterol, hipertenso, acv, infarto} = datosPaciente;
-        return edad && genero && diabetes && fumador && presionArterial && colesterol && hipertenso && acv && infarto;
+        const { edad, genero, diabetes, fumador, presionArterial, colesterol, hipertenso, acv, infarto, renal} = datosPaciente;
+        return edad && genero && diabetes && fumador && presionArterial && colesterol && hipertenso && acv && infarto && renal;
     };
 
     const calcularRiesgo = async () => {
@@ -59,20 +59,26 @@ const Formulario = () => {
             return;
         }
     
-        const { edad, genero, diabetes, fumador, presionArterial, colesterol, ubicacion, fechaRegistro } = datosPaciente;
+        const { edad, genero, diabetes, fumador, presionArterial, colesterol, infarto, acv, renal } = datosPaciente;
+    
+        // Verificar si infarto o acv son "Sí"
+        if (infarto === "Sí" || acv === "Sí" || renal === "Sí") {
+            setNivelRiesgo(">20% <30% Alto");
+            setMostrarModal(true);
+            return;
+        }
     
         // Ajustar la edad y la presión arterial
         const edadAjustada = ajustarEdad(parseInt(edad, 10));
         const presionAjustada = ajustarPresionArterial(parseInt(presionArterial, 10));
     
-        // Calcular el IMC
-        setDatosPaciente((prevDatos) => ({ ...prevDatos }));
-    
         // Calcular el riesgo
         const nivelRiesgo = calcularRiesgoCardiovascular(edadAjustada, genero, diabetes, fumador, presionAjustada, colesterol);
         setNivelRiesgo(nivelRiesgo);
         setMostrarModal(true);
-        
+    
+        // Incluir los medicamentos seleccionados
+        const { medicamentos } = datosPaciente;
     };
 
     const cerrarModal = () => {
@@ -178,7 +184,7 @@ const Formulario = () => {
 
                 {/* Presión Arterial */}
                 <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">Presión Arterial:</label>
+                    <label className="text-sm font-medium text-gray-700">Presión Arterial sistólica:</label>
                     <input
                         type="number"
                         name="presionArterial"
@@ -239,6 +245,22 @@ const Formulario = () => {
                         ))}
                     </div>
                 </div>
+                {/* Enfermedad Renal Cronica */}
+                <div className="flex flex-col">
+                                <label className="text-sm font-medium text-gray-700">¿Tiene enfermedad Renal Crónica?</label>
+                                <div className="flex space-x-2 mb-2">
+                                    {['Sí', 'No'].map(option => (
+                                        <button
+                                            key={option}
+                                            type="button"
+                                            onClick={() => setDatosPaciente({ ...datosPaciente, renal : option })}
+                                            className={`p-2 border rounded-md ${datosPaciente.renal === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
+                                        >
+                                            {option}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
                 {/* Colesterol */}
                 <div className="flex flex-col">
                     <label className="text-sm font-medium text-gray-700">¿Conoce su nivel de colesterol?</label>
