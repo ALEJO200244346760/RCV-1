@@ -193,10 +193,6 @@ const Formulario = () => {
 
     const guardarPaciente = async () => {
         try {
-            // Si no hay medicamentos seleccionados, asegurarse de que se envíe una lista vacía o un valor adecuado
-            const medicamentosArray = datosPaciente.medicamentos || [''];
-            const medicamentosString = medicamentosArray.join(';');
-            
             // Actualizar los datos del paciente para que los medicamentos vacíos no se guarden
             await axiosInstance.post('/api/pacientes', {
                 ...datosPaciente,
@@ -846,13 +842,6 @@ const Formulario = () => {
             <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-4">
                 <div className="bg-white p-6 rounded-md shadow-lg w-full max-w-lg max-h-screen overflow-y-auto">
                 <div className="flex justify-between mb-4">
-                    {/* Botón Agregar Medicamento */}
-                    <button
-                    onClick={toggleModalMedicamentos}
-                    className="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
-                    >
-                    SIGIPSA
-                    </button>
                     {/* Botón Guardar Paciente */}
                     <button
                     onClick={guardarPaciente}
