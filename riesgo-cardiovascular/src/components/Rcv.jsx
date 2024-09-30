@@ -10,6 +10,7 @@ const Formulario = () => {
     const [mostrarModal, setMostrarModal] = useState(false);
     const [modalAdvertencia, setModalAdvertencia] = useState(null);
     const [mensajeExito, setMensajeExito] = useState('');
+    const [error, setError] = useState('');
 
     const manejarCambio = (e) => {
         const { name, value } = e.target;
@@ -127,10 +128,6 @@ const Formulario = () => {
         // Ajustar la edad y la presión arterial
         const edadAjustada = ajustarEdad(parseInt(edad, 10));
         const presionAjustada = ajustarPresionArterial(parseInt(presionArterial, 10));
-    
-        // Calcular el IMC
-        const imc = calcularIMC();
-        setDatosPaciente((prevDatos) => ({ ...prevDatos, imc }));
     
         // Calcular el riesgo
         const nivelRiesgo = calcularRiesgoCardiovascular(edadAjustada, genero, diabetes, fumador, presionAjustada, colesterol);
