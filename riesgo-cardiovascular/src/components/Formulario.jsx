@@ -949,7 +949,7 @@ const Formulario = () => {
                 <p><strong>Género:</strong> {datosPaciente.genero}</p>
                 <p><strong>Diabetes:</strong> {datosPaciente.diabetes}</p>
                 <p><strong>Fumador:</strong> {datosPaciente.fumador}</p>
-                <p><strong>Presión Arterial:</strong> {datosPaciente.presionArterial}</p>
+                <p><strong>Presión Arterial sistolica:</strong> {datosPaciente.presionArterial}</p>
                 <p><strong>Colesterol:</strong> {datosPaciente.colesterol || 'No especificado'}</p>
                 <p><strong>Peso:</strong> {datosPaciente.peso || 'No especificado'}</p>
                 <p><strong>Talla:</strong> {datosPaciente.talla || 'No especificada'} cm</p>
