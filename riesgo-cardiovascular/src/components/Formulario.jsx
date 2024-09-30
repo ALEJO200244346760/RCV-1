@@ -104,6 +104,15 @@ const Formulario = () => {
         if (name === 'cuil') {
             validarCuil(value);
         }
+        if (name === 'edad') {
+            validarCampos(value);
+        }
+        if (name === 'presionArterial') {
+            validarCampos(value);
+        }
+        if (name === 'colesterol') {
+            validarCampos(value);
+        }
     };
 
     const validarCuil = (cuil) => {
