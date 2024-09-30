@@ -105,7 +105,7 @@ const Formulario = () => {
         
         const esValido = validarCampos(); // Llama a la función de validación
         if (!esValido) {
-            setModalAdvertencia('Todos los campos deben estar completos.');
+            setModalAdvertencia(error);
             setMostrarModal(true);
             return;
         }
