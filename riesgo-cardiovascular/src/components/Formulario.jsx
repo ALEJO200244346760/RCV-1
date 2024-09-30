@@ -111,6 +111,7 @@ const Formulario = () => {
             ...datosPaciente,
             [name]: value,
         });
+        validarCuil(value);
     };
 
     const manejarSeleccionColesterol = (value) => {
