@@ -105,7 +105,7 @@ const Formulario = () => {
         
         const esValido = validarCampos(); // Llama a la función de validación
         if (!esValido) {
-            setModalAdvertencia(error);
+            setModalAdvertencia('Revisa los datos.');
             setMostrarModal(true);
             return;
         }
