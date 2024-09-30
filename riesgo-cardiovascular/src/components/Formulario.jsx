@@ -53,8 +53,8 @@ const Formulario = () => {
     const validarCuil = (cuil) => {
         const soloNumeros = /^\d+$/; // Expresión regular para solo números
 
-        if (cuil.length < 9 || !soloNumeros.test(cuil)) {
-            setError('El CUIL o DNI debe tener al menos 9 dígitos y contener solo números.');
+        if (cuil.length < 7 || !soloNumeros.test(cuil)) {
+            setError('El CUIL o DNI debe tener al menos 7 dígitos y contener solo números.');
         } else {
             setError('');
         }
