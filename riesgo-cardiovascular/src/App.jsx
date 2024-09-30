@@ -4,7 +4,7 @@ import Header from './components/Header';
 import Estadisticas from './components/Estadisticas';
 import Formulario from './components/Formulario';
 import EditarPaciente from './components/EditarPaciente';
-import TomarPresion from './components/tomarPresion';
+import TomarPresion from './components/TomarPresion';
 import Login from './components/Login';
 import Register from './components/Register';
 import AdminPanel from './components/AdminPanel';
@@ -17,7 +17,6 @@ function App() {
 
   const isCardiologo = Array.isArray(roles) && roles.includes('ROLE_CARDIOLOGO');
   const isCardiologia = Array.isArray(roles) && roles.includes('ROLE_CARDIOLOGIA');
-  const isNurse = Array.isArray(roles) && roles.includes('ENFERMERO');
 
   return (
     <Router>
