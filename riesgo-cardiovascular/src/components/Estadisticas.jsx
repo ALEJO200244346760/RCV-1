@@ -489,12 +489,6 @@ function Estadisticas() {
                 { label: "ACV", value: paciente.acv },
                 { label: "RENAL", value: paciente.renal },
                 { label: "Infarto", value: paciente.infarto },
-                { label: "Hipertensión Arterial", value: paciente.hipertensionArterial !== null ? paciente.hipertensionArterial : 'N/A' },
-                { label: "Notificación de Riesgo", value: paciente.notificacionRiesgo !== null ? paciente.notificacionRiesgo : 'N/A' },
-                { label: "Medicaciones Dispensa", value: paciente.medicacionDispensa !== null ? paciente.medicacionDispensa : 'N/A' },
-                { label: "Medicaciones Prescripción", value: paciente.medicacionPrescripcion !== null ? paciente.medicacionPrescripcion : 'N/A' },
-                { label: "Tabaquismo", value: paciente.tabaquismo !== null ? paciente.tabaquismo : 'N/A' },
-                { label: "Laboratorio", value: paciente.laboratorio !== null ? paciente.laboratorio : 'N/A' },
               ].map(({ label, value }) => (
                 <div className="flex justify-between mb-2">
                   <div className="w-2/5 text-sm font-medium text-gray-900">{label}:</div>
