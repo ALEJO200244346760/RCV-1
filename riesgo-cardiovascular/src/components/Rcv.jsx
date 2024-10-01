@@ -27,7 +27,6 @@ const Formulario = () => {
         if (name === 'colesterol') {
             validarCampos(value);
         }
-        
     };
 
     const manejarSeleccionColesterol = (value) => {
@@ -65,6 +64,11 @@ const Formulario = () => {
             renal,
             infarto,
         } = datosPaciente;
+
+        if (!edad || !genero || !diabetes || !fumador || !presionArterial || !hipertenso || !acv || !renal || !infarto) {
+            setError('Por favor, complete todos los campos obligatorios.');
+            return false;
+        }
     
         if (!edad || edad < 1 || edad > 120) {
             setError('Ingrese bien la edad.');

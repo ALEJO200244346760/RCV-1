@@ -184,6 +184,11 @@ const Formulario = () => {
             peso,
             talla
         } = datosPaciente;
+
+        if (!edad || !cuil || !ubicacion || !peso || !talla || !genero || !diabetes || !fumador || !presionArterial || !hipertenso || !acv || !renal || !infarto) {
+            setError('Por favor, complete todos los campos obligatorios.');
+            return false;
+        }
     
         // Verificar que todos los campos obligatorios tengan respuesta
         if (!cuil || cuil.length < 7) {
