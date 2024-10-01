@@ -336,7 +336,7 @@ const AdminPanel = () => {
       if (error.response) {
         const errorMessage = await error.response.text(); // Intenta obtener el texto del error
         console.error('Error cargando datos:', errorMessage);
-        setError('Error cargando datos: ' + errorMessage);
+        setError('Error cargando datos, vuelva a iniciar sesión: ' + errorMessage);
       } else {
         console.error('Error cargando datos:', error);
         setError('Error cargando datos');
