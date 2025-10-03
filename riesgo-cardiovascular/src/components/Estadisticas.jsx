@@ -24,12 +24,12 @@ function Estadisticas() {
     actividadFisica: '',
     horasSueno: '',
     estresCronico: '',
-    tumoresGinecologicos: '',
-    enfermedadesAutoinmunes: '',
-    tuvoHijos: '',
-    ciclosMenstruales: '',
-    histerectomia: '',
-    menopausia: '',
+    tumoresGinecologicos: '', // NUEVO
+    enfermedadesAutoinmunes: '', // NUEVO
+    tuvoHijos: '', // NUEVO
+    ciclosMenstruales: '', // NUEVO
+    histerectomia: '', // NUEVO
+    menopausia: '', // NUEVO
   });
 
   useEffect(() => {
@@ -81,26 +81,30 @@ function Estadisticas() {
 
       // Filtro IMC (clasificación)
       if (filtros.imc) {
+        // Asumo que el objeto paciente tiene p.imc y p.imc.clasificacion
         if (!p.imc || p.imc.clasificacion !== filtros.imc) return false;
       }
 
       // Conoce colesterol sí/no
       if (filtros.conoceColesterol) {
         const conoce = filtros.conoceColesterol === 'sí';
-        const tieneCol = p.colesterol != null && p.colesterol !== '' && !isNaN(p.colesterol);
+        const tieneCol = p.colesterol != null && p.colesterol !== '' && p.colesterol !== 'No' && !isNaN(p.colesterol);
         if (conoce && !tieneCol) return false;
         if (!conoce && tieneCol) return false;
       }
 
       // Nivel de colesterol específico si conoce
-      if (filtros.nivelColesterol && p.colesterol != null && !isNaN(p.colesterol)) {
+      if (filtros.nivelColesterol && p.colesterol != null && p.colesterol !== 'No' && !isNaN(p.colesterol)) {
         const nivelPac = obtenerNivelColesterol(Number(p.colesterol));
         if (nivelPac.toString() !== filtros.nivelColesterol) return false;
       }
 
       // Tensión sistólica (puedes decidir rangos o valores exactos)
       if (filtros.tensionSistolica) {
-        if (p.tensionSistolica != filtros.tensionSistolica) return false;
+        // Asegura que p.tensionSistolica es un número para la comparación
+        const tensionFiltro = parseInt(filtros.tensionSistolica, 10);
+        const tensionPaciente = parseInt(p.tensionSistolica, 10);
+        if (isNaN(tensionFiltro) || isNaN(tensionPaciente) || tensionPaciente !== tensionFiltro) return false;
       }
 
       // Fumador
@@ -121,23 +125,30 @@ function Estadisticas() {
       // Estrés crónico
       if (filtros.estresCronico && p.estresCronico !== filtros.estresCronico) return false;
 
-      // Tumores ginecológicos
+      // Tumores ginecológicos (NUEVO)
       if (filtros.tumoresGinecologicos && p.tumoresGinecologicos !== filtros.tumoresGinecologicos) return false;
 
-      // Enfermedades autoinmunes
+      // Enfermedades autoinmunes (NUEVO)
       if (filtros.enfermedadesAutoinmunes && p.enfermedadesAutoinmunes !== filtros.enfermedadesAutoinmunes) return false;
 
-      // Tuvo hijos
+      // Tuvo hijos (NUEVO)
       if (filtros.tuvoHijos && p.tuvoHijos !== filtros.tuvoHijos) return false;
 
-      // Ciclos menstruales
+      // Ciclos menstruales (NUEVO)
       if (filtros.ciclosMenstruales && p.ciclosMenstruales !== filtros.ciclosMenstruales) return false;
 
-      // Histerectomía
+      // Histerectomía (NUEVO - Solo relevante si ciclosMenstruales es 'No' en el Formulario, pero se filtra directo aquí)
       if (filtros.histerectomia && p.histerectomia !== filtros.histerectomia) return false;
 
-      // Menopausia
-      if (filtros.menopausia && p.menopausia !== filtros.menopausia) return false;
+      // Menopausia (NUEVO - Solo relevante si ciclosMenstruales es 'No' en el Formulario, pero se filtra directo aquí)
+      // El formulario usa 'edadMenopausia', pero el filtro es 'menopausia', asumo que el campo 'menopausia' se establece a 'Sí' si se ingresa edadMenopausia
+      // o se usa la lógica booleana implícita en el Formulario. Lo mantengo como booleano por simplicidad del filtro.
+      if (filtros.menopausia) {
+          const valorFiltro = filtros.menopausia === 'Sí' ? 'Sí' : 'No';
+          // Si ciclosMenstruales es 'No' en el formulario, es el camino a menopausia.
+          // Aquí filtramos por el campo 'menopausia' del paciente (si existe) o inferimos de ciclosMenstruales/histerectomia
+          if (p.menopausia !== valorFiltro) return false;
+      }
 
       return true;
     });
@@ -147,12 +158,16 @@ function Estadisticas() {
     return <p>Cargando pacientes...</p>;
   }
 
+  // --- Renderizado de Componente ---
+
   return (
     <div className="max-w-6xl mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6">Estadísticas (Formulario Mujer)</h1>
 
+      {/* --- SECCIÓN DE FILTROS --- */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        {/* Aquí todos los filtros */}
+        
+        {/* Filtros existentes */}
         <div>
           <label>Edad</label>
           <select name="edad" value={filtros.edad} onChange={handleFiltroChange} className="block w-full border rounded p-1">
@@ -270,6 +285,7 @@ function Estadisticas() {
           </select>
         </div>
 
+        {/* --- NUEVOS FILTROS --- */}
         <div>
           <label>Tumores ginecológicos</label>
           <select name="tumoresGinecologicos" value={filtros.tumoresGinecologicos} onChange={handleFiltroChange} className="block w-full border rounded p-1">
@@ -316,13 +332,15 @@ function Estadisticas() {
         </div>
 
         <div>
-          <label>Menopausia</label>
+          <label>Menopausia (Edad Ingresada)</label>
           <select name="menopausia" value={filtros.menopausia} onChange={handleFiltroChange} className="block w-full border rounded p-1">
             <option value="">Todos</option>
             <option value="Sí">Sí</option>
             <option value="No">No</option>
           </select>
         </div>
+        {/* --- FIN NUEVOS FILTROS --- */}
+
       </div>
 
       <button onClick={toggleGraficos} className="mb-4 px-4 py-2 bg-indigo-600 text-white rounded">
@@ -341,33 +359,43 @@ function Estadisticas() {
         </h2>
       </div>
 
+      {/* --- LISTADO DE PACIENTES FILTRADOS CON CAMPOS AMPLIADOS --- */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {pacientesFiltrados.map((p, idx) => (
           <div key={p.dni ?? idx} className="bg-white shadow-md rounded-lg p-4">
+            <h3 className="font-bold text-lg border-b mb-2">Paciente {p.dni ?? idx}</h3>
             <div><strong>DNI:</strong> {p.dni}</div>
             <div><strong>Edad:</strong> {p.edad}</div>
+            <div><strong>Tensión:</strong> {p.tensionSistolica}/{p.tensionDiastolica}</div>
             <div>
               <strong>IMC:</strong> {p.imc?.valor} — <em>{p.imc?.clasificacion}</em>
             </div>
-            <div><strong>Colesterol:</strong> {p.colesterol != null ? p.colesterol : 'No conoce'}</div>
+            <div><strong>Colesterol:</strong> {p.colesterol !== 'No' ? p.colesterol : 'No conoce'}</div>
             <div><strong>Fuma diario:</strong> {p.fumaDiario}</div>
-            <div><strong>Toma medicación diaria:</strong> {p.tomaMedicacionDiario}</div>
+            <div><strong>Toma medicación diaria:</strong> {p.tomaMedicacionDiario} {p.medicacionCondiciones?.length > 0 ? `(${p.medicacionCondiciones.join(', ')})` : ''}</div>
             <div>
-              <strong>Nivel de riesgo:</strong>{' '}
+              <strong>Riesgo:</strong>{' '}
               <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${obtenerColorRiesgo(p.nivelRiesgo)}`}>
                 {p.nivelRiesgo}
               </span>
             </div>
+            
+            <hr className="my-2"/>
+            <p className="font-semibold text-sm">Hábitos:</p>
             <div><strong>Actividad física ≥150 min:</strong> {p.actividadFisica}</div>
             <div><strong>Duerme 7h:</strong> {p.horasSueno}</div>
             <div><strong>Estrés crónico:</strong> {p.estresCronico} {p.estresCronico === 'Sí' ? `(${p.estresTipo})` : ''}</div>
-            <div><strong>Tumores ginecológicos:</strong> {p.tumoresGinecologicos}</div>
-            <div><strong>Enfermedades autoinmunes:</strong> {p.enfermedadesAutoinmunes}</div>
-            <div><strong>Tuvo hijos:</strong> {p.tuvoHijos}</div>
+            
+            <hr className="my-2"/>
+            <p className="font-semibold text-sm">Ginecológico:</p>
+            <div><strong>Tumores ginecológicos:</strong> {p.tumoresGinecologicos} {p.tumoresTipo?.length > 0 ? `(${p.tumoresTipo.join(', ')})` : ''}</div>
+            <div><strong>Enfermedades autoinmunes:</strong> {p.enfermedadesAutoinmunes} {p.autoinmunesTipo?.length > 0 ? `(${p.autoinmunesTipo.join(', ')})` : ''}</div>
+            <div><strong>Tuvo hijos:</strong> {p.tuvoHijos}
+                {p.tuvoHijos === 'Sí' ? ` (${p.cantidadHijos} hijos, Complicaciones: ${p.complicacionesEmbarazo})` : ` (${p.motivoNoHijos})`}
+            </div>
             <div><strong>Ciclos menstruales:</strong> {p.ciclosMenstruales}</div>
             <div><strong>Histerectomía:</strong> {p.histerectomia}</div>
-            <div><strong>Menopausia:</strong> {p.menopausia}</div>
-            <div><strong>Tensión:</strong> {p.tensionSistolica}/{p.tensionDiastolica}</div>
+            <div><strong>Menopausia:</strong> {p.menopausia} {p.edadMenopausia ? ` (Edad: ${p.edadMenopausia})` : ''}</div>
           </div>
         ))}
       </div>
