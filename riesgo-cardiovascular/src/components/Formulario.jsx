@@ -251,7 +251,6 @@ const Formulario = () => {
         setError(''); // Limpiar el error si todas las validaciones pasan
         return true;
     };
-    
 
     const calcularRiesgo = async () => {
         

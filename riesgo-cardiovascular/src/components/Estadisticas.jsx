@@ -25,7 +25,8 @@ function Estadisticas() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const [mostrarDetalles, setMostrarDetalles] = useState({}); // Estado para mostrar detalles de cada paciente
-  
+  const [mostrarGraficos, setMostrarGraficos] = useState(false);
+
   const toggleDetalles = (id) => {
     setMostrarDetalles((prev) => ({
       ...prev,
@@ -177,6 +178,10 @@ function Estadisticas() {
       default:
         return '';
     }
+  };
+
+  const toggleGraficos = () => {
+    setMostrarGraficos(prev => !prev);
   };
 
   const copiarDatos = (paciente) => {
@@ -428,7 +433,20 @@ function Estadisticas() {
       </div>
 
       {/* Gráficos */}
-      <EstadisticasGraficos pacientesFiltrados={pacientesFiltrados} />
+      {/* Pestaña para los gráficos */}
+      <button 
+        onClick={toggleGraficos} 
+        className="bg-indigo-600 text-white p-2 rounded"
+      >
+        {mostrarGraficos ? 'Ocultar Gráficos' : 'Mostrar Gráficos'}
+      </button>
+
+      {/* Mostrar los gráficos si el estado es verdadero */}
+      {mostrarGraficos && (
+        <div className="mt-4">
+          <EstadisticasGraficos pacientesFiltrados={pacientesFiltrados} />
+        </div>
+      )}
 
       <div className="mt-4">
         <h2 className="text-xl font-semibold">Total de Personas que Coinciden con los Filtros: {pacientesFiltrados.length}</h2>

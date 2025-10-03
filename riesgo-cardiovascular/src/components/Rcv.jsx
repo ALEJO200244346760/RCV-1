@@ -406,7 +406,7 @@ const Formulario = () => {
             {modalAdvertencia && (
                 <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg">
-                        <h2 className="text-lg font-semibold mb-4">Advertencias</h2>
+                        <h2 className="text-lg font-semibold mb-4">Recomendaciones</h2>
                         <div className="overflow-y-auto max-h-80">
                             <pre className="whitespace-pre-wrap text-left">{modalAdvertencia}</pre>
                         </div>

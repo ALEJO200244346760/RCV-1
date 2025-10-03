@@ -24,6 +24,8 @@ public class Paciente {
     @Column
     private String fumador;
     @Column
+    private String exfumador;
+    @Column
     private String presionArterial;
     @Column
     private String colesterol;
