@@ -6,55 +6,82 @@ import lombok.Data;
 @Entity
 @Data
 public class Paciente {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    // --- Datos Generales y de Riesgo ---
     @Column
-    private String fechaRegistro;
+    private String fechaRegistro; // Se mantiene del modelo original
     @Column
-    private String ubicacion;
+    private String ubicacion; // Se mantiene del modelo original
     @Column
-    private String cuil;
+    private String dni; // Anteriormente 'cuil'
     @Column
     private String edad;
     @Column
-    private String genero;
-    @Column
-    private String diabetes;
-    @Column
-    private String fumador;
-    @Column
-    private String exfumador;
-    @Column
-    private String presionArterial;
+    private String genero; // Será 'femenino' por defecto desde el frontend
     @Column
     private String colesterol;
     @Column
-    private String nivelRiesgo;
+    private String nivelRiesgo; // Calculado
+    @Column(columnDefinition = "TEXT")
+    private String imc; // Almacenará valor y clasificación, ej: "26.5 (Sobrepeso)"
+
+    // --- Hábitos de Vida ---
+    @Column
+    private String tomaMedicacionDiario; // Sí/No
+    @Column(columnDefinition = "TEXT")
+    private String medicacionCondiciones; // "Diabetes, Hipertensión"
+    @Column
+    private String fumaDiario; // Sí/No
+    @Column
+    private String actividadFisica; // Sí/No
+    @Column
+    private String horasSueno; // Sí/No
+    @Column
+    private String estresCronico; // Sí/No
+    @Column
+    private String estresTipo; // "Depresión", "Otras"
+
+    // --- Antecedentes de Salud Femenina ---
+    @Column
+    private String tumoresGinecologicos; // Sí/No
+    @Column(columnDefinition = "TEXT")
+    private String tumoresTipo; // "Ovarios, Mama"
+    @Column
+    private String enfermedadesAutoinmunes; // Sí/No
+    @Column(columnDefinition = "TEXT")
+    private String autoinmunesTipo; // "Lupus, Artritis"
+    
+    // --- Salud Reproductiva ---
+    @Column
+    private String tuvoHijos; // Sí/No
+    @Column
+    private String cantidadHijos;
+    @Column
+    private String complicacionesEmbarazo; // Sí/No
+    @Column
+    private String motivoNoHijos; // "No quiso", "No pudo", etc.
+    @Column
+    private String ciclosMenstruales; // Sí/No
+    @Column
+    private String metodoAnticonceptivo;
+    @Column
+    private String histerectomia; // Sí/No
+    @Column
+    private String edadMenopausia;
+
+    // --- Datos Antropométricos y de Medición ---
     @Column
     private String peso;
     @Column
     private String talla;
     @Column
-    private String imc;
+    private String cintura;
     @Column
-    private String hipertenso;
+    private String tensionSistolica; // Anteriormente 'presionArterial'
     @Column
-    private String infarto;
-    @Column
-    private String acv;
-    @Column
-    private String renal;
-    @Column(name = "medicamentos_notificacion_riesgo", columnDefinition = "LONGTEXT")
-    private String notificacionRiesgo;
-    @Column(name = "medicamentos_hipertension_arterial", columnDefinition = "LONGTEXT")
-    private String hipertensionArterial;
-    @Column(name = "medicamentos_prescripcion", columnDefinition = "LONGTEXT")
-    private String medicacionPrescripcion;
-    @Column(name = "medicamentos_dispensa", columnDefinition = "LONGTEXT")
-    private String medicacionDispensa;
-    @Column(name = "medicamentos_tabaquismo", columnDefinition = "LONGTEXT")
-    private String tabaquismo;
-    @Column(name = "medicamentos_laboratorio", columnDefinition = "LONGTEXT")
-    private String laboratorio;
+    private String tensionDiastolica;
 }
