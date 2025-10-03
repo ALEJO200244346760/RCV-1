@@ -1,1132 +1,318 @@
-import React, { useEffect, useState } from 'react';
-import { calcularRiesgoCardiovascular } from './Calculadora';
-import { Advertencia, DatosPacienteInicial, obtenerColorRiesgo, obtenerTextoRiesgo,listaNotificacionRiesgo, listaConsulta, listaPractica, listaHipertensionArterial, listaMedicacionPrescripcion, listaMedicacionDispensa, listaTabaquismo, listaLaboratorio } from './ConstFormulario';
-import { getLocations } from '../services/userService';
-import axiosInstance from '../axiosConfig';
-import { useAuth } from '../context/AuthContext'; // Importa el contexto de autenticación
+import React, { useState, useEffect } from 'react';
 
-// Lista de medicamentos para la hipertensión
-const listaMedicamentosHipertension = [
-    "Enalapril 10 mg cada 12 Hs",
-    "Enalapril 5 mg cada 12 Hs",
-    "Losartan 25 mg cada 12 Hs",
-    "Losartan 50 mg cada 12 Hs",
-    "Amlodipina 10 mg cada12 Hs",
-    "Amlodipina 5 mg cada12 Hs",
-    "Hidroclorotiazida 25 mg cada 12 Hs",
-    "Furosemida 20 mg cada 12 Hs",
-    "Valsartán 160 mg cada 12 Hs",
-    "Valsartán 80 mg cada 12 Hs",
-    "Carvedilol 25 mg cada 12 Hs",
-    "Carvedilol 12,5 mg cada 12 Hs",
-    "Bisoprolol 5 mg cada 12 Hs",
-    "Bisoprolol 2,5 mg cada 12 Hs",
-    "Nebivolol 10 mg por día",
-    "Nebivolol 5 mg por día",
-    "Espironolactona 25 mg por día",
-    "Otros"
-];
-
-const listaMedicamentosDiabetes = [
-    "Metformina 500 mg dos por dia", "Metformina 850 mg dos por dia",
-    "Metformina 1000 mg dos por dia", "Otra"
-];
-
-const listaMedicamentosColesterol = [
-    "Atorvastatina 10 mg uno por día", "Atorvastatina 20 mg uno por día", "Atorvastatina 40 mg uno por día",
-    "Atorvastatina 80 mg uno por día", "Rosuvastatina 5 mg uno por día", "Rosuvastatina 10 mg uno por día",
-    "Rosuvastatina 20 mg uno por día", "Rosuastatina 40 mg uno por día", "Otra"
-];
-
-const Formulario = () => {
-    // Añadimos los nuevos campos al estado inicial del paciente
-    const [datosPaciente, setDatosPaciente] = useState({
-        ...DatosPacienteInicial,
-        numeroGestas: '',
-        fum: '',
+const NuevoFormulario = () => {
+    // Estado principal para todos los datos del formulario
+    const [datos, setDatos] = useState({
+        dni: '',
+        edad: '',
+        tomaMedicacionDiario: null, // 'si' o 'no'
+        medicacionTipo: {
+            diabetes: false,
+            hipertension: false,
+            colesterol: false,
+            tiroides: false,
+            otras: false,
+        },
+        fumaDiario: null,
+        actividadFisica: null,
+        horasSueno: null,
+        estresCronico: null,
+        estresTipo: {
+            depresion: false,
+            otras: false,
+        },
+        tumoresGinecologicos: null,
+        tumorTipo: {
+            ovarios: false,
+            mama: false,
+            utero: false,
+        },
+        enfermedadesAutoinmunes: null,
+        autoinmuneTipo: {
+            lupus: false,
+            artritis: false,
+            otras: false,
+        },
+        tuvoHijos: null,
+        cantidadHijos: '',
+        complicacionesEmbarazo: null,
+        razonNoHijos: '', // 'noQuiso', 'noPudo', 'tuvoPerdidas', 'noSeDio'
+        menopausia: null,
+        edadMenopausia: '',
+        presentaCiclosMenstruales: null,
         metodoAnticonceptivo: '',
-        trastornosHipertensivos: '',
-        diabetesGestacional: '',
-        sop: '', // Síndrome de Ovario Poliquístico
-        medicamentosHipertension: '', // Para almacenar la lista de medicamentos seleccionados
-        medicamentosDiabetes: '',
-        medicamentosColesterol: '',
+        presentaHisterectomia: null,
+        peso: '',
+        talla: '',
+        taSistolica: '',
+        taDiastolica: '',
+        cintura: '',
     });
-    const [nivelColesterolConocido, setNivelColesterolConocido] = useState(null);
-    const [nivelRiesgo, setNivelRiesgo] = useState(null);
-    const [error, setError] = useState('');
-    const [mostrarModal, setMostrarModal] = useState(false);
-    const [modalAdvertencia, setModalAdvertencia] = useState(null);
-    const [mostrarModalMedicamentos, setMostrarModalMedicamentos] = useState(false);
-    const [medicamentosSeleccionados, setMedicamentosSeleccionados] = useState({
-        notificacionRiesgo: [],
-        consulta: [],
-        practica: [],
-        hipertensionArterial: [],
-        medicacionPrescripcion: [],
-        medicacionDispensa: [],
-        tabaquismo: [],
-        laboratorio: [],
-    });
-    // Nuevo estado para la selección de medicamentos de hipertensión
-    const [medicamentosHipertensionSeleccionados, setMedicamentosHipertensionSeleccionados] = useState([]);
-    const [medicamentosDiabetesSeleccionados, setMedicamentosDiabetesSeleccionados] = useState([]);
-    const [medicamentosColesterolSeleccionados, setMedicamentosColesterolSeleccionados] = useState([]);
-    const [mensajeExito, setMensajeExito] = useState('');
-    const [ubicaciones, setUbicaciones] = useState([]);
-    const { user, roles } = useAuth(); // Obtiene el usuario y roles del contexto
-    const [mostrarRenal, setMostrarRenal] = useState(false);
-    const [creatinina, setCreatinina] = useState('');
-    const [tfg, setTfg] = useState(null);
 
-    // Variable para el máximo de la fecha (día actual)
-    const today = new Date().toISOString().split('T')[0];
+    // Estados para valores calculados
+    const [imc, setImc] = useState('');
+    const [categoriaImc, setCategoriaImc] = useState('');
 
-    useEffect(() => {
-        if (!creatinina || isNaN(creatinina) || !datosPaciente.edad || !datosPaciente.genero) {
-            setTfg(null);
-            return;
-        }
+    // --- MANEJADORES DE CAMBIOS ---
 
-        const edad = Number(datosPaciente.edad);
-        const cr = parseFloat(creatinina);
-        let resultado = null;
-
-        if (datosPaciente.genero === 'femenino') {
-            if (cr <= 0.7) {
-                resultado = 144 * Math.pow(cr / 0.7, -0.329) * Math.pow(0.993, edad);
-            } else {
-                resultado = 144 * Math.pow(cr / 0.7, -1.209) * Math.pow(0.993, edad);
-            }
-        } else {
-            if (cr <= 0.9) {
-                resultado = 141 * Math.pow(cr / 0.9, -0.411) * Math.pow(0.993, edad);
-            } else {
-                resultado = 141 * Math.pow(cr / 0.9, -1.209) * Math.pow(0.993, edad);
-            }
-        }
-
-        setTfg(resultado);
-    }, [creatinina, datosPaciente]);
-
-        
-    useEffect(() => {
-        const fetchUbicaciones = async () => {
-            const ubicacionesData = await getLocations();
-            setUbicaciones(ubicacionesData);
-        };
-
-        fetchUbicaciones();
-    }, []);
-
-    // Efecto para actualizar el campo de texto en datosPaciente cuando cambian los checkboxes
-    useEffect(() => {
-        setDatosPaciente(prev => ({
-            ...prev,
-            medicamentosHipertension: medicamentosHipertensionSeleccionados.join('; ')
-        }));
-    }, [medicamentosHipertensionSeleccionados]);
-    
-    useEffect(() => {
-        setDatosPaciente(prev => ({
-            ...prev,
-            medicamentosDiabetes: medicamentosDiabetesSeleccionados.join('; ')
-        }));
-    }, [medicamentosDiabetesSeleccionados]);
-
-    useEffect(() => {
-        setDatosPaciente(prev => ({
-            ...prev,
-            medicamentosColesterol: medicamentosColesterolSeleccionados.join('; ')
-        }));
-    }, [medicamentosColesterolSeleccionados]);
-
-
-    const validarCuil = (cuil) => {
-        const soloNumeros = /^\d+$/; // Expresión regular para solo números
-
-        if (cuil.length > 0 && cuil.length < 7) {
-            setError('El CUIL o DNI debe tener al menos 7 dígitos y contener solo números.');
-        } else if (cuil.length >= 7 && !soloNumeros.test(cuil)) {
-            setError('El CUIL o DNI debe contener solo números.');
-        } else {
-            setError('');
-        }
-    };
-
-    useEffect(() => {
-        // Asignar la ubicación del usuario al estado inicial si es un usuario normal
-        if (user && user.ubicacion) {
-            setDatosPaciente(prevState => ({
-                ...prevState,
-                ubicacion: user.ubicacion.nombre // Asegúrate de que esté usando el nombre correcto
-            }));
-        }
-    }, [user]);
-
-    const manejarCambio = (e) => {
+    // Manejador para inputs de texto y numéricos
+    const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setDatosPaciente({
-            ...datosPaciente,
-            [name]: value,
-        });
-        if (name === 'cuil') {
-            validarCuil(value);
-        }
+        setDatos(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleHipertensionMedChange = (e) => {
-        const { value, checked } = e.target;
-        setMedicamentosHipertensionSeleccionados(prev => {
-            if (checked) {
-                return [...prev, value];
+    // Manejador para botones de opción (Sí/No)
+    const handleOptionChange = (name, value) => {
+        setDatos(prev => ({ ...prev, [name]: value }));
+    };
+
+    // Manejador para checkboxes
+    const handleCheckboxChange = (category, name) => {
+        setDatos(prev => ({
+            ...prev,
+            [category]: {
+                ...prev[category],
+                [name]: !prev[category][name],
+            },
+        }));
+    };
+
+    // --- CÁLCULO AUTOMÁTICO DE IMC ---
+    useEffect(() => {
+        const pesoNum = parseFloat(datos.peso);
+        const tallaNum = parseFloat(datos.talla);
+
+        if (pesoNum > 0 && tallaNum > 0) {
+            const tallaMetros = tallaNum / 100;
+            const imcCalculado = pesoNum / (tallaMetros * tallaMetros);
+            setImc(imcCalculado.toFixed(2));
+
+            if (imcCalculado < 18.5) {
+                setCategoriaImc('Bajo Peso');
+            } else if (imcCalculado >= 18.5 && imcCalculado < 25) {
+                setCategoriaImc('Normopeso');
+            } else if (imcCalculado >= 25 && imcCalculado < 30) {
+                setCategoriaImc('Sobrepeso');
             } else {
-                return prev.filter(med => med !== value);
+                setCategoriaImc('Obesidad');
             }
-        });
-    };
-
-    const handleDiabetesMedChange = (e) => {
-        const { value, checked } = e.target;
-        setMedicamentosDiabetesSeleccionados(prev => {
-            if (checked) {
-                return [...prev, value];
-            } else {
-                return prev.filter(med => med !== value);
-            }
-        });
-    };
-
-    const handleColesterolMedChange = (e) => {
-        const { value, checked } = e.target;
-        setMedicamentosColesterolSeleccionados(prev => {
-            if (checked) {
-                return [...prev, value];
-            } else {
-                return prev.filter(med => med !== value);
-            }
-        });
-    };
-
-    const manejarSeleccionColesterol = (value) => {
-        setNivelColesterolConocido(value === 'si');
-        setDatosPaciente({
-            ...datosPaciente,
-            colesterol: value === 'no' ? 'No' : datosPaciente.colesterol
-        });
-    };
-
-    const calcularIMC = () => {
-        const peso = parseFloat(datosPaciente.peso);
-        const tallaCm = parseFloat(datosPaciente.talla);
-        if (peso && tallaCm) {
-            const tallaM = tallaCm / 100; // Convertir centímetros a metros
-            const imc = peso / (tallaM * tallaM);
-            return imc.toFixed(2);
+        } else {
+            setImc('');
+            setCategoriaImc('');
         }
-        return '';
-    };
-
-    const ajustarEdad = (edad) => {
-        if (edad < 50) return 40;
-        if (edad >= 50 && edad <= 59) return 50;
-        if (edad >= 60 && edad <= 69) return 60;
-        return 70;
-    };
-
-    const ajustarPresionArterial = (presion) => {
-        if (presion < 140) return 120;
-        if (presion >= 140 && presion <= 159) return 140;
-        if (presion >= 160 && presion <= 179) return 160;
-        return 180;
-    };
-
-    const validarCampos = () => {
-        const {
-            edad,
-            genero,
-            cuil,
-            diabetes,
-            fumador,
-            exfumador,
-            presionArterial,
-            colesterol,
-            infarto,
-            acv,
-            renal,
-            pulmonar
-        } = datosPaciente;
-    
-        if (!edad || !genero || !cuil || !diabetes || !fumador || !exfumador || !presionArterial || !colesterol || !infarto || !acv || !renal || !pulmonar) {
-            setError('Por favor, complete todos los campos obligatorios.');
-            return false;
-        }
-        if (cuil.length < 7) {
-            setError('El CUIL debe tener al menos 7 dígitos.');
-            return false;
-        }
-        if (edad < 1 || edad > 120) {
-            setError('La edad debe estar entre 1 y 120 años.');
-            return false;
-        }
-        if (presionArterial < 50 || presionArterial > 250) {
-            setError('La tensión arterial debe estar entre 60 y 250.');
-            return false;
-        }
-        if (colesterol !== 'No' && (colesterol < 150 || colesterol > 400)) {
-            setError('El colesterol debe estar entre 150 y 400, o ser "No".');
-            return false;
-        }
-    
-        setError('');
-        return true;
-    };
-
-    const calcularRiesgo = async () => {
-        if (!validarCampos()) {
-            setModalAdvertencia('Todos los campos deben estar completos.');
-            setMostrarModal(true);
-            return;
-        }
-    
-        if (nivelColesterolConocido && !datosPaciente.colesterol) {
-            setModalAdvertencia('Debe ingresar el nivel de colesterol.');
-            setMostrarModal(true);
-            return;
-        }
-    
-        const { edad, genero, diabetes, fumador, exfumador, presionArterial, colesterol, enfermedad, infarto, acv, renal } = datosPaciente;
-    
-        if (enfermedad === "Sí" ||infarto === "Sí" || acv === "Sí" || renal === "Sí") {
-            setNivelRiesgo(">20% <30% Alto");
-            setMostrarModal(true);
-            return;
-        }
-    
-        const edadAjustada = ajustarEdad(parseInt(edad, 10));
-        const presionAjustada = ajustarPresionArterial(parseInt(presionArterial, 10));
-        const imc = calcularIMC();
-        setDatosPaciente((prevDatos) => ({ ...prevDatos, imc }));
-    
-        const riesgoCalculado = calcularRiesgoCardiovascular(edadAjustada, genero, diabetes, fumador, presionAjustada, colesterol);
-        setNivelRiesgo(riesgoCalculado);
-        setMostrarModal(true);
-    };    
-
-    const guardarPaciente = async () => {
-        try {
-            await axiosInstance.post('/api/pacientes', {
-                ...datosPaciente,
-                nivelRiesgo,
-                tfg: tfg,
-            });
-    
-            console.log('Datos guardados exitosamente');
-            setMensajeExito('Paciente guardado con éxito');
-            setTimeout(() => setMensajeExito(''), 3000);
-            setTimeout(() => {
-                window.location.reload(); // Recargar la página para un nuevo formulario
-            }, 1000);
-        } catch (error) {
-            console.error('Error al guardar los datos:', error);
-            setModalAdvertencia('Ocurrió un error al guardar los datos. Por favor, vuelva a cargar la página.');
-            setMostrarModal(true);
-        }
-    };
-    
-    const toggleModalMedicamentos = () => {
-        setMostrarModalMedicamentos(!mostrarModalMedicamentos);
-    };
-
-    const handleMedicamentoChange = (categoria, evento) => {
-        const { value, checked } = evento.target;
-        setMedicamentosSeleccionados((prevSeleccionados) => {
-            const nuevosSeleccionados = checked
-                ? [...prevSeleccionados[categoria], value]
-                : prevSeleccionados[categoria].filter((med) => med !== value);
-            return {
-                ...prevSeleccionados,
-                [categoria]: nuevosSeleccionados,
-            };
-        });
-    };
-
-    const guardarMedicamentos = () => {
-        const nuevosDatosPaciente = {
-            ...datosPaciente,
-            notificacionRiesgo: medicamentosSeleccionados.notificacionRiesgo.join('; '),
-            consulta: medicamentosSeleccionados.consulta.join('; '),
-            practica: medicamentosSeleccionados.practica.join('; '),
-            hipertensionArterial: medicamentosSeleccionados.hipertensionArterial.join('; '),
-            medicacionPrescripcion: medicamentosSeleccionados.medicacionPrescripcion.join('; '),
-            medicacionDispensa: medicamentosSeleccionados.medicacionDispensa.join('; '),
-            tabaquismo: medicamentosSeleccionados.tabaquismo.join('; '),
-            laboratorio: medicamentosSeleccionados.laboratorio.join('; '),
-        };
-        setDatosPaciente(nuevosDatosPaciente);
-        setMensajeExito('Medicamentos guardados con éxito');
-        toggleModalMedicamentos(); // Cerrar el modal
-    };
-    
-    const cerrarModal = () => {
-        setMostrarModal(false);
-        setMostrarModalMedicamentos(false);
-        setModalAdvertencia(null);
-    };
-    
-    const abrirModalAdvertencia = (nivel) => {
-        setModalAdvertencia(Advertencia[nivel]);
-    };
-    
-    const renderRiesgoGrid = (riesgo) => {
-        const riesgos = [
-            '<10% Bajo',
-            '>10% <20% Moderado',
-            '>20% <30% Alto',
-            '>30% <40% Muy Alto',
-            '>40% Crítico'
-        ];
-        return (
-            <div className="grid grid-cols-12 gap-2">
-                {riesgos.map((nivel) => (
-                    <React.Fragment key={nivel}>
-                        <div className={`col-span-4 ${obtenerColorRiesgo(nivel)}`}></div>
-                        <div
-                            className={`col-span-8 ${riesgo === nivel ? obtenerColorRiesgo(nivel) : 'bg-gray-300'} p-2 cursor-pointer`}
-                            onClick={() => abrirModalAdvertencia(nivel)}
-                        >
-                            <span className={`${riesgo === nivel ? 'text-white' : 'text-gray-600'}`}>{obtenerTextoRiesgo(nivel)}</span>
-                        </div>
-                    </React.Fragment>
-                ))}
-            </div>
-        );
-    };
-
-    return (
-        <div className="flex flex-col items-center p-6 max-w-2xl mx-auto">
-            <form className="w-full space-y-6">
-                <h1 className="text-3xl font-bold mb-6">Formulario de Evaluación de Riesgo Cardiovascular</h1>
-                
-                {/* Cuil */}
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">DNI:</label>
-                    <input
-                        type="text"
-                        name="cuil"
-                        value={datosPaciente.cuil}
-                        onChange={manejarCambio}
-                        className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                        style={{ appearance: 'none' }}
-                    />
-                </div>
-
-                {/* Telefono */}
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">Teléfono:</label>
-                    <input
-                        type="number"
-                        name="telefono"
-                        value={datosPaciente.telefono}
-                        onChange={manejarCambio}
-                        className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                </div>
-
-                {/* Género */}
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">Género:</label>
-                    <div className="flex space-x-2">
-                        {['masculino', 'femenino'].map(option => (
-                            <button
-                                key={option}
-                                type="button"
-                                className={`p-2 border rounded ${datosPaciente.genero === option ? 'bg-indigo-500 text-white' : 'bg-white text-gray-700'}`}
-                                onClick={() => setDatosPaciente(prevDatos => ({ ...prevDatos, genero: option }))}
-                            >
-                                {option.charAt(0).toUpperCase() + option.slice(1)}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* CAMPOS CONDICIONALES PARA GÉNERO FEMENINO */}
-                {datosPaciente.genero === 'femenino' && (
-                    <div className="p-4 border-l-4 border-indigo-500 bg-indigo-50 space-y-4 rounded-r-lg">
-                        <h3 className="text-lg font-semibold text-gray-800">Información Adicional</h3>
-                        
-                        {/* Numero de gestas */}
-                        <div className="flex flex-col">
-                            <label className="text-sm font-medium text-gray-700">Número de gestas:</label>
-                            <input
-                                type="number"
-                                name="numeroGestas"
-                                value={datosPaciente.numeroGestas}
-                                onChange={manejarCambio}
-                                className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                            />
-                        </div>
-                        
-                        {/* Fecha de ultima menstruacion */}
-                        <div className="flex flex-col">
-                            <label className="text-sm font-medium text-gray-700">Fecha de última menstruación:</label>
-                            <input
-                                type="date"
-                                name="fum"
-                                value={datosPaciente.fum}
-                                onChange={manejarCambio}
-                                max={today} // Limita la fecha al día de hoy o anteriores
-                                className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                            />
-                        </div>
-
-                        {/* Metodo anticonceptivo */}
-                        <div className="flex flex-col">
-                            <label className="text-sm font-medium text-gray-700">Método anticonceptivo:</label>
-                            <input
-                                type="text"
-                                name="metodoAnticonceptivo"
-                                value={datosPaciente.metodoAnticonceptivo}
-                                onChange={manejarCambio}
-                                className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                            />
-                        </div>
-
-                        {/* Trastornos hipertensivos del embarazo */}
-                        <div className="flex flex-col">
-                            <label className="text-sm font-medium text-gray-700">Trastornos hipertensivos del embarazo:</label>
-                            <input
-                                type="text"
-                                name="trastornosHipertensivos"
-                                value={datosPaciente.trastornosHipertensivos}
-                                onChange={manejarCambio}
-                                className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                            />
-                        </div>
-
-                        {/* Diabetes gestacional */}
-                        <div className="flex flex-col">
-                            <label className="text-sm font-medium text-gray-700">Diabetes gestacional:</label>
-                            <input
-                                type="text"
-                                name="diabetesGestacional"
-                                value={datosPaciente.diabetesGestacional}
-                                onChange={manejarCambio}
-                                className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                            />
-                        </div>
-
-                        {/* Síndrome de Ovario Poliquístico */}
-                        <div className="flex flex-col">
-                            <label className="text-sm font-medium text-gray-700">Síndrome de Ovario Poliquístico:</label>
-                            <input
-                                type="text"
-                                name="sop"
-                                value={datosPaciente.sop}
-                                onChange={manejarCambio}
-                                className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                            />
-                        </div>
-                    </div>
-                )}
-                {/* FIN DE CAMPOS CONDICIONALES */}
+    }, [datos.peso, datos.talla]);
 
 
-                {/* Edad */}
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">Edad:</label>
-                    <input
-                        type="number"
-                        name="edad"
-                        value={datosPaciente.edad}
-                        onChange={manejarCambio}
-                        className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                </div>
-
-                {/* Hipertenso */}
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">¿Toma medicamentos para la hipertensión arterial?</label>
-                    <div className="flex space-x-2 mb-2">
-                        {['Sí', 'No'].map(option => (
-                            <button
-                                key={option}
-                                type="button"
-                                onClick={() => {
-                                    setDatosPaciente({ ...datosPaciente, hipertenso: option });
-                                    // Si la respuesta es No, limpiar la lista de seleccionados
-                                    if (option === 'No') {
-                                        setMedicamentosHipertensionSeleccionados([]);
-                                    }
-                                }}
-                                className={`p-2 border rounded-md ${datosPaciente.hipertenso === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
-                            >
-                                {option}
-                            </button>
-                        ))}
-                    </div>
-                    
-                    {/* LISTA CONDICIONAL DE MEDICAMENTOS PARA HIPERTENSIÓN */}
-                    {datosPaciente.hipertenso === 'Sí' && (
-                        <div className="p-4 mt-2 border-l-4 border-green-500 bg-green-50 space-y-2 rounded-r-lg">
-                            <h4 className="text-md font-semibold text-gray-800">Seleccione los medicamentos:</h4>
-                            <div className="max-h-60 overflow-y-auto pr-2">
-                                {listaMedicamentosHipertension.map((medicamento, index) => (
-                                    <div key={index} className="flex items-center my-1">
-                                        <input
-                                            type="checkbox"
-                                            id={`med-ht-${index}`}
-                                            value={medicamento}
-                                            onChange={handleHipertensionMedChange}
-                                            checked={medicamentosHipertensionSeleccionados.includes(medicamento)}
-                                            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                        />
-                                        <label htmlFor={`med-ht-${index}`} className="ml-3 text-sm text-gray-700">
-                                            {medicamento}
-                                        </label>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Diabetes */}
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">¿Toma medicamentos para Diabetes?</label>
-                    <div className="flex space-x-2">
-                        {['Sí', 'No'].map(option => (
-                            <button
-                                key={option}
-                                type="button"
-                                onClick={() => {
-                                    setDatosPaciente({ ...datosPaciente, diabetes: option });
-                                    if (option === 'No') {
-                                        setMedicamentosDiabetesSeleccionados([]);
-                                    }
-                                }}
-                                className={`p-2 border rounded-md ${datosPaciente.diabetes === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
-                            >
-                                {option.charAt(0).toUpperCase() + option.slice(1)}
-                            </button>
-                        ))}
-                    </div>
-                    {datosPaciente.diabetes === 'Sí' && (
-                        <div className="p-4 mt-2 border-l-4 border-green-500 bg-green-50 space-y-2 rounded-r-lg">
-                            <h4 className="text-md font-semibold text-gray-800">Seleccione los medicamentos:</h4>
-                            <div className="max-h-60 overflow-y-auto pr-2">
-                                {listaMedicamentosDiabetes.map((medicamento, index) => (
-                                    <div key={index} className="flex items-center my-1">
-                                        <input
-                                            type="checkbox"
-                                            id={`med-db-${index}`}
-                                            value={medicamento}
-                                            onChange={handleDiabetesMedChange}
-                                            checked={medicamentosDiabetesSeleccionados.includes(medicamento)}
-                                            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                        />
-                                        <label htmlFor={`med-db-${index}`} className="ml-3 text-sm text-gray-700">
-                                            {medicamento}
-                                        </label>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Medicaión colesterol */}
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">¿Toma medicamentos para el colesterol?</label>
-                    <div className="flex space-x-2">
-                        {['Sí', 'No'].map(option => (
-                            <button
-                                key={option}
-                                type="button"
-                                onClick={() => {
-                                    setDatosPaciente({ ...datosPaciente, medicolesterol: option });
-                                    if (option === 'No') {
-                                        setMedicamentosColesterolSeleccionados([]);
-                                    }
-                                }}
-                                className={`p-2 border rounded-md ${datosPaciente.medicolesterol === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
-                            >
-                                {option.charAt(0).toUpperCase() + option.slice(1)}
-                            </button>
-                        ))}
-                    </div>
-                    {datosPaciente.medicolesterol === 'Sí' && (
-                        <div className="p-4 mt-2 border-l-4 border-green-500 bg-green-50 space-y-2 rounded-r-lg">
-                            <h4 className="text-md font-semibold text-gray-800">Seleccione los medicamentos:</h4>
-                            <div className="max-h-60 overflow-y-auto pr-2">
-                                {listaMedicamentosColesterol.map((medicamento, index) => (
-                                    <div key={index} className="flex items-center my-1">
-                                        <input
-                                            type="checkbox"
-                                            id={`med-col-${index}`}
-                                            value={medicamento}
-                                            onChange={handleColesterolMedChange}
-                                            checked={medicamentosColesterolSeleccionados.includes(medicamento)}
-                                            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                        />
-                                        <label htmlFor={`med-col-${index}`} className="ml-3 text-sm text-gray-700">
-                                            {medicamento}
-                                        </label>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Colesterol */}
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">¿Conoce su nivel de colesterol?</label>
-                    <div className="flex space-x-2 mb-2">
-                        {['si', 'no'].map(option => (
-                            <button
-                                key={option}
-                                type="button"
-                                onClick={() => manejarSeleccionColesterol(option)}
-                                className={`p-2 border rounded-md ${nivelColesterolConocido === (option === 'si') ? 'bg-green-500 text-white' : 'border-gray-300'}`}
-                            >
-                                {option.charAt(0).toUpperCase() + option.slice(1)}
-                            </button>
-                        ))}
-                    </div>
-                    {nivelColesterolConocido === true && (
-                        <input
-                            type="number"
-                            name="colesterol"
-                            value={datosPaciente.colesterol === 'No' ? '' : datosPaciente.colesterol}
-                            onChange={manejarCambio}
-                            className="p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                            style={{ appearance: 'none' }}
-                        />
-                    )}
-                </div>
-
-                {/* Aspirina */}
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">¿Toma aspirina o anticuagulantes?</label>
-                    <div className="flex space-x-2 mb-2">
-                        {['sí', 'no'].map(option => (
-                            <button
-                                key={option}
-                                type="button"
-                                onClick={() => setDatosPaciente({ ...datosPaciente, aspirina: option })}
-                                className={`p-2 border rounded-md ${datosPaciente.aspirina === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
-                            >
-                                {option.charAt(0).toUpperCase() + option.slice(1)}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Fumador */}
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">¿Es fumador?</label>
-                    <div className="flex space-x-2 mb-2">
-                        {['sí', 'no'].map(option => (
-                            <button
-                                key={option}
-                                type="button"
-                                onClick={() => setDatosPaciente({ ...datosPaciente, fumador: option })}
-                                className={`p-2 border rounded-md ${datosPaciente.fumador === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
-                            >
-                                {option.charAt(0).toUpperCase() + option.slice(1)}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* exFumador */}
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">¿Es exfumador?</label>
-                    <div className="flex space-x-2 mb-2">
-                        {['sí', 'no'].map(option => (
-                            <button
-                                key={option}
-                                type="button"
-                                onClick={() => setDatosPaciente({ ...datosPaciente, exfumador: option })}
-                                className={`p-2 border rounded-md ${datosPaciente.exfumador === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
-                            >
-                                {option.charAt(0).toUpperCase() + option.slice(1)}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Enfermedad cardiovascular */}
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">¿Presenta enfermedad cardiovascular documentada?</label>
-                    <div className="flex space-x-2 mb-2">
-                        {['Sí', 'No'].map(option => (
-                            <button
-                                key={option}
-                                type="button"
-                                onClick={() => setDatosPaciente({ ...datosPaciente, enfermedad: option })}
-                                className={`p-2 border rounded-md ${datosPaciente.enfermedad === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
-                            >
-                                {option}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Infarto */}
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">¿Ha tenido un infarto?</label>
-                    <div className="flex space-x-2 mb-2">
-                        {['Sí', 'No'].map(option => (
-                            <button
-                                key={option}
-                                type="button"
-                                onClick={() => setDatosPaciente({ ...datosPaciente, infarto: option })}
-                                className={`p-2 border rounded-md ${datosPaciente.infarto === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
-                            >
-                                {option}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* ACV */}
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">¿Ha tenido un ACV?</label>
-                    <div className="flex space-x-2 mb-2">
-                        {['Sí', 'No'].map(option => (
-                            <button
-                                key={option}
-                                type="button"
-                                onClick={() => setDatosPaciente({ ...datosPaciente, acv: option })}
-                                className={`p-2 border rounded-md ${datosPaciente.acv === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
-                            >
-                                {option}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Enfermedad Renal Cronica */}
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">¿Tiene enfermedad Renal Crónica?</label>
-                    <div className="flex space-x-2 mb-2">
-                        {['Sí', 'No'].map(option => (
-                        <button
-                        key={option}
-                        type="button"
-                        onClick={() => setDatosPaciente({ ...datosPaciente, renal : option })}
-                        className={`p-2 border rounded-md ${datosPaciente.renal === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
-                        >
-                        {option}
-                        </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Enfermedad Pulmonar */}
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">¿Tiene enfermedad Pulmonar?</label>
-                    <div className="flex space-x-2 mb-2">
-                        {['Sí', 'No'].map(option => (
-                        <button
-                        key={option}
-                        type="button"
-                        onClick={() => setDatosPaciente({ ...datosPaciente, pulmonar : option })}
-                        className={`p-2 border rounded-md ${datosPaciente.pulmonar === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
-                        >
-                        {option}
-                        </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Alergias */}
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">¿Alergias a medicamentos o antibióticos?</label>
-                    <div className="flex space-x-2 mb-2">
-                        {['Sí', 'No'].map(option => (
-                        <button
-                        key={option}
-                        type="button"
-                        onClick={() => setDatosPaciente({ ...datosPaciente, alergias: option })}
-                        className={`p-2 border rounded-md ${datosPaciente.alergias === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
-                        >
-                        {option}
-                        </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Tiroides */}
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">¿Toma remedios para la tiroides?</label>
-                    <div className="flex space-x-2 mb-2">
-                        {['Sí', 'No'].map(option => (
-                        <button
-                        key={option}
-                        type="button"
-                        onClick={() => setDatosPaciente({ ...datosPaciente, tiroides: option })}
-                        className={`p-2 border rounded-md ${datosPaciente.tiroides === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
-                        >
-                        {option}
-                        </button>
-                        ))}
-                    </div>
-                </div>
-                
-                {/* Sedentarismo */}
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium text-gray-700">¿Considera tener sedentarismo?</label>
-                    <div className="flex space-x-2 mb-2">
-                        {['Sí', 'No'].map(option => (
-                        <button
-                        key={option}
-                        type="button"
-                        onClick={() => setDatosPaciente({ ...datosPaciente, sedentarismo: option })}
-                        className={`p-2 border rounded-md ${datosPaciente.sedentarismo === option ? 'bg-green-500 text-white' : 'border-gray-300'}`}
-                        >
-                        {option}
-                        </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Presión Arterial */}
-                            <div className="flex flex-col">
-                                <label className="text-sm font-medium text-gray-700">TA Máx.:</label>
-                                <input
-                                    type="number"
-                                    name="presionArterial"
-                                    value={datosPaciente.presionArterial}
-                                    onChange={manejarCambio}
-                                    className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                                    style={{ appearance: 'none' }}
-                                />
-                                <div className="mt-2 flex space-x-2">
-                                    {[80, 90, 100, 110, 120, 130, 140, 160, 180, 200, 220, 240].map(valor => (
-                                        <button
-                                            key={valor}
-                                            type="button"
-                                            className={`p-2 border rounded ${datosPaciente.presionArterial === valor ? 'bg-indigo-500 text-white' : 'bg-white text-gray-700'}`}
-                                            onClick={() => setDatosPaciente(prevDatos => ({ ...prevDatos, presionArterial: valor }))}
-                                        >
-                                            {valor}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Tension Arterial Minima */}
-                            <div className="flex flex-col">
-                                <label className="text-sm font-medium text-gray-700">TA Min.:</label>
-                                <input
-                                    type="number"
-                                    name="presionArterial"
-                                    value={datosPaciente.taMin}
-                                    onChange={manejarCambio}
-                                    className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                                    style={{ appearance: 'none' }}
-                                />
-                                <div className="mt-2 flex space-x-2">
-                                    {[60, 70, 80, 90, 100, 110, 120, 130].map(valor => (
-                                        <button
-                                            key={valor}
-                                            type="button"
-                                            className={`p-2 border rounded ${datosPaciente.taMin === valor ? 'bg-indigo-500 text-white' : 'bg-white text-gray-700'}`}
-                                            onClick={() => setDatosPaciente(prevDatos => ({ ...prevDatos, taMin: valor }))}
-                                        >
-                                            {valor}
-                                        </button>
-                                    ))}
-                                    <button
-                                        type="button"
-                                        className={`p-2 border rounded ${datosPaciente.taMin > 130 ? 'bg-indigo-500 text-white' : 'bg-white text-gray-700'}`}
-                                        onClick={() => setDatosPaciente(prevDatos => ({ ...prevDatos, taMin: 111 }))}
-                                        >+130</button>
-                                </div>
-                            </div>
-
-                            {/* Peso */}
-                            <div className="flex flex-col">
-                                <label className="text-sm font-medium text-gray-700">Peso (kg):</label>
-                                <input
-                                    type="number"
-                                    name="peso"
-                                    value={datosPaciente.peso}
-                                    onChange={manejarCambio}
-                                    className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                                />
-                            </div>
-
-                            {/* Talla */}
-                            <div className="flex flex-col">
-                                <label className="text-sm font-medium text-gray-700">Talla (cm):</label>
-                                <input
-                                    type="number"
-                                    name="talla"
-                                    value={datosPaciente.talla}
-                                    onChange={manejarCambio}
-                                    className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                                />
-                            </div>
-
-                            {/* Cintura */}
-                            <div className="flex flex-col">
-                                <label className="text-sm font-medium text-gray-700">Cintura (cm):</label>
-                                <input
-                                type="number"
-                                name="cintura"
-                                value={datosPaciente.cintura}
-                                onChange={manejarCambio}
-                                className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                                />
-                            </div>
-
-                {/* Doctor */}
-                <div className="flex flex-col mt-4">
-                    <div className="flex justify-end space-x-2">
-                        {['doctor1', 'doctor2', 'doctor3'].map(doctor => (
-                            <button
-                                key={doctor}
-                                type="button"
-                                className={`p-2 border rounded ${datosPaciente.doctor === doctor ? 'bg-indigo-500 text-white' : 'bg-white text-gray-700'}`}
-                                onClick={() => setDatosPaciente(prevDatos => ({ ...prevDatos, doctor }))}
-                            >
-                                {doctor.charAt(0).toUpperCase() + doctor.slice(1)}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
+    // Componente reutilizable para preguntas Sí/No
+    const PreguntaOpcion = ({ label, name, value }) => (
+        <div className="flex flex-col">
+            <label className="text-sm font-medium text-gray-700">{label}</label>
+            <div className="flex space-x-2 mt-1">
                 <button
                     type="button"
-                    onClick={calcularRiesgo}
-                    className="w-full py-2 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600"
+                    onClick={() => handleOptionChange(name, 'si')}
+                    className={`p-2 border rounded-md w-1/2 ${value === 'si' ? 'bg-indigo-600 text-white' : 'border-gray-300'}`}
                 >
-                    Calcular Riesgo
+                    Sí
                 </button>
-            </form>
+                <button
+                    type="button"
+                    onClick={() => handleOptionChange(name, 'no')}
+                    className={`p-2 border rounded-md w-1/2 ${value === 'no' ? 'bg-indigo-600 text-white' : 'border-gray-300'}`}
+                >
+                    No
+                </button>
+            </div>
+        </div>
+    );
 
-            {/* Modal Resultados */}
-            {mostrarModal && !modalAdvertencia && (
-                <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-4">
-                    <div className="bg-white p-6 rounded-md shadow-lg w-full max-w-lg max-h-screen overflow-y-auto">
-                        <div className="flex justify-between mb-4">
-                            <button onClick={guardarPaciente} className="py-2 px-4 bg-green-500 text-white rounded-md hover:bg-green-600">
-                                Guardar Paciente
-                            </button>
+    // Componente reutilizable para checkboxes
+    const OpcionCheckbox = ({ category, name, label, checked }) => (
+         <div className="flex items-center my-1">
+            <input
+                type="checkbox"
+                id={`${category}-${name}`}
+                checked={checked}
+                onChange={() => handleCheckboxChange(category, name)}
+                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+            />
+            <label htmlFor={`${category}-${name}`} className="ml-3 text-sm text-gray-700">
+                {label}
+            </label>
+        </div>
+    );
+
+    return (
+        <div className="flex flex-col items-center p-6 max-w-2xl mx-auto bg-gray-50">
+            <form className="w-full space-y-6">
+                <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Formulario de Salud Integral</h1>
+
+                {/* --- SECCIÓN DATOS BÁSICOS --- */}
+                <div className="p-4 border rounded-lg bg-white shadow-sm">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-700">Datos Básicos</h2>
+                    <div className="space-y-4">
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium text-gray-700">DNI:</label>
+                            <input type="number" name="dni" value={datos.dni} onChange={handleInputChange} className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"/>
                         </div>
-                        {/* Función renal */}
-                            <div className="mt-4 border-t pt-4">
-                                {!mostrarRenal && (
-                                    <button
-                                        onClick={() => setMostrarRenal(true)}
-                                        className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                                    >
-                                        ¿Desea calcular función renal?
-                                    </button>
-                                )}
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium text-gray-700">Edad:</label>
+                            <input type="number" name="edad" value={datos.edad} onChange={handleInputChange} className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"/>
+                        </div>
+                    </div>
+                </div>
 
-                                {mostrarRenal && (
-                                    <div className="mt-2">
-                                        <label className="text-sm font-medium text-gray-700">Creatinina (mg/dl):</label>
-                                        <input
-                                            type="number"
-                                            step="0.01"
-                                            value={creatinina}
-                                            onChange={(e) => setCreatinina(e.target.value)}
-                                            className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:ring-indigo-500 focus:border-indigo-500"
-                                        />
-                                        {tfg && (
-                                            <p className="mt-2 font-semibold text-gray-800">
-                                                Filtrado glomerular: {tfg.toFixed(1)} ml/min/1,73 m²
-                                            </p>
-                                        )}
+                {/* --- SECCIÓN HÁBITOS Y ESTILO DE VIDA --- */}
+                <div className="p-4 border rounded-lg bg-white shadow-sm">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-700">Hábitos y Estilo de Vida</h2>
+                    <div className="space-y-4">
+                        <PreguntaOpcion label="¿Toma medicación a diario?" name="tomaMedicacionDiario" value={datos.tomaMedicacionDiario} />
+                        {datos.tomaMedicacionDiario === 'si' && (
+                            <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 rounded-r-lg">
+                                <h4 className="text-md font-semibold text-gray-800">Seleccione el tipo de medicación:</h4>
+                                <OpcionCheckbox category="medicacionTipo" name="diabetes" label="Diabetes" checked={datos.medicacionTipo.diabetes} />
+                                <OpcionCheckbox category="medicacionTipo" name="hipertension" label="Hipertensión" checked={datos.medicacionTipo.hipertension} />
+                                <OpcionCheckbox category="medicacionTipo" name="colesterol" label="Colesterol" checked={datos.medicacionTipo.colesterol} />
+                                <OpcionCheckbox category="medicacionTipo" name="tiroides" label="Tiroides" checked={datos.medicacionTipo.tiroides} />
+                                <OpcionCheckbox category="medicacionTipo" name="otras" label="Otras" checked={datos.medicacionTipo.otras} />
+                            </div>
+                        )}
+
+                        <PreguntaOpcion label="¿Fuma a diario?" name="fumaDiario" value={datos.fumaDiario} />
+                        <PreguntaOpcion label="¿Realiza actividad física 150 minutos semanales?" name="actividadFisica" value={datos.actividadFisica} />
+                        <PreguntaOpcion label="¿Duerme más de 7 horas diarias?" name="horasSueno" value={datos.horasSueno} />
+                        
+                        <PreguntaOpcion label="¿Sufre de estrés crónico?" name="estresCronico" value={datos.estresCronico} />
+                        {datos.estresCronico === 'si' && (
+                            <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 rounded-r-lg">
+                                 <h4 className="text-md font-semibold text-gray-800">Seleccione:</h4>
+                                <OpcionCheckbox category="estresTipo" name="depresion" label="Depresión" checked={datos.estresTipo.depresion} />
+                                <OpcionCheckbox category="estresTipo" name="otras" label="Otras" checked={datos.estresTipo.otras} />
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* --- SECCIÓN ANTECEDENTES DE SALUD --- */}
+                <div className="p-4 border rounded-lg bg-white shadow-sm">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-700">Antecedentes de Salud</h2>
+                    <div className="space-y-4">
+                        <PreguntaOpcion label="¿Ha tenido tumores ginecológicos?" name="tumoresGinecologicos" value={datos.tumoresGinecologicos} />
+                         {datos.tumoresGinecologicos === 'si' && (
+                            <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 rounded-r-lg">
+                                <h4 className="text-md font-semibold text-gray-800">Seleccione el tipo:</h4>
+                                <OpcionCheckbox category="tumorTipo" name="ovarios" label="Ovarios" checked={datos.tumorTipo.ovarios} />
+                                <OpcionCheckbox category="tumorTipo" name="mama" label="Mama" checked={datos.tumorTipo.mama} />
+                                <OpcionCheckbox category="tumorTipo" name="utero" label="Útero" checked={datos.tumorTipo.utero} />
+                            </div>
+                        )}
+
+                        <PreguntaOpcion label="¿Tiene enfermedades autoinmunes?" name="enfermedadesAutoinmunes" value={datos.enfermedadesAutoinmunes} />
+                        {datos.enfermedadesAutoinmunes === 'si' && (
+                            <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 rounded-r-lg">
+                                <h4 className="text-md font-semibold text-gray-800">Seleccione la enfermedad:</h4>
+                                <OpcionCheckbox category="autoinmuneTipo" name="lupus" label="Lupus" checked={datos.autoinmuneTipo.lupus} />
+                                <OpcionCheckbox category="autoinmuneTipo" name="artritis" label="Artritis" checked={datos.autoinmuneTipo.artritis} />
+                                <OpcionCheckbox category="autoinmuneTipo" name="otras" label="Otras" checked={datos.autoinmuneTipo.otras} />
+                            </div>
+                        )}
+                    </div>
+                </div>
+                
+                {/* --- SECCIÓN SALUD GINECOLÓGICA Y REPRODUCTIVA --- */}
+                <div className="p-4 border rounded-lg bg-white shadow-sm">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-700">Salud Ginecológica y Reproductiva</h2>
+                    <div className="space-y-4">
+                        <PreguntaOpcion label="¿Tuvo hijos?" name="tuvoHijos" value={datos.tuvoHijos} />
+                        {datos.tuvoHijos === 'si' && (
+                            <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 rounded-r-lg space-y-4">
+                                <div className="flex flex-col">
+                                    <label className="text-sm font-medium text-gray-700">¿Cuántos?</label>
+                                    <input type="number" name="cantidadHijos" value={datos.cantidadHijos} onChange={handleInputChange} className="mt-1 p-2 border border-gray-300 rounded-md"/>
+                                </div>
+                                <PreguntaOpcion label="¿Tuvo hipertensión o diabetes gestacional en alguno?" name="complicacionesEmbarazo" value={datos.complicacionesEmbarazo} />
+                            </div>
+                        )}
+                        {datos.tuvoHijos === 'no' && (
+                             <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 rounded-r-lg">
+                                <h4 className="text-md font-semibold text-gray-800">Motivo:</h4>
+                                <div className="flex flex-col space-y-2 mt-2">
+                                     {['No quiso', 'No pudo', 'Tuvo pérdidas', 'No se dio'].map(opcion => (
+                                        <div key={opcion} className="flex items-center">
+                                            <input type="radio" id={opcion} name="razonNoHijos" value={opcion} checked={datos.razonNoHijos === opcion} onChange={handleInputChange} className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"/>
+                                            <label htmlFor={opcion} className="ml-3 block text-sm font-medium text-gray-700">{opcion}</label>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        <PreguntaOpcion label="¿Menopausia?" name="menopausia" value={datos.menopausia} />
+                        {datos.menopausia === 'si' && (
+                            <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 rounded-r-lg space-y-4">
+                                <div className="flex flex-col">
+                                    <label className="text-sm font-medium text-gray-700">¿A qué edad?</label>
+                                    <input type="number" name="edadMenopausia" value={datos.edadMenopausia} onChange={handleInputChange} className="mt-1 p-2 border border-gray-300 rounded-md"/>
+                                </div>
+                                <PreguntaOpcion label="¿Presenta ciclos menstruales todavía?" name="presentaCiclosMenstruales" value={datos.presentaCiclosMenstruales} />
+                                {datos.presentaCiclosMenstruales === 'si' && (
+                                    <div className="flex flex-col">
+                                        <label className="text-sm font-medium text-gray-700">¿Qué método anticonceptivo utiliza?</label>
+                                        <input type="text" name="metodoAnticonceptivo" value={datos.metodoAnticonceptivo} onChange={handleInputChange} className="mt-1 p-2 border border-gray-300 rounded-md"/>
                                     </div>
                                 )}
-                            </div>
-                        <p><strong>DNI:</strong> {datosPaciente.cuil}</p>
-                        <p><strong>Edad:</strong> {datosPaciente.edad}</p>
-                        <p><strong>Género:</strong> {datosPaciente.genero}</p>
-
-                        {/* Mostrar datos adicionales si es femenino */}
-                        {datosPaciente.genero === 'femenino' && (
-                            <div className="mt-2 pt-2 border-t">
-                                <p><strong>Número de gestas:</strong> {datosPaciente.numeroGestas || 'No especificado'}</p>
-                                <p><strong>Fecha de última menstruación:</strong> {datosPaciente.fum || 'No especificada'}</p>
-                                <p><strong>Método anticonceptivo:</strong> {datosPaciente.metodoAnticonceptivo || 'No especificado'}</p>
-                                <p><strong>Trastornos hipertensivos del embarazo:</strong> {datosPaciente.trastornosHipertensivos || 'No especificado'}</p>
-                                <p><strong>Diabetes gestacional:</strong> {datosPaciente.diabetesGestacional || 'No especificado'}</p>
-                                <p><strong>Síndrome de Ovario Poliquístico:</strong> {datosPaciente.sop || 'No especificado'}</p>
+                                {datos.presentaCiclosMenstruales === 'no' && (
+                                    <PreguntaOpcion label="¿Presenta histerectomía?" name="presentaHisterectomia" value={datos.presentaHisterectomia} />
+                                )}
                             </div>
                         )}
-                        
-                        {/* Mostrar medicamentos para hipertensión si aplica */}
-                        {datosPaciente.hipertenso === 'Sí' && datosPaciente.medicamentosHipertension && (
-                             <div className="mt-2 pt-2 border-t">
-                                <p><strong>Medicamentos para Hipertensión:</strong> {datosPaciente.medicamentosHipertension}</p>
-                            </div>
-                        )}
-                        
-                        {datosPaciente.diabetes === 'Sí' && datosPaciente.medicamentosDiabetes && (
-                             <div className="mt-2 pt-2 border-t">
-                                <p><strong>Medicamentos para Diabetes:</strong> {datosPaciente.medicamentosDiabetes}</p>
-                            </div>
-                        )}
-                        
-                        {datosPaciente.medicolesterol === 'Sí' && datosPaciente.medicamentosColesterol && (
-                             <div className="mt-2 pt-2 border-t">
-                                <p><strong>Medicamentos para Colesterol:</strong> {datosPaciente.medicamentosColesterol}</p>
-                            </div>
-                        )}
-
-                        <p><strong>Diabetes:</strong> {datosPaciente.diabetes}</p>
-                        <p><strong>Fumador:</strong> {datosPaciente.fumador}</p>
-                        <p><strong>Ex-Fumador:</strong> {datosPaciente.exfumador}</p>
-                        <p><strong>Tensión Arterial Máxima:</strong> {datosPaciente.presionArterial}</p>
-                        <p><strong>Tensión Arterial Mínima:</strong> {datosPaciente.taMin}</p>
-                        <p><strong>Colesterol:</strong> {datosPaciente.colesterol || 'No especificado'}</p>
-                        <p><strong>Peso:</strong> {datosPaciente.peso || 'No especificado'} kg</p>
-                        <p><strong>Talla:</strong> {datosPaciente.talla || 'No especificada'} cm</p>
-                        <p><strong>Cintura:</strong> {datosPaciente.cintura || 'No especificada'} cm</p>
-                        <p><strong>IMC:</strong> {datosPaciente.imc || 'No calculado'}</p>
-                        <p><strong>Fecha de Registro:</strong> {datosPaciente.fechaRegistro}</p>
-                        <p><strong>Nivel de Riesgo:</strong></p>
-                        <div className="mb-4">
-                            {renderRiesgoGrid(nivelRiesgo)}
-                        </div>
-                        <button onClick={cerrarModal} className="mt-4 w-full py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600">
-                            Cerrar
-                        </button>
                     </div>
                 </div>
-            )}
 
-            {/* Mensaje de éxito */}
-            {mensajeExito && (
-                <div className="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded-md shadow-md">
-                    {mensajeExito}
-                </div>
-            )}
-
-            {/* Modal Advertencia */}
-            {modalAdvertencia && (
-                <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white p-6 rounded-md shadow-lg w-11/12 max-w-lg">
-                        <h2 className="text-lg font-semibold mb-4">Recomendaciones</h2>
-                        <div className="overflow-y-auto max-h-80">
-                            <pre className="whitespace-pre-wrap text-left">{modalAdvertencia}</pre>
+                {/* --- SECCIÓN MEDICIONES FÍSICAS --- */}
+                 <div className="p-4 border rounded-lg bg-white shadow-sm">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-700">Mediciones Físicas</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium text-gray-700">Peso (kg):</label>
+                            <input type="number" name="peso" value={datos.peso} onChange={handleInputChange} className="mt-1 p-2 border border-gray-300 rounded-md"/>
                         </div>
-                        <button onClick={cerrarModal} className="mt-4 py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600">
-                            Cerrar
-                        </button>
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium text-gray-700">Talla (cm):</label>
+                            <input type="number" name="talla" value={datos.talla} onChange={handleInputChange} className="mt-1 p-2 border border-gray-300 rounded-md"/>
+                        </div>
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium text-gray-700">Tensión Sistólica (Máx.):</label>
+                            <input type="number" name="taSistolica" value={datos.taSistolica} onChange={handleInputChange} className="mt-1 p-2 border border-gray-300 rounded-md"/>
+                        </div>
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium text-gray-700">Tensión Diastólica (Mín.):</label>
+                            <input type="number" name="taDiastolica" value={datos.taDiastolica} onChange={handleInputChange} className="mt-1 p-2 border border-gray-300 rounded-md"/>
+                        </div>
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium text-gray-700">Cintura (cm):</label>
+                            <input type="number" name="cintura" value={datos.cintura} onChange={handleInputChange} className="mt-1 p-2 border border-gray-300 rounded-md"/>
+                        </div>
+                        
+                        {/* IMC Calculado */}
+                        <div className="flex flex-col justify-center items-center bg-gray-100 p-4 rounded-lg">
+                            <label className="text-sm font-medium text-gray-700">Índice de Masa Corporal (IMC):</label>
+                            <p className="text-2xl font-bold mt-1 text-indigo-600">{imc || '...'}</p>
+                            {categoriaImc && (
+                                <p className={`mt-1 text-sm font-semibold px-2 py-1 rounded-full ${
+                                    categoriaImc === 'Normopeso' ? 'bg-green-200 text-green-800' :
+                                    categoriaImc === 'Sobrepeso' ? 'bg-yellow-200 text-yellow-800' :
+                                    categoriaImc === 'Obesidad' ? 'bg-red-200 text-red-800' :
+                                    'bg-blue-200 text-blue-800'
+                                }`}>{categoriaImc}</p>
+                            )}
+                        </div>
                     </div>
                 </div>
-            )}
+
+            </form>
         </div>
     );
 };
 
-export default Formulario;
+export default NuevoFormulario;
