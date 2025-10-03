@@ -36,7 +36,7 @@ const Header = () => {
   return (
     <header className="bg-red-600 text-white py-4 px-6 flex justify-between items-center relative">
       <Link to="/formulario" className="flex items-center text-2xl font-bold hover:text-gray-300">
-        <img src="/logo192.png" alt="Logo" className="h-8 mr-2" />
+        <img src="/farma.png" alt="Logo" className="h-8 mr-2" />
         <h1>RCV</h1>
       </Link>
 
