@@ -38,7 +38,7 @@ const datosInicialesMujer = {
     colesterol: 'No', // Valor por defecto
 };
 
-const FormularioMujer = () => {
+const Formulario = () => {
     const [datosMujer, setDatosMujer] = useState(datosInicialesMujer);
     const [imc, setImc] = useState({ valor: '', clasificacion: '' });
     const [nivelColesterolConocido, setNivelColesterolConocido] = useState(false);
