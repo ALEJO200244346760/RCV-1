@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from 'react';
 // ASUMO que estos archivos existen en tu proyecto y se mantienen igual.
 import { calcularRiesgoCardiovascular } from './Calculadora'; 
-import { Advertencia, obtenerColorRiesgo, obtenerTextoRiesgo } from './ConstFormulario';
-import axiosInstance from '../axiosConfig';
-import React, { useEffect, useState } from 'react';
-// Se importa la función para calcular el riesgo desde tu archivo.
-import { calcularRiesgoCardiovascular } from './Calculadora'; 
-// Asumo que estos archivos de constantes y configuración de axios ya existen en tu proyecto.
 import { obtenerColorRiesgo, obtenerTextoRiesgo } from './ConstFormulario';
 import axiosInstance from '../axiosConfig';
 
@@ -129,9 +123,7 @@ const Formulario = () => {
             return;
         }
 
-        // Mapeo de los datos del formulario a los requeridos por la calculadora
         const edadAjustada = ajustarEdad(parseInt(datosMujer.edad, 10));
-        // Se usa 'presionArterial' como nombre de la variable, tal como pediste
         const presionArterial = ajustarPresionArterial(parseInt(datosMujer.tensionSistolica, 10));
         const diabetes = datosMujer.medicacionCondiciones.includes('Diabetes') ? 'si' : 'no';
         const fuma = datosMujer.fumaDiario === 'Sí' ? 'si' : 'no';
@@ -139,15 +131,15 @@ const Formulario = () => {
 
         const riesgoCalculado = calcularRiesgoCardiovascular(
             edadAjustada,
-            'femenino', // Género es fijo
+            'femenino',
             diabetes,
             fuma,
-            presionArterial, // Se pasa la variable correcta
+            presionArterial,
             colesterolParaCalculo
         );
 
         setNivelRiesgo(riesgoCalculado);
-        setModalAdvertencia(null); // Limpiar advertencias previas
+        setModalAdvertencia(null);
         setMostrarModal(true);
     };
 
