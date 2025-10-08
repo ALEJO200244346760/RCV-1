@@ -81,7 +81,7 @@ public class Paciente {
     @Column
     private String cintura;
     @Column
-    private String tensionSistolica; // Anteriormente 'presionArterial'
+    private String presion; // Anteriormente 'presionArterial'
     @Column
     private String tensionDiastolica;
 }

@@ -3,13 +3,18 @@ import React, { useEffect, useState } from 'react';
 import { calcularRiesgoCardiovascular } from './Calculadora'; 
 import { Advertencia, obtenerColorRiesgo, obtenerTextoRiesgo } from './ConstFormulario';
 import axiosInstance from '../axiosConfig';
+import React, { useEffect, useState } from 'react';
+// Se importa la función para calcular el riesgo desde tu archivo.
+import { calcularRiesgoCardiovascular } from './Calculadora'; 
+// Asumo que estos archivos de constantes y configuración de axios ya existen en tu proyecto.
+import { obtenerColorRiesgo, obtenerTextoRiesgo } from './ConstFormulario';
+import axiosInstance from '../axiosConfig';
 
-
-// Se añaden los nuevos campos al estado inicial.
+// Estado inicial completo con los nuevos campos
 const datosInicialesMujer = {
     dni: '',
-    fechaNacimiento: '',
-    telefono: '',
+    fechaNacimiento: '', // NUEVO
+    telefono: '',        // NUEVO
     edad: '',
     tomaMedicacionDiario: null,
     medicacionCondiciones: [],
@@ -46,12 +51,10 @@ const Formulario = () => {
     const [nivelColesterolConocido, setNivelColesterolConocido] = useState(false);
     
     const [nivelRiesgo, setNivelRiesgo] = useState(null);
-    const [error, setError] = useState('');
     const [mensajeExito, setMensajeExito] = useState('');
     const [mostrarModal, setMostrarModal] = useState(false);
     const [modalAdvertencia, setModalAdvertencia] = useState(null);
 
-    // Efecto para calcular el IMC automáticamente
     useEffect(() => {
         const peso = parseFloat(datosMujer.peso);
         const tallaCm = parseFloat(datosMujer.talla);
@@ -94,21 +97,31 @@ const Formulario = () => {
     // --- LÓGICA DE CÁLCULO Y GUARDADO ---
 
     const validarCampos = () => {
-        // Campos clave para el cálculo de riesgo
         if (!datosMujer.dni || !datosMujer.edad || !datosMujer.tensionSistolica) {
-            setError('Por favor, complete DNI, Edad y Tensión Sistólica para calcular el riesgo.');
             setModalAdvertencia('Por favor, complete DNI, Edad y Tensión Sistólica para calcular el riesgo.');
             setMostrarModal(true);
             return false;
         }
         if (datosMujer.edad < 18 || datosMujer.edad > 100) {
-            setError('La edad debe ser un número válido.');
              setModalAdvertencia('La edad debe ser un número válido.');
              setMostrarModal(true);
             return false;
         }
-        setError('');
         return true;
+    };
+    
+    const ajustarEdad = (edad) => {
+        if (edad < 50) return 40;
+        if (edad >= 50 && edad <= 59) return 50;
+        if (edad >= 60 && edad <= 69) return 60;
+        return 70;
+    };
+
+    const ajustarPresionArterial = (presion) => {
+        if (presion < 140) return 120;
+        if (presion >= 140 && presion <= 159) return 140;
+        if (presion >= 160 && presion <= 179) return 160;
+        return 180;
     };
 
     const calcularRiesgo = () => {
@@ -116,25 +129,25 @@ const Formulario = () => {
             return;
         }
 
-        // --- LÓGICA DE CÁLCULO DE RIESGO ---
-        // 1. Mapear los datos del formulario a los que necesita la calculadora
+        // Mapeo de los datos del formulario a los requeridos por la calculadora
+        const edadAjustada = ajustarEdad(parseInt(datosMujer.edad, 10));
+        // Se usa 'presionArterial' como nombre de la variable, tal como pediste
+        const presionArterial = ajustarPresionArterial(parseInt(datosMujer.tensionSistolica, 10));
         const diabetes = datosMujer.medicacionCondiciones.includes('Diabetes') ? 'si' : 'no';
         const fuma = datosMujer.fumaDiario === 'Sí' ? 'si' : 'no';
-        const edadParaCalculo = parseInt(datosMujer.edad, 10);
-        const presionParaCalculo = parseInt(datosMujer.tensionSistolica, 10);
         const colesterolParaCalculo = nivelColesterolConocido ? parseInt(datosMujer.colesterol, 10) : "No";
 
-        // 2. Llamar a la función importada
         const riesgoCalculado = calcularRiesgoCardiovascular(
-            edadParaCalculo,
-            'femenino',
+            edadAjustada,
+            'femenino', // Género es fijo
             diabetes,
             fuma,
-            presionParaCalculo,
+            presionArterial, // Se pasa la variable correcta
             colesterolParaCalculo
         );
 
         setNivelRiesgo(riesgoCalculado);
+        setModalAdvertencia(null); // Limpiar advertencias previas
         setMostrarModal(true);
     };
 
@@ -142,17 +155,16 @@ const Formulario = () => {
         try {
             const payload = {
                 ...datosMujer,
-                imc: `${imc.valor} (${imc.clasificacion})`, // Envía el IMC como un string combinado
+                imc: `${imc.valor} (${imc.clasificacion})`,
                 nivelRiesgo: nivelRiesgo,
             };
-
             await axiosInstance.post('/api/pacientes', payload);
     
             setMensajeExito('Paciente guardado con éxito');
-            setMostrarModal(false); // Cierra el modal de resultados
+            setMostrarModal(false);
             setTimeout(() => setMensajeExito(''), 3000);
             setTimeout(() => {
-                window.location.reload(); 
+                window.location.reload();
             }, 1000);
         } catch (error) {
             console.error('Error al guardar los datos:', error);
@@ -197,24 +209,21 @@ const Formulario = () => {
                         <label className="text-sm font-medium text-gray-700">Edad:</label>
                         <input type="number" name="edad" value={datosMujer.edad} onChange={handleChange} className="mt-1 p-2 border rounded-md"/>
                     </div>
-                     <div className="flex flex-col">
+                    <div className="flex flex-col">
                         <label className="text-sm font-medium text-gray-700">Fecha de Nacimiento:</label>
                         <input type="date" name="fechaNacimiento" value={datosMujer.fechaNacimiento} onChange={handleChange} className="mt-1 p-2 border rounded-md"/>
                     </div>
-                     <div className="flex flex-col">
+                    <div className="flex flex-col">
                         <label className="text-sm font-medium text-gray-700">Teléfono:</label>
                         <input type="tel" name="telefono" value={datosMujer.telefono} onChange={handleChange} className="mt-1 p-2 border rounded-md"/>
                     </div>
                 </div>
 
-                {/* ... (resto del formulario sin cambios) ... */}
-
-                 <div className="flex flex-col">
+                <div className="flex flex-col">
                     <label className="text-sm font-medium text-gray-700">Género:</label>
                     <button type="button" className="p-2 border rounded bg-indigo-500 text-white w-full md:w-1/3 cursor-not-allowed">Femenino</button>
                 </div>
                 
-                {/* ... (resto del formulario sin cambios) ... */}
                 <div className="flex flex-col">
                     <label className="text-sm font-medium text-gray-700">¿Toma medicación a diario?</label>
                     <div className="flex space-x-2">
@@ -238,16 +247,128 @@ const Formulario = () => {
                         {['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('fumaDiario', o)} className={`p-2 border rounded ${datosMujer.fumaDiario === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>)}
                     </div>
                 </div>
+                
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium">¿Realiza actividad física 150 minutos semanales?</label>
+                    <div className="flex space-x-2 mt-1">
+                         {['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('actividadFisica', o)} className={`p-2 border rounded ${datosMujer.actividadFisica === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>)}
+                    </div>
+                </div>
 
-                {/* --- DATOS PARA CÁLCULO DE RIESGO --- */}
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium">¿Duerme más de 7 horas diarias?</label>
+                    <div className="flex space-x-2 mt-1">
+                         {['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('horasSueno', o)} className={`p-2 border rounded ${datosMujer.horasSueno === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>)}
+                    </div>
+                </div>
+
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium">¿Sufre de estrés crónico?</label>
+                    <div className="flex space-x-2 mt-1">
+                        {['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('estresCronico', o)} className={`p-2 border rounded ${datosMujer.estresCronico === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>)}
+                    </div>
+                    {datosMujer.estresCronico === 'Sí' && (
+                        <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 space-y-2 rounded-r-lg">
+                            {['Depresión', 'Otras'].map(tipo => (
+                                <div key={tipo}>
+                                    <input type="radio" id={`estres-${tipo}`} name="estresTipo" value={tipo} checked={datosMujer.estresTipo === tipo} onChange={handleChange} />
+                                    <label htmlFor={`estres-${tipo}`} className="ml-2">{tipo}</label>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium">¿Antecedentes de tumores ginecológicos?</label>
+                    <div className="flex space-x-2 mt-1">
+                         {['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('tumoresGinecologicos', o)} className={`p-2 border rounded ${datosMujer.tumoresGinecologicos === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>)}
+                    </div>
+                    {datosMujer.tumoresGinecologicos === 'Sí' && (
+                         <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 space-y-2 rounded-r-lg">
+                            {['Ovarios', 'Mama', 'Útero'].map(t => <div key={t}><input type="checkbox" id={t} value={t} checked={datosMujer.tumoresTipo.includes(t)} onChange={() => handleCheckboxChange('tumoresTipo', t)} /><label htmlFor={t} className="ml-2">{t}</label></div>)}
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium">¿Enfermedades autoinmunes?</label>
+                     <div className="flex space-x-2 mt-1">
+                         {['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('enfermedadesAutoinmunes', o)} className={`p-2 border rounded ${datosMujer.enfermedadesAutoinmunes === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>)}
+                    </div>
+                     {datosMujer.enfermedadesAutoinmunes === 'Sí' && (
+                         <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 space-y-2 rounded-r-lg">
+                            {['Lupus', 'Artritis', 'Otras'].map(e => <div key={e}><input type="checkbox" id={e} value={e} checked={datosMujer.autoinmunesTipo.includes(e)} onChange={() => handleCheckboxChange('autoinmunesTipo', e)} /><label htmlFor={e} className="ml-2">{e}</label></div>)}
+                        </div>
+                    )}
+                </div>
+                
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium">¿Tuvo hijos?</label>
+                     <div className="flex space-x-2 mt-1">
+                         {['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('tuvoHijos', o)} className={`p-2 border rounded ${datosMujer.tuvoHijos === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>)}
+                    </div>
+                     {datosMujer.tuvoHijos === 'Sí' && (
+                         <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 space-y-4 rounded-r-lg">
+                            <div className="flex flex-col"><label>¿Cuántos?:</label><input type="number" name="cantidadHijos" value={datosMujer.cantidadHijos} onChange={handleChange} className="p-2 border rounded"/></div>
+                            <div className="flex flex-col"><label>¿Tuvo hipertensión o diabetes gestacional?</label><div className="flex space-x-2 mt-1">{['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('complicacionesEmbarazo', o)} className={`p-2 border rounded ${datosMujer.complicacionesEmbarazo === o ? 'bg-green-500 text-white' : ''}`}>{o}</button>)}</div></div>
+                        </div>
+                    )}
+                    {datosMujer.tuvoHijos === 'No' && (
+                        <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 space-y-2 rounded-r-lg">
+                             {['No quiso', 'No pudo', 'Tuvo pérdidas', 'No se dio'].map(m => <div key={m}><input type="radio" id={m} name="motivoNoHijos" value={m} checked={datosMujer.motivoNoHijos === m} onChange={handleChange} /><label htmlFor={m} className="ml-2">{m}</label></div>)}
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium">¿Presenta ciclos menstruales?</label>
+                     <div className="flex space-x-2 mt-1">
+                         {['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('ciclosMenstruales', o)} className={`p-2 border rounded ${datosMujer.ciclosMenstruales === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>)}
+                    </div>
+                     {datosMujer.ciclosMenstruales === 'Sí' && (
+                        <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 rounded-r-lg">
+                            <label>Método anticonceptivo:</label>
+                            <input type="text" name="metodoAnticonceptivo" value={datosMujer.metodoAnticonceptivo} onChange={handleChange} className="p-2 border rounded w-full"/>
+                        </div>
+                     )}
+                     {datosMujer.ciclosMenstruales === 'No' && (
+                         <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 space-y-4 rounded-r-lg">
+                            <div className="flex flex-col"><label>¿Presenta histerectomía?</label><div className="flex space-x-2 mt-1">{['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('histerectomia', o)} className={`p-2 border rounded ${datosMujer.histerectomia === o ? 'bg-green-500 text-white' : ''}`}>{o}</button>)}</div></div>
+                            <div className="flex flex-col"><label>¿A qué edad presentó la menopausia?:</label><input type="number" name="edadMenopausia" value={datosMujer.edadMenopausia} onChange={handleChange} className="p-2 border rounded"/></div>
+                        </div>
+                     )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                     <div className="flex flex-col">
+                        <label>Peso (kg):</label>
+                        <input type="number" name="peso" value={datosMujer.peso} onChange={handleChange} className="mt-1 p-2 border rounded-md"/>
+                    </div>
+                     <div className="flex flex-col">
+                        <label>Talla (cm):</label>
+                        <input type="number" name="talla" value={datosMujer.talla} onChange={handleChange} className="mt-1 p-2 border rounded-md"/>
+                    </div>
+                     <div className="flex flex-col">
+                        <label>Cintura (cm):</label>
+                        <input type="number" name="cintura" value={datosMujer.cintura} onChange={handleChange} className="mt-1 p-2 border rounded-md"/>
+                    </div>
+                </div>
+
+                {imc.valor && (
+                    <div className="p-3 bg-gray-100 rounded-md text-center">
+                        <p className="font-semibold">IMC: {imc.valor} - <span className="font-bold">{imc.clasificacion}</span></p>
+                    </div>
+                )}
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex flex-col">
                         <label>Tensión Sistólica:</label>
-                        <input type="number" name="tensionSistolica" value={datosMujer.tensionSistolica} onChange={handleChange} className="mt-1 p-2 border rounded-md" placeholder="Ej: 120"/>
+                        <input type="number" name="tensionSistolica" value={datosMujer.tensionSistolica} onChange={handleChange} className="mt-1 p-2 border rounded-md"/>
                     </div>
                     <div className="flex flex-col">
                         <label>Tensión Diastólica:</label>
-                        <input type="number" name="tensionDiastolica" value={datosMujer.tensionDiastolica} onChange={handleChange} className="mt-1 p-2 border rounded-md" placeholder="Ej: 80"/>
+                        <input type="number" name="tensionDiastolica" value={datosMujer.tensionDiastolica} onChange={handleChange} className="mt-1 p-2 border rounded-md"/>
                     </div>
                 </div>
                  <div className="flex flex-col">
@@ -260,7 +381,6 @@ const Formulario = () => {
                         <input type="number" name="colesterol" value={datosMujer.colesterol === 'No' ? '' : datosMujer.colesterol} onChange={handleChange} placeholder="Ingrese valor de colesterol total" className="mt-2 p-2 border rounded"/>
                      )}
                 </div>
-
 
                 <button type="button" onClick={calcularRiesgo} className="w-full py-3 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700">
                     Calcular Riesgo y Finalizar
@@ -278,9 +398,15 @@ const Formulario = () => {
                            <p><strong>Fecha de Nacimiento:</strong> {datosMujer.fechaNacimiento}</p>
                            <p><strong>Teléfono:</strong> {datosMujer.telefono}</p>
                            <p><strong>Edad:</strong> {datosMujer.edad}</p>
-                           {/* ... (resto de los datos del modal) ... */}
                            <p><strong>Toma Medicación:</strong> {datosMujer.tomaMedicacionDiario} {datosMujer.tomaMedicacionDiario === 'Sí' ? `(${datosMujer.medicacionCondiciones.join(', ')})` : ''}</p>
                            <p><strong>Fuma:</strong> {datosMujer.fumaDiario}</p>
+                           <p><strong>Actividad Física (+150 min/sem):</strong> {datosMujer.actividadFisica}</p>
+                           <p><strong>Sueño (+7hs):</strong> {datosMujer.horasSueno}</p>
+                           <p><strong>Estrés Crónico:</strong> {datosMujer.estresCronico} {datosMujer.estresCronico === 'Sí' ? `(${datosMujer.estresTipo})` : ''}</p>
+                           <p><strong>Tuvo Hijos:</strong> {datosMujer.tuvoHijos} {datosMujer.tuvoHijos === 'Sí' ? `(Cantidad: ${datosMujer.cantidadHijos}, Complicaciones: ${datosMujer.complicacionesEmbarazo})` : `(${datosMujer.motivoNoHijos})`}</p>
+                           <p><strong>Ciclos Menstruales:</strong> {datosMujer.ciclosMenstruales}</p>
+                           <hr/>
+                           <p><strong>Peso:</strong> {datosMujer.peso} kg | <strong>Talla:</strong> {datosMujer.talla} cm | <strong>Cintura:</strong> {datosMujer.cintura} cm</p>
                            <p><strong>IMC:</strong> {imc.valor} ({imc.clasificacion})</p>
                            <p><strong>Tensión Arterial:</strong> {datosMujer.tensionSistolica} / {datosMujer.tensionDiastolica} mmHg</p>
                         </div>
