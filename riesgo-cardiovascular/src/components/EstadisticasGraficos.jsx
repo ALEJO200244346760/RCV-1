@@ -18,7 +18,14 @@ const BASE_COLORS = [
     '#EC4899', // Rosa
 ];
 
-function EstadisticasGraficos({ pacientesFiltrados }) {
+// Corregimos la destructuración para que pacientes tome [] si es undefined/null.
+function EstadisticasGraficos({ pacientes: pacientesFiltrados = [] }) {
+  
+  // Si por alguna razón la lista está vacía después de los filtros o aún no se cargó, 
+  // no generamos los gráficos para evitar errores o gráficos vacíos sin sentido.
+  if (pacientesFiltrados.length === 0) {
+      return <div className="p-4 text-center text-gray-500">No hay pacientes que coincidan con los filtros aplicados.</div>;
+  }
   
   // Función para calcular porcentajes para Tooltip
   const calcularPorcentajes = (data) => {
@@ -37,28 +44,25 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
       acc[key] = (acc[key] || 0) + 1;
       return acc;
     }, {});
-
-    // Eliminar 'N/A' si no hay datos, o manejarlo como una opción si es necesario.
-    // Para simplificar, asumiremos que si hay un filtro aplicado, el campo debe existir.
     
+    // Filtramos 'N/A' si no tiene datos
+    const filteredLabels = Object.keys(aggregation).filter(key => key === 'N/A' ? aggregation[key] > 0 : true);
+
     return {
-        labels: Object.keys(aggregation),
+        labels: filteredLabels,
         datasets: [{
             label: 'Cantidad',
-            data: Object.values(aggregation),
-            backgroundColor: colors.slice(0, Object.keys(aggregation).length),
-            borderColor: colors.slice(0, Object.keys(aggregation).length),
+            data: filteredLabels.map(key => aggregation[key]),
+            backgroundColor: colors.slice(0, filteredLabels.length),
+            borderColor: colors.slice(0, filteredLabels.length),
             borderWidth: 1
         }],
-        aggregation: aggregation // Adjunto la agregación para usarla en el tooltip
+        aggregation: aggregation 
     };
   };
 
-  // --- Gráficos Existentes Actualizados (Revisados los nombres de campo) ---
-
   // 1. Datos para Edad
   const edades = pacientesFiltrados.reduce((acc, paciente) => {
-    // El campo 'edad' en el paciente ya viene como la categoría de filtro (e.g., '51-60')
     acc[paciente.edad] = (acc[paciente.edad] || 0) + 1;
     return acc;
   }, {});
@@ -76,14 +80,14 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
   // 2. Datos para IMC (clasificacion)
   const imcCategorias = ['Bajo peso', 'Normopeso', 'Sobrepeso', 'Obesidad Grado I', 'Obesidad Grado II', 'Obesidad Grado III'];
   const conteoIMC = pacientesFiltrados.reduce((acc, paciente) => {
-    // El filtro IMC de Estadisticas.jsx usa directamente el campo 'imc' si es un string (no el objeto {clasificacion: '...'}).
-    // Aquí asumimos que p.imc es el string de clasificación para ser coherentes con el filtro.
+    // El campo IMC en el componente Estadisticas.jsx está filtrando por el valor string de la clasificación,
+    // por eso lo usamos directamente.
     const clasificacion = paciente.imc; 
     if (clasificacion && imcCategorias.includes(clasificacion)) {
       acc[clasificacion] = (acc[clasificacion] || 0) + 1;
     }
     return acc;
-  }, imcCategorias.reduce((a, c) => ({...a, [c]: 0}), {})); // Inicializa con 0s
+  }, imcCategorias.reduce((a, c) => ({...a, [c]: 0}), {})); 
 
   const dataIMC = {
     labels: imcCategorias.filter(categoria => conteoIMC[categoria] > 0),
@@ -118,14 +122,16 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
   // 4. Datos para Fumador (fumaDiario)
   const dataFumador = createBinaryPieData('fumaDiario', 'Fumador', ['#EF4444', '#34D399']);
   
-  // 5. Datos para Colesterol (Se mantiene la lógica de rangos)
+  // 5. Datos para Colesterol (rangos)
   const calcularRangoColesterol = (colesterol) => {
     if (colesterol == null || colesterol === 'No' || isNaN(colesterol)) return 'No conoce';
     const numColesterol = Number(colesterol);
-    if (numColesterol < 154) return 'Muy Bajo';
-    if (numColesterol >= 155 && numColesterol <= 192) return 'Bajo';
-    if (numColesterol >= 193 && numColesterol <= 231) return 'Moderado';
-    if (numColesterol >= 232) return 'Alto/Muy Alto'; // Combinamos por simplificar
+    // Rangos ajustados basados en el componente Estadisticas.jsx
+    if (numColesterol < 154) return 'Muy Bajo'; // 4
+    if (numColesterol >= 155 && numColesterol <= 192) return 'Bajo'; // 5
+    if (numColesterol >= 193 && numColesterol <= 231) return 'Moderado'; // 6
+    if (numColesterol >= 232) return 'Alto/Muy Alto'; // 7/8
+    return 'N/A';
   };
 
   const colesterolAggr = pacientesFiltrados.reduce((acc, paciente) => {
@@ -145,15 +151,13 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
     aggregation: colesterolAggr
   };
 
-  // 6. Datos para Diabetes (asumo que existe el campo 'diabetes')
-  // No hay filtro de diabetes en Estadisticas.jsx, pero mantengo el gráfico.
+  // 6. Datos para Diabetes (asumo campo 'diabetes')
   const dataDiabetes = createBinaryPieData('diabetes', 'Diabetes');
 
-  // 7. Datos para Ubicación (asumo que existe el campo 'ubicacion')
-  // No hay filtro de ubicación en Estadisticas.jsx, pero mantengo el gráfico.
+  // 7. Datos para Ubicación (asumo campo 'ubicacion')
   const dataUbicacion = createBinaryPieData('ubicacion', 'Ubicación', BASE_COLORS);
 
-  // --- NUEVOS GRÁFICOS ESPECÍFICOS DE MUJER/HÁBITOS ---
+  // --- NUEVOS GRÁFICOS DE HÁBITOS ---
 
   // 8. Toma Medicación Diaria
   const dataTomaMedicacion = createBinaryPieData('tomaMedicacionDiario', 'Toma Medicación Diaria', ['#8B5CF6', '#34D399']);
@@ -166,6 +170,8 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
 
   // 11. Estrés Crónico
   const dataEstresCronico = createBinaryPieData('estresCronico', 'Estrés Crónico', ['#EF4444', '#34D399']);
+
+  // --- NUEVOS GRÁFICOS DE SALUD FEMENINA ---
 
   // 12. Tumores Ginecológicos
   const dataTumoresGinecológicos = createBinaryPieData('tumoresGinecologicos', 'Tumores Ginecológicos', ['#EC4899', '#34D399']);
@@ -223,7 +229,6 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
             ticks: { stepSize: 1 }
         },
         x: {
-            // Asegura que las etiquetas del eje X se vean bien en la barra
             autoSkip: false,
             maxRotation: 45,
             minRotation: 45,
@@ -264,7 +269,7 @@ function EstadisticasGraficos({ pacientesFiltrados }) {
       <ChartWrapper title="Histerectomía" chartType="Pie" data={dataHisterectomia} options={pieOptions(dataHisterectomia.aggregation)} />
       <ChartWrapper title="Menopausia" chartType="Pie" data={dataMenopausia} options={pieOptions(dataMenopausia.aggregation)} />
       
-      {/* Otros Gráficos de Pastel */}
+      {/* Otros Gráficos */}
       <ChartWrapper title="Diabetes" chartType="Pie" data={dataDiabetes} options={pieOptions(dataDiabetes.aggregation)} />
       <ChartWrapper title="Rango de Colesterol" chartType="Pie" data={dataColesterol} options={pieOptions(dataColesterol.aggregation)} />
       <ChartWrapper title="Ubicación" chartType="Pie" data={dataUbicacion} options={pieOptions(dataUbicacion.aggregation)} />
