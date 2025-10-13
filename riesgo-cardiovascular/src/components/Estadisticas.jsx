@@ -318,7 +318,16 @@ function Estadisticas() {
             <div><strong>IMC:</strong> {p.imc}</div>
             <div><strong>Colesterol:</strong> {p.colesterol !== 'No' ? p.colesterol : 'No conoce'}</div>
             <div><strong>Fuma diario:</strong> {p.fumaDiario}</div>
-            <div><strong>Toma medicación:</strong> {p.tomaMedicacionDiario} {p.medicacionCondiciones?.length > 0 ? `(${p.medicacionCondiciones.join(', ')})` : ''}</div>
+            
+            {/* INICIO CORRECCIÓN para medicacionCondiciones */}
+            <div>
+              <strong>Toma medicación:</strong> {p.tomaMedicacionDiario}{' '}
+              {(p.medicacionCondiciones && p.medicacionCondiciones.length > 0)
+                ? `(${Array.isArray(p.medicacionCondiciones) ? p.medicacionCondiciones.join(', ') : p.medicacionCondiciones})`
+                : ''}
+            </div>
+            {/* FIN CORRECCIÓN */}
+
             <div>
               <strong>Riesgo:</strong>{' '}
               <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full text-white ${obtenerColorRiesgo(p.nivelRiesgo)}`}>
@@ -334,8 +343,23 @@ function Estadisticas() {
             
             <hr className="my-2"/>
             <p className="font-semibold text-sm text-gray-600">Salud Femenina:</p>
-            <div><strong>Tumores ginecológicos:</strong> {p.tumoresGinecologicos} {p.tumoresTipo?.length > 0 ? `(${p.tumoresTipo.join(', ')})` : ''}</div>
-            <div><strong>Enf. autoinmunes:</strong> {p.enfermedadesAutoinmunes} {p.autoinmunesTipo?.length > 0 ? `(${p.autoinmunesTipo.join(', ')})` : ''}</div>
+            
+            {/* CORRECCIÓN: Aplicar la misma validación de Array para tumoresTipo y autoinmunesTipo */}
+            <div>
+              <strong>Tumores ginecológicos:</strong> {p.tumoresGinecologicos}{' '}
+              {(p.tumoresTipo && p.tumoresTipo.length > 0)
+                ? `(${Array.isArray(p.tumoresTipo) ? p.tumoresTipo.join(', ') : p.tumoresTipo})`
+                : ''}
+            </div>
+
+            <div>
+              <strong>Enf. autoinmunes:</strong> {p.enfermedadesAutoinmunes}{' '}
+              {(p.autoinmunesTipo && p.autoinmunesTipo.length > 0)
+                ? `(${Array.isArray(p.autoinmunesTipo) ? p.autoinmunesTipo.join(', ') : p.autoinmunesTipo})`
+                : ''}
+            </div>
+            {/* FIN CORRECCIÓN de Array validation */}
+
             <div><strong>Tuvo hijos:</strong> {p.tuvoHijos}
                 {p.tuvoHijos === 'Sí' ? ` (${p.cantidadHijos} hijos, Complicaciones: ${p.complicacionesEmbarazo})` : ` (${p.motivoNoHijos})`}
             </div>
