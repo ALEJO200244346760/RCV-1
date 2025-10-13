@@ -13,63 +13,69 @@ public class Paciente {
 
     // --- Datos Generales y de Riesgo ---
     @Column
-    private String fechaRegistro; // Se mantiene del modelo original
+    private String fechaRegistro;
     @Column
-    private String ubicacion; // Se mantiene del modelo original
+    private String ubicacion;
     @Column
-    private String dni; // Anteriormente 'cuil'
+    private String dni;
+    @Column
+    private String telefono; // NUEVO
+    @Column
+    private String fechaNacimiento; // NUEVO
     @Column
     private String edad;
     @Column
-    private String genero; // Será 'femenino' por defecto desde el frontend
+    private String genero;
     @Column
     private String colesterol;
     @Column
-    private String nivelRiesgo; // Calculado
+    private String nivelRiesgo;
     @Column(columnDefinition = "TEXT")
-    private String imc; // Almacenará valor y clasificación, ej: "26.5 (Sobrepeso)"
+    private String imc; // Almacena "valor (clasificación)"
 
     // --- Hábitos de Vida ---
     @Column
-    private String tomaMedicacionDiario; // Sí/No
+    private String tomaMedicacionDiario;
     @Column(columnDefinition = "TEXT")
-    private String medicacionCondiciones; // "Diabetes, Hipertensión"
+    private String medicacionCondiciones;
     @Column
-    private String fumaDiario; // Sí/No
+    private String fumaDiario;
     @Column
-    private String actividadFisica; // Sí/No
+    private String actividadFisica;
     @Column
-    private String horasSueno; // Sí/No
+    private String horasSueno;
     @Column
-    private String estresCronico; // Sí/No
+    private String estresCronico;
     @Column
-    private String estresTipo; // "Depresión", "Otras"
+    private String estresTipo;
 
     // --- Antecedentes de Salud Femenina ---
     @Column
-    private String tumoresGinecologicos; // Sí/No
+    private String tumoresGinecologicos;
     @Column(columnDefinition = "TEXT")
-    private String tumoresTipo; // "Ovarios, Mama"
+    private String tumoresTipo;
     @Column
-    private String enfermedadesAutoinmunes; // Sí/No
+    private String enfermedadesAutoinmunes;
     @Column(columnDefinition = "TEXT")
-    private String autoinmunesTipo; // "Lupus, Artritis"
+    private String autoinmunesTipo;
     
     // --- Salud Reproductiva ---
     @Column
-    private String tuvoHijos; // Sí/No
+    private String tuvoHijos;
     @Column
     private String cantidadHijos;
     @Column
-    private String complicacionesEmbarazo; // Sí/No
+    private String complicacionesEmbarazo;
     @Column
-    private String motivoNoHijos; // "No quiso", "No pudo", etc.
+    private String motivoNoHijos;
     @Column
-    private String ciclosMenstruales; // Sí/No
+    private String ciclosMenstruales;
     @Column
     private String metodoAnticonceptivo;
     @Column
-    private String histerectomia; // Sí/No
+    private String histerectomia;
+    @Column
+    private String menopausia; // NUEVO
     @Column
     private String edadMenopausia;
 
@@ -81,7 +87,7 @@ public class Paciente {
     @Column
     private String cintura;
     @Column
-    private String presion; // Anteriormente 'presionArterial'
+    private String tensionSistolica; // CORREGIDO (antes 'presion')
     @Column
     private String tensionDiastolica;
 }
