@@ -145,26 +145,55 @@ const Formulario = () => {
 
     const guardarPaciente = async () => {
         try {
+            // Se crea una copia de los datos del estado para poder modificarlos de forma segura.
+            const datosParaEnviar = { ...datosMujer };
+
+            // Lógica clave para corregir el campo 'menopausia':
+            // Si la paciente indicó que NO tiene ciclos menstruales y además ingresó una edad para la menopausia,
+            // se establece el campo 'menopausia' como "Sí".
+            // Para todos los demás casos, se establece como "No".
+            if (datosParaEnviar.ciclosMenstruales === 'No' && datosParaEnviar.edadMenopausia) {
+                datosParaEnviar.menopausia = 'Sí';
+            } else {
+                datosParaEnviar.menopausia = 'No';
+            }
+
+            // Se construye el objeto final ('payload') que se enviará al backend.
+            // Incluye los datos del formulario ya corregidos, más el IMC y el nivel de riesgo.
             const payload = {
-                ...datosMujer,
+                ...datosParaEnviar,
                 imc: `${imc.valor} (${imc.clasificacion})`,
                 nivelRiesgo: nivelRiesgo,
             };
+
+            // Se realiza la llamada POST al endpoint de la API con los datos correctos.
             await axiosInstance.post('/api/pacientes', payload);
     
+            // Si la llamada es exitosa, se muestra un mensaje de éxito.
             setMensajeExito('Paciente guardado con éxito');
-            setMostrarModal(false);
+            setMostrarModal(false); // Se cierra el modal de resumen.
+
+            // Se programan acciones para limpiar el mensaje y recargar la página.
             setTimeout(() => setMensajeExito(''), 3000);
             setTimeout(() => {
                 window.location.reload();
             }, 1000);
+
         } catch (error) {
+            // Si ocurre un error en la llamada a la API, se captura aquí.
             console.error('Error al guardar los datos:', error);
-            setModalAdvertencia('Ocurrió un error al guardar los datos.');
+            
+            // Es muy útil mostrar en consola el detalle del error que devuelve el backend.
+            if (error.response) {
+                console.error('Detalle del error del backend:', error.response.data);
+            }
+            
+            // Se muestra una advertencia genérica al usuario.
+            setModalAdvertencia('Ocurrió un error al guardar los datos. Revise la consola para más detalles.');
             setMostrarModal(true);
         }
     };
-
+    
     const cerrarModal = () => {
         setMostrarModal(false);
         setModalAdvertencia(null);

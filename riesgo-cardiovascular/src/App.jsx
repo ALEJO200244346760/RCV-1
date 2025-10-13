@@ -27,7 +27,7 @@ function App() {
           element={
             (token && (isCardiologo || isCardiologia)) 
               ? <Formulario /> 
-              : <Navigate to="/rcv" />
+              : <Navigate to="/" />
           } 
         />
         <Route path="/rcv" element={<Rcv />} />
