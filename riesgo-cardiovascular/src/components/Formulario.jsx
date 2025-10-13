@@ -142,41 +142,41 @@ const Formulario = () => {
         setModalAdvertencia(null);
         setMostrarModal(true);
     };
-
+    
     const guardarPaciente = async () => {
         try {
-            // Se crea una copia de los datos del estado para poder modificarlos.
-            const datosParaEnviar = { ...datosMujer };
+            // 1. Clonar los datos del formulario
+            let datosParaEnviar = { ...datosMujer };
 
-            // --- INICIO DE LA CORRECCIÓN DEFINITIVA ---
-
-            // 1. Lógica para asignar un valor a 'menopausia' (como antes).
+            // 2. Lógica para menopausia
             if (datosParaEnviar.ciclosMenstruales === 'No' && datosParaEnviar.edadMenopausia) {
                 datosParaEnviar.menopausia = 'Sí';
             } else {
                 datosParaEnviar.menopausia = 'No';
             }
 
-            // 2. Bucle para convertir TODOS los valores 'null' a un texto vacío ("").
-            // Esto previene el error 400 para cualquier campo que no se haya completado.
+            // 3. Convertir null a string vacío
             Object.keys(datosParaEnviar).forEach(key => {
                 if (datosParaEnviar[key] === null) {
                     datosParaEnviar[key] = '';
                 }
             });
 
-            // 3. Se construye el payload final con los datos ya limpios.
+            // 4. Convertir campos tipo array a string
+            const camposArray = ['medicacionCondiciones', 'autoinmunesTipo', 'tumoresTipo'];
+            datosParaEnviar = transformarArraysAString(datosParaEnviar, camposArray);
+
+            // 5. Armar payload final
             const payload = {
                 ...datosParaEnviar,
                 imc: `${imc.valor} (${imc.clasificacion})`,
                 nivelRiesgo: nivelRiesgo,
             };
 
-            // --- FIN DE LA CORRECCIÓN ---
-
-            // Se realiza la llamada POST al endpoint de la API con el payload seguro.
+            // 6. Enviar POST
             await axiosInstance.post('/api/pacientes', payload);
-    
+
+            // 7. Feedback y recarga
             setMensajeExito('Paciente guardado con éxito');
             setMostrarModal(false);
             setTimeout(() => setMensajeExito(''), 3000);
@@ -193,6 +193,18 @@ const Formulario = () => {
             setMostrarModal(true);
         }
     };
+
+// Función auxiliar para arrays
+const transformarArraysAString = (obj, camposArray) => {
+    const nuevo = { ...obj };
+    camposArray.forEach(campo => {
+        if (Array.isArray(nuevo[campo])) {
+            nuevo[campo] = nuevo[campo].join(', ');
+        }
+    });
+    return nuevo;
+};
+
 
     const cerrarModal = () => {
         setMostrarModal(false);
