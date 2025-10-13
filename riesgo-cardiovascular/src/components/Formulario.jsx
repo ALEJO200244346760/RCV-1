@@ -145,55 +145,55 @@ const Formulario = () => {
 
     const guardarPaciente = async () => {
         try {
-            // Se crea una copia de los datos del estado para poder modificarlos de forma segura.
+            // Se crea una copia de los datos del estado para poder modificarlos.
             const datosParaEnviar = { ...datosMujer };
 
-            // Lógica clave para corregir el campo 'menopausia':
-            // Si la paciente indicó que NO tiene ciclos menstruales y además ingresó una edad para la menopausia,
-            // se establece el campo 'menopausia' como "Sí".
-            // Para todos los demás casos, se establece como "No".
+            // --- INICIO DE LA CORRECCIÓN DEFINITIVA ---
+
+            // 1. Lógica para asignar un valor a 'menopausia' (como antes).
             if (datosParaEnviar.ciclosMenstruales === 'No' && datosParaEnviar.edadMenopausia) {
                 datosParaEnviar.menopausia = 'Sí';
             } else {
                 datosParaEnviar.menopausia = 'No';
             }
 
-            // Se construye el objeto final ('payload') que se enviará al backend.
-            // Incluye los datos del formulario ya corregidos, más el IMC y el nivel de riesgo.
+            // 2. Bucle para convertir TODOS los valores 'null' a un texto vacío ("").
+            // Esto previene el error 400 para cualquier campo que no se haya completado.
+            Object.keys(datosParaEnviar).forEach(key => {
+                if (datosParaEnviar[key] === null) {
+                    datosParaEnviar[key] = '';
+                }
+            });
+
+            // 3. Se construye el payload final con los datos ya limpios.
             const payload = {
                 ...datosParaEnviar,
                 imc: `${imc.valor} (${imc.clasificacion})`,
                 nivelRiesgo: nivelRiesgo,
             };
 
-            // Se realiza la llamada POST al endpoint de la API con los datos correctos.
+            // --- FIN DE LA CORRECCIÓN ---
+
+            // Se realiza la llamada POST al endpoint de la API con el payload seguro.
             await axiosInstance.post('/api/pacientes', payload);
     
-            // Si la llamada es exitosa, se muestra un mensaje de éxito.
             setMensajeExito('Paciente guardado con éxito');
-            setMostrarModal(false); // Se cierra el modal de resumen.
-
-            // Se programan acciones para limpiar el mensaje y recargar la página.
+            setMostrarModal(false);
             setTimeout(() => setMensajeExito(''), 3000);
             setTimeout(() => {
                 window.location.reload();
             }, 1000);
 
         } catch (error) {
-            // Si ocurre un error en la llamada a la API, se captura aquí.
             console.error('Error al guardar los datos:', error);
-            
-            // Es muy útil mostrar en consola el detalle del error que devuelve el backend.
             if (error.response) {
                 console.error('Detalle del error del backend:', error.response.data);
             }
-            
-            // Se muestra una advertencia genérica al usuario.
             setModalAdvertencia('Ocurrió un error al guardar los datos. Revise la consola para más detalles.');
             setMostrarModal(true);
         }
     };
-    
+
     const cerrarModal = () => {
         setMostrarModal(false);
         setModalAdvertencia(null);
