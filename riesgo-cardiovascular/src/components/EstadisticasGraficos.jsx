@@ -6,16 +6,16 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Toolti
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
-// Colores base para gráficos
+// Colores base para gráficos (adaptados a la paleta de Tailwind/Moderno)
 const BASE_COLORS = [
-    '#60A5FA', // Azul
-    '#34D399', // Verde
-    '#FDE047', // Amarillo
-    '#F97316', // Naranja
-    '#EF4444', // Rojo
-    '#B91C1C', // Rojo oscuro
-    '#8B5CF6', // Púrpura
-    '#EC4899', // Rosa
+    '#60A5FA', // Azul (Bajo riesgo/general)
+    '#34D399', // Verde (Bueno)
+    '#FDE047', // Amarillo (Moderado)
+    '#F97316', // Naranja (Alto)
+    '#EF4444', // Rojo (Muy Alto/Negativo)
+    '#8B5CF6', // Púrpura (Salud Femenina)
+    '#EC4899', // Rosa (Salud Femenina)
+    '#B91C1C', // Rojo oscuro (Crítico)
 ];
 
 // Corregimos la destructuración para que pacientes tome [] si es undefined/null.
@@ -29,249 +29,208 @@ function EstadisticasGraficos({ pacientes: pacientesFiltrados = [] }) {
   
   // Función para calcular porcentajes para Tooltip
   const calcularPorcentajes = (data) => {
-    const total = Object.values(data).reduce((sum, val) => sum + val, 0);
+    const total = Object.values(data).reduce((sum, current) => sum + current, 0);
     return Object.keys(data).reduce((acc, key) => {
-      acc[key] = total > 0 ? ((data[key] / total) * 100).toFixed(2) : 0;
-      return acc;
+        acc[key] = total > 0 ? ((data[key] / total) * 100).toFixed(1) : 0;
+        return acc;
     }, {});
   };
+  
+  // Función centralizada de agregación para gráficos de pastel (Pie)
+  const aggregateDataPie = (field, customTransform = (val) => val) => {
+      const aggregation = {};
+      pacientesFiltrados.forEach(p => {
+          const value = customTransform(p[field]);
+          if (value) {
+              aggregation[value] = (aggregation[value] || 0) + 1;
+          } else {
+              aggregation['No especificado'] = (aggregation['No especificado'] || 0) + 1;
+          }
+      });
+      
+      const labels = Object.keys(aggregation);
+      const dataValues = Object.values(aggregation);
+      
+      return {
+          labels: labels,
+          datasets: [{
+              data: dataValues,
+              backgroundColor: labels.map((_, index) => BASE_COLORS[index % BASE_COLORS.length]),
+              hoverOffset: 4
+          }],
+          aggregation: aggregation,
+      };
+  };
+  
+  // Función de agregación para el IMC (Gráfico de Barras)
+  const aggregateIMC = () => {
+    const categories = {
+        'Bajo Peso': 0,
+        'Peso Normal': 0,
+        'Sobrepeso': 0,
+        'Obesidad Clase I': 0,
+        'Obesidad Clase II': 0,
+        'Obesidad Clase III': 0,
+    };
 
-  // Función genérica para crear datos de Pie Chart a partir de un campo booleano (Sí/No)
-  const createBinaryPieData = (field, title, colors = ['#34D399', '#EF4444']) => {
-    const aggregation = pacientesFiltrados.reduce((acc, paciente) => {
-      // Usamos 'N/A' si el campo es undefined/null o string vacío.
-      const key = paciente[field] || 'N/A';
-      acc[key] = (acc[key] || 0) + 1;
-      return acc;
-    }, {});
-    
-    // Filtramos 'N/A' si no tiene datos
-    const filteredLabels = Object.keys(aggregation).filter(key => key === 'N/A' ? aggregation[key] > 0 : true);
+    pacientesFiltrados.forEach(p => {
+        // Asumiendo que p.imc viene en formato "valor (clasificación)"
+        const match = p.imc ? p.imc.match(/\((.*?)\)/) : null;
+        const classification = match ? match[1] : null;
+
+        if (classification && categories.hasOwnProperty(classification)) {
+            categories[classification]++;
+        }
+    });
+
+    const labels = Object.keys(categories);
+    const dataValues = Object.values(categories);
 
     return {
-        labels: filteredLabels,
+        labels: labels,
         datasets: [{
-            label: 'Cantidad',
-            data: filteredLabels.map(key => aggregation[key]),
-            backgroundColor: colors.slice(0, filteredLabels.length),
-            borderColor: colors.slice(0, filteredLabels.length),
-            borderWidth: 1
-        }],
-        aggregation: aggregation 
+            label: 'Número de Pacientes',
+            data: dataValues,
+            backgroundColor: [
+                '#60A5FA', // Bajo Peso
+                '#34D399', // Peso Normal
+                '#FDE047', // Sobrepeso
+                '#F97316', // Obesidad I
+                '#EF4444', // Obesidad II
+                '#B91C1C', // Obesidad III
+            ],
+            borderColor: '#fff',
+            borderWidth: 1,
+        }]
     };
   };
 
-  // 1. Datos para Edad
-  const edades = pacientesFiltrados.reduce((acc, paciente) => {
-    acc[paciente.edad] = (acc[paciente.edad] || 0) + 1;
-    return acc;
-  }, {});
-  const dataEdad = {
-    labels: Object.keys(edades),
-    datasets: [{
-      label: 'Cantidad',
-      data: Object.values(edades),
-      backgroundColor: BASE_COLORS,
-      borderColor: BASE_COLORS,
-      borderWidth: 1
-    }]
-  };
-
-  // 2. Datos para IMC (clasificacion)
-  const imcCategorias = ['Bajo peso', 'Normopeso', 'Sobrepeso', 'Obesidad Grado I', 'Obesidad Grado II', 'Obesidad Grado III'];
-  const conteoIMC = pacientesFiltrados.reduce((acc, paciente) => {
-    // El campo IMC en el componente Estadisticas.jsx está filtrando por el valor string de la clasificación,
-    // por eso lo usamos directamente.
-    const clasificacion = paciente.imc; 
-    if (clasificacion && imcCategorias.includes(clasificacion)) {
-      acc[clasificacion] = (acc[clasificacion] || 0) + 1;
-    }
-    return acc;
-  }, imcCategorias.reduce((a, c) => ({...a, [c]: 0}), {})); 
-
-  const dataIMC = {
-    labels: imcCategorias.filter(categoria => conteoIMC[categoria] > 0),
-    datasets: [{
-      label: 'Número de Pacientes',
-      data: imcCategorias.map(categoria => conteoIMC[categoria]).filter(count => count > 0),
-      backgroundColor: ['#60A5FA', '#34D399', '#FDE047', '#F97316', '#EF4444', '#B91C1C'],
-      borderColor: ['#60A5FA', '#34D399', '#FDE047', '#F97316', '#EF4444', '#B91C1C'],
-      borderWidth: 1
-    }],
-    aggregation: conteoIMC
-  };
-
-  // 3. Datos para Nivel de Riesgo
-  const riesgos = pacientesFiltrados.reduce((acc, paciente) => {
-    acc[paciente.nivelRiesgo] = (acc[paciente.nivelRiesgo] || 0) + 1;
-    return acc;
-  }, {});
-  const labelsRiesgoOrdenadas = ['<10% Bajo', '>10% <20% Moderado', '>20% <30% Alto', '>30% <40% Muy Alto', '>40% Crítico'];
-  const dataRiesgo = {
-    labels: labelsRiesgoOrdenadas.filter(label => riesgos[label] !== undefined && riesgos[label] > 0),
-    datasets: [{
-      label: 'Cantidad',
-      data: labelsRiesgoOrdenadas.map(label => riesgos[label] || 0).filter(count => count > 0),
-      backgroundColor: BASE_COLORS.slice(0, labelsRiesgoOrdenadas.length),
-      borderColor: BASE_COLORS.slice(0, labelsRiesgoOrdenadas.length),
-      borderWidth: 1
-    }],
-    aggregation: riesgos
-  };
-
-  // 4. Datos para Fumador (fumaDiario)
-  const dataFumador = createBinaryPieData('fumaDiario', 'Fumador', ['#EF4444', '#34D399']);
-  
-  // 5. Datos para Colesterol (rangos)
-  const calcularRangoColesterol = (colesterol) => {
-    if (colesterol == null || colesterol === 'No' || isNaN(colesterol)) return 'No conoce';
-    const numColesterol = Number(colesterol);
-    // Rangos ajustados basados en el componente Estadisticas.jsx
-    if (numColesterol < 154) return 'Muy Bajo'; // 4
-    if (numColesterol >= 155 && numColesterol <= 192) return 'Bajo'; // 5
-    if (numColesterol >= 193 && numColesterol <= 231) return 'Moderado'; // 6
-    if (numColesterol >= 232) return 'Alto/Muy Alto'; // 7/8
-    return 'N/A';
-  };
-
-  const colesterolAggr = pacientesFiltrados.reduce((acc, paciente) => {
-    const rango = calcularRangoColesterol(paciente.colesterol);
-    acc[rango] = (acc[rango] || 0) + 1;
-    return acc;
-  }, { 'No conoce': 0 });
-  const dataColesterol = {
-    labels: Object.keys(colesterolAggr).filter(label => colesterolAggr[label] > 0),
-    datasets: [{
-      label: 'Cantidad',
-      data: Object.values(colesterolAggr).filter(count => count > 0),
-      backgroundColor: BASE_COLORS,
-      borderColor: BASE_COLORS,
-      borderWidth: 1
-    }],
-    aggregation: colesterolAggr
-  };
-
-  // 6. Datos para Diabetes (asumo campo 'diabetes')
-  const dataDiabetes = createBinaryPieData('diabetes', 'Diabetes');
-
-  // 7. Datos para Ubicación (asumo campo 'ubicacion')
-  const dataUbicacion = createBinaryPieData('ubicacion', 'Ubicación', BASE_COLORS);
-
-  // --- NUEVOS GRÁFICOS DE HÁBITOS ---
-
-  // 8. Toma Medicación Diaria
-  const dataTomaMedicacion = createBinaryPieData('tomaMedicacionDiario', 'Toma Medicación Diaria', ['#8B5CF6', '#34D399']);
-
-  // 9. Actividad Física
-  const dataActividadFisica = createBinaryPieData('actividadFisica', 'Actividad Física $\ge 150 \text{ min/sem}$', ['#34D399', '#EF4444']);
-  
-  // 10. Horas Sueño (+7h)
-  const dataHorasSueno = createBinaryPieData('horasSueno', 'Duerme $+7\text{h}$', ['#60A5FA', '#F97316']);
-
-  // 11. Estrés Crónico
-  const dataEstresCronico = createBinaryPieData('estresCronico', 'Estrés Crónico', ['#EF4444', '#34D399']);
-
-  // --- NUEVOS GRÁFICOS DE SALUD FEMENINA ---
-
-  // 12. Tumores Ginecológicos
-  const dataTumoresGinecológicos = createBinaryPieData('tumoresGinecologicos', 'Tumores Ginecológicos', ['#EC4899', '#34D399']);
-
-  // 13. Enfermedades Autoinmunes
-  const dataEnfermedadesAutoinmunes = createBinaryPieData('enfermedadesAutoinmunes', 'Enfermedades Autoinmunes', ['#B91C1C', '#34D399']);
-  
-  // 14. Tuvo Hijos
-  const dataTuvoHijos = createBinaryPieData('tuvoHijos', 'Tuvo Hijos', ['#8B5CF6', '#EC4899']);
-
-  // 15. Ciclos Menstruales
-  const dataCiclosMenstruales = createBinaryPieData('ciclosMenstruales', 'Ciclos Menstruales', ['#EC4899', '#34D399']);
-
-  // 16. Histerectomía
-  const dataHisterectomia = createBinaryPieData('histerectomia', 'Histerectomía', ['#F97316', '#34D399']);
-
-  // 17. Menopausia
-  const dataMenopausia = createBinaryPieData('menopausia', 'Menopausia', ['#EC4899', '#34D399']);
-  
-  // Opciones base para los gráficos (tooltips con porcentaje)
+  // Opciones base para Gráficos de Pastel
   const pieOptions = (aggregation) => ({
-      responsive: true,
-      plugins: { 
-          legend: { position: 'top' }, 
-          tooltip: { 
-              callbacks: { 
-                  label: (tooltipItem) => {
-                      const label = tooltipItem.label;
-                      const raw = tooltipItem.raw;
-                      const percentages = calcularPorcentajes(aggregation);
-                      return `${label}: ${raw} (${percentages[label]}%)`;
-                  } 
-              } 
-          }
-      }
+    responsive: true,
+    plugins: {
+        legend: {
+            position: 'top',
+        },
+        tooltip: {
+            callbacks: {
+                label: function(context) {
+                    const label = context.label || '';
+                    const value = context.parsed || 0;
+                    const total = Object.values(aggregation).reduce((sum, current) => sum + current, 0);
+                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                    return `${label}: ${value} (${percentage}%)`;
+                }
+            }
+        },
+        title: {
+            display: false,
+        },
+    }
   });
 
-  const barOptions = (aggregation) => ({
+  // Opciones base para Gráficos de Barra
+  const barOptions = {
     responsive: true,
-    plugins: { 
-        legend: { display: false }, 
-        tooltip: { 
-            callbacks: { 
-                label: (tooltipItem) => {
-                    const label = tooltipItem.label;
-                    const raw = tooltipItem.raw;
-                    const percentages = calcularPorcentajes(aggregation);
-                    return `${label}: ${raw} (${percentages[label]}%)`;
-                } 
-            } 
-        }
+    plugins: {
+        legend: { position: 'top', },
+        title: { display: false },
     },
     scales: {
-        y: { 
-            ticks: { stepSize: 1 }
-        },
-        x: {
-            autoSkip: false,
-            maxRotation: 45,
-            minRotation: 45,
+        y: {
+            beginAtZero: true
         }
     }
+  };
+
+  // --- 1. Generación de Datos para Gráficos ---
+
+  // Datos de Riesgo y Demográficos
+  const dataNivelRiesgo = aggregateDataPie('nivelRiesgo');
+  const dataGenero = aggregateDataPie('genero');
+  const dataIMC = aggregateIMC();
+
+  // Datos de Hábitos de Vida
+  const dataFumador = aggregateDataPie('fumaDiario');
+  const dataTomaMedicacion = aggregateDataPie('tomaMedicacionDiario', (val) => val === 'Sí' ? 'Sí' : 'No'); // Simplificamos a Sí/No
+  const dataActividadFisica = aggregateDataPie('actividadFisica');
+  const dataHorasSueno = aggregateDataPie('horasSueno');
+  const dataEstresCronico = aggregateDataPie('estresCronico');
+  
+  // Datos de Salud Femenina
+  const dataTumoresGinecológicos = aggregateDataPie('tumoresGinecologicos');
+  const dataEnfermedadesAutoinmunes = aggregateDataPie('enfermedadesAutoinmunes');
+  const dataTuvoHijos = aggregateDataPie('tuvoHijos');
+  const dataCiclosMenstruales = aggregateDataPie('ciclosMenstruales');
+  const dataHisterectomia = aggregateDataPie('histerectomia');
+  const dataMenopausia = aggregateDataPie('menopausia');
+
+  // --- NUEVOS GRÁFICOS DE SALUD MAMARIA ---
+  const dataFamiliarCancerMama = aggregateDataPie('familiarCancerMama');
+  const dataPuncionMama = aggregateDataPie('puncionMama');
+  const dataMamaDensa = aggregateDataPie('mamaDensa');
+  // ----------------------------------------
+
+  // Gráfico de Colesterol (Conoce/Nivel) - Ejemplo de transformación
+  const dataColesterol = aggregateDataPie('colesterol', (val) => val === 'No' ? 'No Conoce / No tiene' : 'Sí Conoce / Tiene');
+  
+  // Gráfico de Condiciones (Diabetes) - Transformación de Array/String
+  const dataDiabetes = aggregateDataPie('medicacionCondiciones', (val) => {
+    if (!val) return 'No';
+    const conditions = Array.isArray(val) ? val : val.split(', ').map(c => c.trim());
+    return conditions.some(c => c.toLowerCase().includes('diabetes')) ? 'Sí' : 'No';
   });
-
-
+  
+  // Componente Wrapper para gráficos
   const ChartWrapper = ({ title, chartType, data, options }) => (
-    <div className="bg-white p-4 shadow-lg rounded-lg h-96 flex flex-col">
-        <h3 className="text-center font-semibold mb-2">{title}</h3>
-        <div className="flex-grow flex items-center justify-center">
-          {chartType === 'Bar' ? <Bar data={data} options={options} /> : <Pie data={data} options={options} />}
-        </div>
-    </div>
+      <div className="p-4 bg-gray-50 rounded-lg shadow-md border">
+          <h3 className="text-lg font-semibold text-gray-700 mb-4 text-center">{title}</h3>
+          <div className="h-64 flex items-center justify-center">
+              {chartType === 'Pie' && <Pie data={data} options={options} />}
+              {chartType === 'Bar' && <Bar data={data} options={options} />}
+          </div>
+      </div>
   );
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="space-y-8">
       
-      {/* Gráficos de Barras / Distribución */}
-      <ChartWrapper title="Distribución de Edad" chartType="Bar" data={dataEdad} options={barOptions(edades)} />
-      <ChartWrapper title="Clasificación de IMC" chartType="Bar" data={dataIMC} options={barOptions(dataIMC.aggregation)} />
-      <ChartWrapper title="Nivel de Riesgo Cardiovascular" chartType="Bar" data={dataRiesgo} options={barOptions(dataRiesgo.aggregation)} />
-      
-      {/* Gráficos de Hábitos */}
-      <ChartWrapper title="Fumador Diario" chartType="Pie" data={dataFumador} options={pieOptions(dataFumador.aggregation)} />
-      <ChartWrapper title="Toma Medicación Diaria" chartType="Pie" data={dataTomaMedicacion} options={pieOptions(dataTomaMedicacion.aggregation)} />
-      <ChartWrapper title="Actividad Física $\ge 150 \text{ min/sem}$" chartType="Pie" data={dataActividadFisica} options={pieOptions(dataActividadFisica.aggregation)} />
-      <ChartWrapper title="Duerme $+7\text{h}$" chartType="Pie" data={dataHorasSueno} options={pieOptions(dataHorasSueno.aggregation)} />
-      <ChartWrapper title="Estrés Crónico" chartType="Pie" data={dataEstresCronico} options={pieOptions(dataEstresCronico.aggregation)} />
+      {/* Sección 1: Riesgo Cardiovascular y Demográficos */}
+      <h2 className="text-2xl font-bold text-indigo-700 pt-4 border-t-2 border-indigo-200">Riesgo y Demografía</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <ChartWrapper title="Nivel de Riesgo Cardiovascular" chartType="Pie" data={dataNivelRiesgo} options={pieOptions(dataNivelRiesgo.aggregation)} />
+        <ChartWrapper title="Clasificación de Género" chartType="Pie" data={dataGenero} options={pieOptions(dataGenero.aggregation)} />
+        <ChartWrapper title="Clasificación de IMC" chartType="Bar" data={dataIMC} options={barOptions} />
+      </div>
 
-      {/* Gráficos de Salud Femenina */}
-      <ChartWrapper title="Tumores Ginecológicos" chartType="Pie" data={dataTumoresGinecológicos} options={pieOptions(dataTumoresGinecológicos.aggregation)} />
-      <ChartWrapper title="Enfermedades Autoinmunes" chartType="Pie" data={dataEnfermedadesAutoinmunes} options={pieOptions(dataEnfermedadesAutoinmunes.aggregation)} />
-      <ChartWrapper title="Tuvo Hijos" chartType="Pie" data={dataTuvoHijos} options={pieOptions(dataTuvoHijos.aggregation)} />
-      <ChartWrapper title="Ciclos Menstruales" chartType="Pie" data={dataCiclosMenstruales} options={pieOptions(dataCiclosMenstruales.aggregation)} />
-      <ChartWrapper title="Histerectomía" chartType="Pie" data={dataHisterectomia} options={pieOptions(dataHisterectomia.aggregation)} />
-      <ChartWrapper title="Menopausia" chartType="Pie" data={dataMenopausia} options={pieOptions(dataMenopausia.aggregation)} />
+      {/* Sección 2: Hábitos y Estilo de Vida */}
+      <h2 className="text-2xl font-bold text-indigo-700 pt-4 border-t-2 border-indigo-200">Hábitos de Vida</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <ChartWrapper title="Fumador Diario" chartType="Pie" data={dataFumador} options={pieOptions(dataFumador.aggregation)} />
+        <ChartWrapper title="Actividad Física" chartType="Pie" data={dataActividadFisica} options={pieOptions(dataActividadFisica.aggregation)} />
+        <ChartWrapper title="Horas de Sueño" chartType="Pie" data={dataHorasSueno} options={pieOptions(dataHorasSueno.aggregation)} />
+        <ChartWrapper title="Estrés Crónico" chartType="Pie" data={dataEstresCronico} options={pieOptions(dataEstresCronico.aggregation)} />
+        <ChartWrapper title="Uso de Medicación Diaria" chartType="Pie" data={dataTomaMedicacion} options={pieOptions(dataTomaMedicacion.aggregation)} />
+        <ChartWrapper title="Conocimiento/Nivel de Colesterol" chartType="Pie" data={dataColesterol} options={pieOptions(dataColesterol.aggregation)} />
+      </div>
       
-      {/* Otros Gráficos */}
-      <ChartWrapper title="Diabetes" chartType="Pie" data={dataDiabetes} options={pieOptions(dataDiabetes.aggregation)} />
-      <ChartWrapper title="Rango de Colesterol" chartType="Pie" data={dataColesterol} options={pieOptions(dataColesterol.aggregation)} />
+      {/* Sección 3: Salud Femenina y Antecedentes */}
+      <h2 className="text-2xl font-bold text-indigo-700 pt-4 border-t-2 border-indigo-200">Salud Femenina y Antecedentes</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* --- NUEVOS GRÁFICOS DE SALUD MAMARIA --- */}
+        <ChartWrapper title="Familiar con Cáncer de Mama" chartType="Pie" data={dataFamiliarCancerMama} options={pieOptions(dataFamiliarCancerMama.aggregation)} />
+        <ChartWrapper title="Punción Mamaria Previa" chartType="Pie" data={dataPuncionMama} options={pieOptions(dataPuncionMama.aggregation)} />
+        <ChartWrapper title="Mama Densa" chartType="Pie" data={dataMamaDensa} options={pieOptions(dataMamaDensa.aggregation)} />
+        {/* ---------------------------------------- */}
+        
+        <ChartWrapper title="Tumores Ginecológicos" chartType="Pie" data={dataTumoresGinecológicos} options={pieOptions(dataTumoresGinecológicos.aggregation)} />
+        <ChartWrapper title="Enfermedades Autoinmunes" chartType="Pie" data={dataEnfermedadesAutoinmunes} options={pieOptions(dataEnfermedadesAutoinmunes.aggregation)} />
+        <ChartWrapper title="Tuvo Hijos" chartType="Pie" data={dataTuvoHijos} options={pieOptions(dataTuvoHijos.aggregation)} />
+        <ChartWrapper title="Histerectomía" chartType="Pie" data={dataHisterectomia} options={pieOptions(dataHisterectomia.aggregation)} />
+        <ChartWrapper title="Menopausia" chartType="Pie" data={dataMenopausia} options={pieOptions(dataMenopausia.aggregation)} />
+        <ChartWrapper title="Ciclos Menstruales (Regularidad)" chartType="Pie" data={dataCiclosMenstruales} options={pieOptions(dataCiclosMenstruales.aggregation)} />
+        <ChartWrapper title="Pacientes con Diabetes" chartType="Pie" data={dataDiabetes} options={pieOptions(dataDiabetes.aggregation)} />
+      </div>
       
     </div>
   );
