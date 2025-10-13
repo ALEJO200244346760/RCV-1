@@ -272,7 +272,6 @@ function EstadisticasGraficos({ pacientes: pacientesFiltrados = [] }) {
       {/* Otros Gráficos */}
       <ChartWrapper title="Diabetes" chartType="Pie" data={dataDiabetes} options={pieOptions(dataDiabetes.aggregation)} />
       <ChartWrapper title="Rango de Colesterol" chartType="Pie" data={dataColesterol} options={pieOptions(dataColesterol.aggregation)} />
-      <ChartWrapper title="Ubicación" chartType="Pie" data={dataUbicacion} options={pieOptions(dataUbicacion.aggregation)} />
       
     </div>
   );
