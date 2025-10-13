@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import EstadisticasGraficos from './EstadisticasGraficos';
-import { obtenerColorRiesgo } from './ConstFormulario';// Estadisticas.jsx
+// import EstadisticasGraficos from './EstadisticasGraficos'; // COMENTADO: ERROR DE RESOLUCIÓN
+// import { obtenerColorRiesgo } from './ConstFormulario'; // COMENTADO: ERROR DE RESOLUCIÓN
 
-// Función Stub (temporal) para reemplazar obtenerColorRiesgo y evitar errores
+// Función Stub (temporal) para reemplazar obtenerColorRiesgo y evitar errores de compilación
 const obtenerColorRiesgo = (nivelRiesgo) => {
     switch (nivelRiesgo) {
         case 'Bajo': return 'bg-green-200 text-green-800';
@@ -17,8 +17,7 @@ const obtenerColorRiesgo = (nivelRiesgo) => {
     }
 };
 
-// Usamos el mismo axiosInstance configurado para el Formulario (asumiendo que ya existe)
-const apiBaseURL = '/api/pacientes'; // Usamos una ruta relativa o ajustamos a tu configuración
+const apiBaseURL = '/api/pacientes'; 
 const axiosInstance = axios.create({
     baseURL: 'https://rcv-production.up.railway.app/api', // Ajusta esto a tu baseURL real si es necesario
     // Otras configuraciones de Axios si las tienes
@@ -56,7 +55,7 @@ function Estadisticas() {
     ciclosMenstruales: '',
     histerectomia: '',
     menopausia: '',
-    // --- NUEVOS FILTROS ---
+    // --- NUEVOS FILTROS DE SALUD MAMARIA ---
     familiarCancerMama: '',
     puncionMama: '',
     mamaDensa: '',
@@ -99,7 +98,6 @@ function Estadisticas() {
   
   // Función para manejar la eliminación de pacientes
   const handleDelete = async (id, dni) => {
-    // Usamos un modal o confirmación en el futuro, por ahora usamos window.confirm
     if (window.confirm(`¿Estás seguro de eliminar el paciente con DNI: ${dni}? Esta acción es irreversible.`)) {
         try {
             await axiosInstance.delete(`${apiBaseURL}/${id}`);
@@ -437,7 +435,6 @@ function Estadisticas() {
           </div>
           
           {/* Resto de filtros... */}
-          {/* Aquí puedes agregar más filtros de los campos restantes de Paciente.java */}
 
         </div>
         <div className="mt-6 flex justify-end">
