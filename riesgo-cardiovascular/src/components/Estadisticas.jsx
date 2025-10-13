@@ -19,7 +19,7 @@ const obtenerColorRiesgo = (nivelRiesgo) => {
 
 const apiBaseURL = '/api/pacientes'; 
 const axiosInstance = axios.create({
-    baseURL: 'https://rcv-production.up.railway.app/api', // Ajusta esto a tu baseURL real si es necesario
+    baseURL: 'https://rcv-production.up.railway.app', // Ajusta esto a tu baseURL real si es necesario
     // Otras configuraciones de Axios si las tienes
 });
 
