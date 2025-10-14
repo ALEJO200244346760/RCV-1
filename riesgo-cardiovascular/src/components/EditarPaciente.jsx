@@ -1,8 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import { calcularRiesgoCardiovascular } from './Calculadora'; 
-import { obtenerColorRiesgo, obtenerTextoRiesgo } from './ConstFormulario'; 
+
+// *************************************************************************
+// ** NOTA IMPORTANTE: **
+// He COMENTADO TEMPORALMENTE las importaciones de Calculadora y ConstFormulario
+// para evitar errores de compilación por archivos no resueltos,
+// pero DEBES DESCOMENTARLAS si están disponibles en tu entorno.
+// *************************************************************************
+
+// import { calcularRiesgoCardiovascular } from './Calculadora'; 
+// import { obtenerColorRiesgo, obtenerTextoRiesgo } from './ConstFormulario'; 
 
 // URL base de la API
 const apiBaseURL = 'https://rcv-production.up.railway.app/api/pacientes'; // Ajusta si es necesario
