@@ -455,15 +455,14 @@ function Estadisticas() {
               onClick={() => setMostrarGraficos(!mostrarGraficos)} 
               className={`px-4 py-2 text-sm font-medium rounded-lg shadow-md transition ${mostrarGraficos ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-green-500 hover:bg-green-600 text-white'}`}
           >
-              {mostrarGraficos ? 'Ocultar Gráficos' : 'Mostrar Gráficos (Temporalmente deshabilitado)'}
+              {mostrarGraficos ? 'Ocultar Gráficos' : 'Mostrar Gráficos'}
           </button>
       </div>
 
       {/* --- SECCIÓN DE GRÁFICOS --- */}
       {mostrarGraficos && (
           <div className="mb-8 p-6 bg-white rounded-xl shadow-lg">
-              {/* <EstadisticasGraficos pacientes={pacientesFiltrados} /> // COMENTADO */}
-              <p className="text-center text-gray-500">Los gráficos están temporalmente deshabilitados debido a la falta del componente EstadisticasGraficos.jsx</p>
+              <EstadisticasGraficos pacientes={pacientesFiltrados} />
           </div>
       )}
 
