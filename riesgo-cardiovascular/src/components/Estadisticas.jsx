@@ -6,13 +6,13 @@ import EstadisticasGraficos from './EstadisticasGraficos';
 // Función Stub (temporal) para reemplazar obtenerColorRiesgo y evitar errores de compilación
 const obtenerColorRiesgo = (nivelRiesgo) => {
     switch (nivelRiesgo) {
-        case 'Bajo': return 'bg-green-200 text-green-800';
-        case 'Moderado': return 'bg-yellow-200 text-yellow-800';
-        case 'Alto': return 'bg-orange-200 text-orange-800';
-        case 'Muy Alto': return 'bg-red-200 text-red-800';
-        case 'Crítico': return 'bg-purple-200 text-purple-800';
-        default: return 'bg-gray-200 text-gray-800';
-    }
+        case '<10% Bajo': return 'bg-green-500';
+        case '>10% <20% Moderado': return 'bg-yellow-500';
+        case '>20% <30% Alto': return 'bg-orange-500';
+        case '>30% <40% Muy Alto': return 'bg-red-500';
+        case '>40% Crítico': return 'bg-red-800';
+        default: return 'bg-gray-200';
+      }
 };
 
 const apiBaseURL = '/api/pacientes'; 
