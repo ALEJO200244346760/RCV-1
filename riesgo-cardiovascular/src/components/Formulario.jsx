@@ -349,7 +349,7 @@ const transformarArraysAString = (obj, camposArray) => {
                 </div>
 
                 <div className="flex flex-col">
-                    <label className="text-sm font-medium">¿Duerme más de 7 horas diarias?</label>
+                    <label className="text-sm font-medium">¿Duerme entre 6 y 8 horas diarias?</label>
                     <div className="flex space-x-2 mt-1">
                          {['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('horasSueno', o)} className={`p-2 border rounded ${datosMujer.horasSueno === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>)}
                     </div>
