@@ -3,85 +3,38 @@ import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 
 // *************************************************************************
-// ** NOTA IMPORTANTE: **
-// He COMENTADO TEMPORALMENTE las importaciones de Calculadora y ConstFormulario
-// para evitar errores de compilación por archivos no resueltos,
-// pero DEBES DESCOMENTARLAS si están disponibles en tu entorno.
+// ** STUBS (Funciones temporales para garantizar la compilación y la lógica) **
 // *************************************************************************
 
+// Comentadas para evitar errores de resolución si los archivos no están
 // import { calcularRiesgoCardiovascular } from './Calculadora'; 
 // import { obtenerColorRiesgo, obtenerTextoRiesgo } from './ConstFormulario'; 
 
-// URL base de la API
-const apiBaseURL = 'https://rcv-production.up.railway.app/api/pacientes'; // Ajusta si es necesario
-const axiosInstance = axios.create({
-    baseURL: 'https://rcv-production.up.way.app/api', 
-});
-
-
-// ESTADO INICIAL COMPLETO (Sincronizado con Formulario.jsx)
-const initialState = {
-    dni: '',
-    fechaNacimiento: '', 
-    telefono: '',        
-    edad: '',
-    genero: 'femenino',
-    
-    // --- Medidas ---
-    peso: '',
-    talla: '',
-    cintura: '',
-    tensionSistolica: '',
-    tensionDiastolica: '',
-    colesterol: 'No', // Asume 'No' o un valor numérico
-    
-    // --- Hábitos / Condiciones ---
-    tomaMedicacionDiario: null,
-    medicacionCondiciones: [], // Array o String separado por comas
-    fumaDiario: null,
-    actividadFisica: null,
-    horasSueno: null,
-    estresCronico: null,
-    estresTipo: '',
-    enfermedadesAutoinmunes: null,
-    autoinmunesTipo: [], // Array o String separado por comas
-    
-    // --- Salud Femenina ---
-    tumoresGinecologicos: null,
-    tumoresTipo: [], // Array o String separado por comas
-    tuvoHijos: null,
-    cantidadHijos: '',
-    complicacionesEmbarazo: null,
-    motivoNoHijos: '',
-    menopausia: null,
-    edadMenopausia: '',
-    ciclosMenstruales: null,
-    metodoAnticonceptivo: '',
-    histerectomia: null,
-
-    // --- Salud Mamaria (NUEVOS) ---
-    familiarCancerMama: null, // Sí/No
-    puncionMama: null,       // Sí/No
-    mamaDensa: null,         // Sí/No/No recuerdo/No sé lo que es
-    
-    // --- Resultados ---
-    imc: '', // Se calcula en el backend o en Calculadora.js
-    nivelRiesgo: '', // Se calcula en el backend o en Calculadora.js
-    fechaRegistro: '',
-    ubicacion: '',
-};
-
-// *************************************************************************
-// ** STUBS (Funciones temporales para garantizar la compilación) **
-// *************************************************************************
 const calcularRiesgoCardiovascular = (datos) => {
-    // Simulamos un cálculo simple o usamos el valor que viene del backend
-    const imc = parseFloat(datos.peso) / (parseFloat(datos.talla) ** 2);
-    const nivel = imc > 30 ? 'Muy Alto' : (imc > 25 ? 'Alto' : 'Bajo');
+    // Intenta calcular IMC si peso y talla son válidos
+    const peso = parseFloat(datos.peso);
+    const talla = parseFloat(datos.talla);
+    let imc = datos.imc;
+    let nivel = datos.nivelRiesgo; // Usar el valor existente por defecto
 
-    // Retornamos el riesgo calculado o el existente si el cálculo falla
+    if (!isNaN(peso) && !isNaN(talla) && talla > 0) {
+        const imcCalculado = peso / (talla ** 2);
+        imc = `${imcCalculado.toFixed(1)} kg/m²`;
+
+        // Lógica de simulación simple para el riesgo basado en IMC
+        if (imcCalculado > 30) {
+            nivel = 'Muy Alto';
+        } else if (imcCalculado > 25) {
+            nivel = 'Alto';
+        } else if (imcCalculado > 18.5) {
+            nivel = 'Moderado';
+        } else {
+            nivel = 'Bajo';
+        }
+    }
+
     return { 
-        imc: isNaN(imc) ? datos.imc : `${imc.toFixed(1)} (Simulación)`, 
+        imc: imc, 
         nivelRiesgo: nivel 
     };
 };
@@ -108,10 +61,86 @@ const obtenerTextoRiesgo = (nivel) => {
 // *************************************************************************
 
 
+// ** CORRECCIÓN DE URL BASE **
+const axiosInstance = axios.create({
+    // Base URL Corregida de 'way.app' a 'railway.app'
+    baseURL: 'https://rcv-production.up.railway.app/api', 
+});
+
+
+// ESTADO INICIAL COMPLETO (Sincronizado con Formulario.jsx)
+const initialState = {
+    dni: '',
+    fechaNacimiento: '', 
+    telefono: '',        
+    edad: '',
+    genero: 'femenino',
+    
+    // --- Medidas ---
+    peso: '',
+    talla: '',
+    cintura: '',
+    tensionSistolica: '',
+    tensionDiastolica: '',
+    colesterol: 'No', // Almacena 'No' o el valor numérico (mg/dL)
+    
+    // --- Hábitos / Condiciones ---
+    tomaMedicacionDiario: null,
+    medicacionCondiciones: [],
+    fumaDiario: null,
+    actividadFisica: null,
+    horasSueno: null,
+    estresCronico: null,
+    estresTipo: '',
+    enfermedadesAutoinmunes: null,
+    autoinmunesTipo: [],
+    
+    // --- Salud Femenina ---
+    tumoresGinecologicos: null,
+    tumoresTipo: [],
+    tuvoHijos: null,
+    cantidadHijos: '',
+    complicacionesEmbarazo: null,
+    motivoNoHijos: '',
+    menopausia: null,
+    edadMenopausia: '',
+    ciclosMenstruales: null,
+    metodoAnticonceptivo: '',
+    histerectomia: null,
+
+    // --- Salud Mamaria (NUEVOS) ---
+    familiarCancerMama: null, 
+    puncionMama: null,       
+    mamaDensa: null,         
+    
+    // --- Resultados ---
+    imc: '',
+    nivelRiesgo: '',
+    fechaRegistro: '',
+    ubicacion: '',
+};
+
+// Función helper para normalizar valores booleanos/strings del backend a valores de formulario
+const safeMapBoolean = (value) => {
+    const stringValue = String(value);
+    if (['Sí', 'No', 'No aplica', 'No recuerdo', 'No sé lo que es', 'Regulares', 'Irregulares', 'Ausentes', 'Sedentario', 'Moderado', 'Activo'].includes(stringValue)) {
+        return stringValue;
+    }
+    if (value === true || stringValue === 'true') {
+        return 'Sí';
+    }
+    if (value === false || stringValue === 'false') {
+        return 'No';
+    }
+    return null;
+};
+
 function EditarPaciente() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [datos, setDatos] = useState(initialState);
+  // Estado local para manejar el radio de Colesterol separadamente
+  const [colesterolOption, setColesterolOption] = useState('No');
   const [loading, setLoading] = useState(true);
   const [mensaje, setMensaje] = useState(null);
   const [error, setError] = useState(null);
@@ -120,33 +149,59 @@ function EditarPaciente() {
 
   // 1. Cargar datos del paciente
   useEffect(() => {
+    setLoading(true);
     axiosInstance.get(apiPath)
       .then(response => {
         const data = response.data;
         
         // El backend puede devolver arrays como strings separados por coma. 
-        // Normalizamos para el estado del formulario.
         const normalizarArray = (value) => {
             if (Array.isArray(value)) return value;
-            return value ? value.split(',').map(item => item.trim()) : [];
+            return value ? String(value).split(',').map(item => item.trim()).filter(item => item) : [];
         };
 
-        setDatos({
-          ...initialState, // Asegura que todos los campos existen
+        // Mapear el estado cargado
+        const loadedData = {
+          ...initialState, 
           ...data,
+          // Normalizar Arrays
           medicacionCondiciones: normalizarArray(data.medicacionCondiciones),
           tumoresTipo: normalizarArray(data.tumoresTipo),
           autoinmunesTipo: normalizarArray(data.autoinmunesTipo),
-          // Convertimos booleanos/null a string 'Sí'/'No' si es necesario
-          tomaMedicacionDiario: data.tomaMedicacionDiario ? String(data.tomaMedicacionDiario) : null,
-          fumaDiario: data.fumaDiario ? String(data.fumaDiario) : null,
-          // etc. para todos los null/booleans que vienen del backend
-        });
+
+          // Normalizar Booleanos/Strings para RadioGroups
+          tomaMedicacionDiario: safeMapBoolean(data.tomaMedicacionDiario),
+          fumaDiario: safeMapBoolean(data.fumaDiario),
+          actividadFisica: safeMapBoolean(data.actividadFisica),
+          horasSueno: safeMapBoolean(data.horasSueno),
+          estresCronico: safeMapBoolean(data.estresCronico),
+          enfermedadesAutoinmunes: safeMapBoolean(data.enfermedadesAutoinmunes),
+          tumoresGinecologicos: safeMapBoolean(data.tumoresGinecologicos),
+          tuvoHijos: safeMapBoolean(data.tuvoHijos),
+          complicacionesEmbarazo: safeMapBoolean(data.complicacionesEmbarazo),
+          menopausia: safeMapBoolean(data.menopausia),
+          histerectomia: safeMapBoolean(data.histerectomia),
+          familiarCancerMama: safeMapBoolean(data.familiarCancerMama),
+          puncionMama: safeMapBoolean(data.puncionMama),
+          mamaDensa: safeMapBoolean(data.mamaDensa),
+
+          // Dejar colesterol como viene (string 'No' o valor numérico string)
+          colesterol: data.colesterol || 'No'
+        };
+
+        setDatos(loadedData);
+        // Inicializar el estado de la opción de colesterol
+        if (loadedData.colesterol !== 'No') {
+            setColesterolOption('Sí');
+        } else {
+            setColesterolOption('No');
+        }
+
         setLoading(false);
       })
       .catch(err => {
         console.error('Error al cargar paciente:', err);
-        setError('No se pudo cargar la información del paciente.');
+        setError('No se pudo cargar la información del paciente. Asegúrate que la URL es correcta.');
         setLoading(false);
       });
   }, [id, apiPath]);
@@ -157,7 +212,7 @@ function EditarPaciente() {
 
     if (type === 'checkbox') {
       setDatos(prev => {
-        const list = prev[name];
+        const list = Array.isArray(prev[name]) ? prev[name] : [];
         if (checked) {
           return { ...prev, [name]: [...list, value] };
         } else {
@@ -169,15 +224,37 @@ function EditarPaciente() {
     }
   };
   
+  // 2b. Manejar cambio específico para el campo Colesterol (Radio + Valor)
+  const manejarCambioColesterol = (e) => {
+    const { name, value } = e.target;
+    
+    if (name === 'colesterolOption') {
+        setColesterolOption(value);
+        // Si eligen 'No', restablecer el valor numérico en datos
+        if (value === 'No') {
+            setDatos(prev => ({ ...prev, colesterol: 'No' }));
+        } else {
+             // Si eligen 'Sí', si el valor actual es 'No', lo dejamos vacío para que el usuario ingrese el número
+             if (datos.colesterol === 'No') {
+                 setDatos(prev => ({ ...prev, colesterol: '' }));
+             }
+        }
+    } else if (name === 'colesterol') {
+        // Maneja el input numérico
+        setDatos(prev => ({ ...prev, colesterol: value }));
+    }
+  };
+
+
   // 3. Recalcular IMC/Riesgo al cambiar datos clave
   const datosCalculados = useMemo(() => {
-      // Solo calcula si tiene datos suficientes
-      if (datos.peso && datos.talla && datos.tensionSistolica) {
+      // Solo calcula si tiene datos suficientes para el cálculo base de IMC/Riesgo
+      if (datos.peso && datos.talla && parseFloat(datos.peso) > 0 && parseFloat(datos.talla) > 0) {
           return calcularRiesgoCardiovascular(datos);
       }
-      // Si no hay datos suficientes, usa los valores existentes (del backend)
+      // Si no hay datos suficientes para calcular, usa los valores existentes (del backend)
       return { imc: datos.imc, nivelRiesgo: datos.nivelRiesgo };
-  }, [datos.peso, datos.talla, datos.tensionSistolica, datos]);
+  }, [datos.peso, datos.talla, datos.tensionSistolica, datos.imc, datos.nivelRiesgo]);
 
 
   // 4. Enviar datos
@@ -186,13 +263,27 @@ function EditarPaciente() {
     setError(null);
     setMensaje(null);
 
-    // Preparar los datos antes de enviar (ej. convertir arrays a string)
+    // Validar campos requeridos antes de enviar
+    if (!datos.dni || !datos.fechaNacimiento || !datos.edad || !datos.genero || !datos.peso || !datos.talla || !datos.tensionSistolica) {
+        setError('Por favor, completa todos los campos obligatorios (*).');
+        return;
+    }
+
+
+    // Preparar los datos antes de enviar (ej. convertir arrays a string separado por comas)
     const datosAEnviar = {
         ...datos,
         ...datosCalculados, // Incluimos el IMC y NivelRiesgo recalculados
+        // Convertir Arrays a String para el backend
         medicacionCondiciones: Array.isArray(datos.medicacionCondiciones) ? datos.medicacionCondiciones.join(', ') : datos.medicacionCondiciones,
         tumoresTipo: Array.isArray(datos.tumoresTipo) ? datos.tumoresTipo.join(', ') : datos.tumoresTipo,
         autoinmunesTipo: Array.isArray(datos.autoinmunesTipo) ? datos.autoinmunesTipo.join(', ') : datos.autoinmunesTipo,
+        
+        // Asegurar que los campos nullables se envíen como string 'Sí'/'No' o null/'' si el backend lo requiere
+        // (Aunque los stubs manejan esto, es mejor ser explícito)
+        tomaMedicacionDiario: datos.tomaMedicacionDiario || null,
+        fumaDiario: datos.fumaDiario || null,
+        // ... otros campos de RadioGroup que pueden ser null
     };
     
     axiosInstance.put(apiPath, datosAEnviar)
@@ -207,10 +298,11 @@ function EditarPaciente() {
   };
 
   if (loading) {
-    return <div className="text-center p-8 text-xl font-semibold">Cargando datos del paciente...</div>;
+    return <div className="text-center p-8 text-xl font-semibold text-indigo-600">Cargando datos del paciente...</div>;
   }
 
   if (error && !loading) {
+    // Si hay un error de carga, lo mostramos, pero si hay un error de guardado, el formulario sigue visible
     return <div className="text-center p-8 text-xl font-semibold text-red-600">{error}</div>;
   }
   
@@ -237,7 +329,7 @@ function EditarPaciente() {
                 </label>
             ))}
         </div>
-        {(datos[name] === 'Sí' || datos[name] === 'No') && conditionalContent && (
+        {conditionalContent && (
             <div className="mt-2 p-3 bg-gray-50 rounded-md border border-gray-200">
                 {conditionalContent(datos[name])}
             </div>
@@ -256,7 +348,7 @@ function EditarPaciente() {
                         type="checkbox"
                         name={name}
                         value={opt}
-                        checked={datos[name].includes(opt)}
+                        checked={Array.isArray(datos[name]) ? datos[name].includes(opt) : false}
                         onChange={manejarCambio}
                         className="form-checkbox h-4 w-4 text-indigo-600 rounded"
                     />
@@ -266,9 +358,48 @@ function EditarPaciente() {
         </div>
     </div>
   );
+  
+  // Componente específico para Colesterol para manejar el estado dual (Sí/No y Valor)
+  const ColesterolInput = () => (
+    <div className="flex flex-col">
+        <label className="block text-sm font-medium text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">Colesterol Total</label>
+        <div className="mt-1 flex flex-wrap gap-4">
+            {['No', 'Sí'].map(opt => (
+                <label key={opt} className="inline-flex items-center text-gray-700">
+                    <input
+                        type="radio"
+                        name="colesterolOption"
+                        value={opt}
+                        checked={colesterolOption === opt}
+                        onChange={manejarCambioColesterol}
+                        className="form-radio h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
+                    />
+                    <span className="ml-2">{opt}</span>
+                </label>
+            ))}
+        </div>
+        
+        {colesterolOption === 'Sí' && (
+            <div className="mt-2 p-3 bg-gray-50 rounded-md border border-gray-200">
+                <label htmlFor="colesterolValue" className="block text-sm font-medium text-gray-700">Valor (mg/dL)</label>
+                <input 
+                    type="number" 
+                    name="colesterol" 
+                    id="colesterolValue" 
+                    value={datos.colesterol !== 'No' ? datos.colesterol : ''} 
+                    onChange={manejarCambioColesterol} 
+                    placeholder="Valor numérico (mg/dL)" 
+                    required 
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                />
+            </div>
+        )}
+    </div>
+  );
+
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-gray-50 min-h-screen font-sans">
       <div className="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-2xl">
         
         <h1 className="text-3xl font-extrabold text-indigo-700 mb-6 border-b pb-2">
@@ -276,8 +407,8 @@ function EditarPaciente() {
         </h1>
         
         {/* Mensajes de feedback */}
-        {mensaje && <div className="p-4 mb-4 text-sm font-medium text-green-700 bg-green-100 rounded-lg">{mensaje}</div>}
-        {error && <div className="p-4 mb-4 text-sm font-medium text-red-700 bg-red-100 rounded-lg">{error}</div>}
+        {mensaje && <div className="p-4 mb-4 text-sm font-medium text-green-700 bg-green-100 rounded-lg border border-green-300">{mensaje}</div>}
+        {error && <div className="p-4 mb-4 text-sm font-medium text-red-700 bg-red-100 rounded-lg border border-red-300">{error}</div>}
 
         <form onSubmit={actualizarPaciente} className="space-y-8">
 
@@ -287,19 +418,19 @@ function EditarPaciente() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                         <label htmlFor="dni" className="block text-sm font-medium text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">DNI</label>
-                        <input type="text" name="dni" id="dni" value={datos.dni} onChange={manejarCambio} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                        <input type="text" name="dni" id="dni" value={datos.dni || ''} onChange={manejarCambio} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
                     </div>
                     <div>
                         <label htmlFor="fechaNacimiento" className="block text-sm font-medium text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">Fecha de Nacimiento</label>
-                        <input type="date" name="fechaNacimiento" id="fechaNacimiento" value={datos.fechaNacimiento} onChange={manejarCambio} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                        <input type="date" name="fechaNacimiento" id="fechaNacimiento" value={datos.fechaNacimiento || ''} onChange={manejarCambio} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
                     </div>
                     <div>
                         <label htmlFor="telefono" className="block text-sm font-medium text-gray-700">Teléfono</label>
-                        <input type="text" name="telefono" id="telefono" value={datos.telefono} onChange={manejarCambio} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                        <input type="text" name="telefono" id="telefono" value={datos.telefono || ''} onChange={manejarCambio} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
                     </div>
                     <div>
                         <label htmlFor="edad" className="block text-sm font-medium text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">Edad (años)</label>
-                        <input type="number" name="edad" id="edad" value={datos.edad} onChange={manejarCambio} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                        <input type="number" name="edad" id="edad" value={datos.edad || ''} onChange={manejarCambio} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
                     </div>
                     <div>
                         <label htmlFor="genero" className="block text-sm font-medium text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">Género</label>
@@ -318,55 +449,39 @@ function EditarPaciente() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div className="col-span-1">
                         <label htmlFor="peso" className="block text-sm font-medium text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">Peso (kg)</label>
-                        <input type="number" name="peso" id="peso" value={datos.peso} onChange={manejarCambio} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                        <input type="number" name="peso" id="peso" value={datos.peso || ''} onChange={manejarCambio} required step="any" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
                     </div>
                     <div className="col-span-1">
                         <label htmlFor="talla" className="block text-sm font-medium text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">Talla (m)</label>
-                        <input type="number" name="talla" id="talla" value={datos.talla} onChange={manejarCambio} step="0.01" required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                        <input type="number" name="talla" id="talla" value={datos.talla || ''} onChange={manejarCambio} step="0.01" required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
                     </div>
                     <div className="col-span-2">
                         <label htmlFor="cintura" className="block text-sm font-medium text-gray-700">Circunferencia de Cintura (cm)</label>
-                        <input type="number" name="cintura" id="cintura" value={datos.cintura} onChange={manejarCambio} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                        <input type="number" name="cintura" id="cintura" value={datos.cintura || ''} onChange={manejarCambio} step="any" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
                     </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                         <label htmlFor="tensionSistolica" className="block text-sm font-medium text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">Tensión Sistólica</label>
-                        <input type="number" name="tensionSistolica" id="tensionSistolica" value={datos.tensionSistolica} onChange={manejarCambio} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                        <input type="number" name="tensionSistolica" id="tensionSistolica" value={datos.tensionSistolica || ''} onChange={manejarCambio} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
                     </div>
                     <div>
                         <label htmlFor="tensionDiastolica" className="block text-sm font-medium text-gray-700">Tensión Diastólica</label>
-                        <input type="number" name="tensionDiastolica" id="tensionDiastolica" value={datos.tensionDiastolica} onChange={manejarCambio} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                        <input type="number" name="tensionDiastolica" id="tensionDiastolica" value={datos.tensionDiastolica || ''} onChange={manejarCambio} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
                     </div>
-                    <div>
-                        <label htmlFor="colesterol" className="block text-sm font-medium text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">Colesterol Total</label>
-                        <RadioGroup 
-                            name="colesterol"
-                            options={['No', 'Sí']}
-                            label=""
-                            conditionalContent={() => (
-                                <input 
-                                    type="number" 
-                                    name="colesterol" 
-                                    value={datos.colesterol !== 'No' ? datos.colesterol : ''} 
-                                    onChange={manejarCambio} 
-                                    placeholder="Valor numérico (mg/dL)" 
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                                />
-                            )}
-                        />
-                    </div>
+                    {/* Componente de Colesterol Corregido */}
+                    <ColesterolInput /> 
                 </div>
 
-                <div className="mt-6 p-4 border rounded-xl" style={{ borderLeftWidth: '6px', borderLeftColor: obtenerColorRiesgo(nivelRiesgo).split(' ')[3] }}>
+                <div className="mt-6 p-4 border rounded-xl" style={{ borderLeftWidth: '6px', borderLeftColor: obtenerColorRiesgo(nivelRiesgo).split(' ')[3].replace('border-', '') }}>
                     <h3 className="text-lg font-bold">Resultados de Riesgo Calculados</h3>
                     <p className="mt-2 text-sm">
-                        **IMC (Índice de Masa Corporal):** <span className="font-semibold">{datosCalculados.imc}</span>
+                        **IMC (Índice de Masa Corporal):** <span className="font-semibold">{datosCalculados.imc || datos.imc || 'N/A'}</span>
                     </p>
                     <div className={`mt-2 p-2 rounded-lg ${obtenerColorRiesgo(nivelRiesgo)}`}>
                         <p className="font-semibold">Nivel de Riesgo Cardiovascular:</p>
-                        <p className="text-lg font-extrabold">{nivelRiesgo}</p>
-                        <p className="text-xs mt-1">{obtenerTextoRiesgo(nivelRiesgo)}</p>
+                        <p className="text-lg font-extrabold">{nivelRiesgo || datos.nivelRiesgo || 'Indefinido'}</p>
+                        <p className="text-xs mt-1">{obtenerTextoRiesgo(nivelRiesgo || datos.nivelRiesgo)}</p>
                     </div>
                 </div>
             </div>
@@ -382,15 +497,17 @@ function EditarPaciente() {
                             label="¿Ha tenido histerectomía?"
                             name="histerectomia"
                             options={['Sí', 'No']}
+                            isRequired={false}
                         />
                         <RadioGroup 
                             label="¿Se encuentra en menopausia?"
                             name="menopausia"
                             options={['Sí', 'No', 'No aplica']}
-                            conditionalContent={() => (
+                            isRequired={false}
+                            conditionalContent={(respuesta) => respuesta === 'Sí' && (
                                 <div>
                                     <label htmlFor="edadMenopausia" className="block text-sm font-medium text-gray-700 mt-2">Edad de inicio de menopausia:</label>
-                                    <input type="number" name="edadMenopausia" id="edadMenopausia" value={datos.edadMenopausia} onChange={manejarCambio} placeholder="Años" className="mt-1 block w-full border rounded-md p-2" />
+                                    <input type="number" name="edadMenopausia" id="edadMenopausia" value={datos.edadMenopausia || ''} onChange={manejarCambio} placeholder="Años" className="mt-1 block w-full border rounded-md p-2" />
                                 </div>
                             )}
                         />
@@ -402,10 +519,11 @@ function EditarPaciente() {
                             label="Ciclos menstruales"
                             name="ciclosMenstruales"
                             options={['Regulares', 'Irregulares', 'Ausentes', 'No aplica']}
+                            isRequired={false}
                         />
                         <div>
                             <label htmlFor="metodoAnticonceptivo" className="block text-sm font-medium text-gray-700">Método anticonceptivo actual (si aplica)</label>
-                            <input type="text" name="metodoAnticonceptivo" id="metodoAnticonceptivo" value={datos.metodoAnticonceptivo} onChange={manejarCambio} className="mt-1 block w-full border rounded-md p-2" />
+                            <input type="text" name="metodoAnticonceptivo" id="metodoAnticonceptivo" value={datos.metodoAnticonceptivo || ''} onChange={manejarCambio} className="mt-1 block w-full border rounded-md p-2" />
                         </div>
                     </div>
 
@@ -414,11 +532,12 @@ function EditarPaciente() {
                         label="¿Ha tenido hijos?"
                         name="tuvoHijos"
                         options={['Sí', 'No']}
+                        isRequired={false}
                         conditionalContent={(respuesta) => respuesta === 'Sí' ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label htmlFor="cantidadHijos" className="block text-sm font-medium text-gray-700">Cantidad de hijos</label>
-                                    <input type="number" name="cantidadHijos" id="cantidadHijos" value={datos.cantidadHijos} onChange={manejarCambio} className="mt-1 block w-full border rounded-md p-2" />
+                                    <input type="number" name="cantidadHijos" id="cantidadHijos" value={datos.cantidadHijos || ''} onChange={manejarCambio} className="mt-1 block w-full border rounded-md p-2" />
                                 </div>
                                 <RadioGroup 
                                     label="¿Hubo complicaciones graves en algún embarazo?"
@@ -427,12 +546,12 @@ function EditarPaciente() {
                                     isRequired={false}
                                 />
                             </div>
-                        ) : (
+                        ) : (respuesta === 'No' && (
                             <div>
                                 <label htmlFor="motivoNoHijos" className="block text-sm font-medium text-gray-700">Motivo de no tener hijos (si aplica)</label>
-                                <input type="text" name="motivoNoHijos" id="motivoNoHijos" value={datos.motivoNoHijos} onChange={manejarCambio} className="mt-1 block w-full border rounded-md p-2" />
+                                <input type="text" name="motivoNoHijos" id="motivoNoHijos" value={datos.motivoNoHijos || ''} onChange={manejarCambio} className="mt-1 block w-full border rounded-md p-2" />
                             </div>
-                        )}
+                        ))}
                     />
                 </div>
             )}
@@ -446,18 +565,21 @@ function EditarPaciente() {
                         label="¿Tiene familiar de primer grado con cáncer de mama?"
                         name="familiarCancerMama"
                         options={['Sí', 'No']}
+                        isRequired={false}
                     />
                     
                     <RadioGroup 
                         label="¿Se ha realizado punciones mamarias (biopsia) previamente?"
                         name="puncionMama"
                         options={['Sí', 'No']}
+                        isRequired={false}
                     />
                     
                     <RadioGroup 
                         label="¿Tiene mamas densas (según mamografía)?"
                         name="mamaDensa"
                         options={['Sí', 'No', 'No recuerdo', 'No sé lo que es']}
+                        isRequired={false}
                     />
                 </div>
             )}
@@ -471,7 +593,8 @@ function EditarPaciente() {
                     label="¿Toma medicación diaria para una condición crónica?"
                     name="tomaMedicacionDiario"
                     options={['Sí', 'No']}
-                    conditionalContent={() => (
+                    isRequired={false}
+                    conditionalContent={(respuesta) => respuesta === 'Sí' && (
                         <CheckboxGroup 
                             label="Especificar condiciones/medicación (seleccione todas las que apliquen):"
                             name="medicacionCondiciones"
@@ -485,7 +608,8 @@ function EditarPaciente() {
                     label="¿Ha tenido tumores ginecológicos (benignos o malignos)?"
                     name="tumoresGinecologicos"
                     options={['Sí', 'No']}
-                    conditionalContent={() => (
+                    isRequired={false}
+                    conditionalContent={(respuesta) => respuesta === 'Sí' && (
                         <CheckboxGroup 
                             label="Tipo de tumor:"
                             name="tumoresTipo"
@@ -499,7 +623,8 @@ function EditarPaciente() {
                     label="¿Padece enfermedades autoinmunes?"
                     name="enfermedadesAutoinmunes"
                     options={['Sí', 'No']}
-                    conditionalContent={() => (
+                    isRequired={false}
+                    conditionalContent={(respuesta) => respuesta === 'Sí' && (
                         <CheckboxGroup 
                             label="Tipo de enfermedad autoinmune:"
                             name="autoinmunesTipo"
@@ -510,7 +635,7 @@ function EditarPaciente() {
 
                 {/* HÁBITOS */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <RadioGroup label="¿Fuma a diario?" name="fumaDiario" options={['Sí', 'No']} />
+                    <RadioGroup label="¿Fuma a diario?" name="fumaDiario" options={['Sí', 'No']} isRequired={false} />
                     <RadioGroup label="Actividad Física (tipo)" name="actividadFisica" options={['Sedentario', 'Moderado', 'Activo']} isRequired={false} />
                     <RadioGroup label="Horas de sueño promedio" name="horasSueno" options={['Menos de 6h', '6-8h', 'Más de 8h']} isRequired={false} />
                 </div>
@@ -520,10 +645,11 @@ function EditarPaciente() {
                     label="¿Padece estrés crónico?"
                     name="estresCronico"
                     options={['Sí', 'No']}
-                    conditionalContent={() => (
+                    isRequired={false}
+                    conditionalContent={(respuesta) => respuesta === 'Sí' && (
                         <div>
                             <label htmlFor="estresTipo" className="block text-sm font-medium text-gray-700 mt-2">Tipo de Estrés:</label>
-                            <input type="text" name="estresTipo" id="estresTipo" value={datos.estresTipo} onChange={manejarCambio} placeholder="Laboral, familiar, económico, etc." className="mt-1 block w-full border rounded-md p-2" />
+                            <input type="text" name="estresTipo" id="estresTipo" value={datos.estresTipo || ''} onChange={manejarCambio} placeholder="Laboral, familiar, económico, etc." className="mt-1 block w-full border rounded-md p-2" />
                         </div>
                     )}
                 />
