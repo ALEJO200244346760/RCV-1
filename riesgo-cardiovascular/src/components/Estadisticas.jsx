@@ -2,9 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import EstadisticasGraficos from './EstadisticasGraficos'; // Asegúrate de que este archivo existe y se importa correctamente
-// import { obtenerColorRiesgo } from './ConstFormulario'; // COMENTADO: ERROR DE RESOLUCIÓN
-
+import EstadisticasGraficos from './EstadisticasGraficos'; 
 // Función Stub (temporal) para reemplazar obtenerColorRiesgo y evitar errores de compilación
 const obtenerColorRiesgo = (nivelRiesgo) => {
     switch (nivelRiesgo) {
@@ -32,14 +30,18 @@ const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-
     <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
 </svg>;
 
+const CopyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7v4a2 2 0 002 2h4a2 2 0 002-2V7m-4 6v-4m0 0V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v14a2 2 0 002 2h4a2 2 0 002-2v-2" />
+</svg>;
 
-// Componente PacienteCard (extraído y mejorado para ser autocontenido)
-const PacienteCard = React.memo(({ paciente: p, onDelete, onEdit }) => {
-    // Función auxiliar para formatear tipos (si vienen como string JSON o array)
+
+// Componente PacienteCard
+const PacienteCard = React.memo(({ paciente: p, onDelete, onEdit, onCopy }) => {
     const formatTypes = (data) => {
         if (!data) return '';
         if (Array.isArray(data)) return data.join(', ');
         try {
+            // Intentar parsear si viene como string JSON
             const parsed = JSON.parse(data);
             if (Array.isArray(parsed)) return parsed.join(', ');
             return data;
@@ -60,16 +62,15 @@ const PacienteCard = React.memo(({ paciente: p, onDelete, onEdit }) => {
 
             <p className="text-sm text-gray-500 mb-4">
                 <span className="font-medium text-gray-700">DNI:</span> {p.dni} |
-                <span className="font-medium text-gray-700"> Fecha Nac:</span> {p.fechaNacimiento} |
+                <span className="font-medium text-gray-700"> Edad:</span> {p.edad} |
                 <span className="font-medium text-gray-700"> Tel:</span> {p.telefono}
             </p>
 
             <div className="text-sm text-gray-700 space-y-1">
-                <p><strong>Edad:</strong> {p.edad} años</p>
                 <p><strong>Género:</strong> {p.genero}</p>
                 <p><strong>Ubicación:</strong> {p.ubicacion}</p>
                 <hr className="my-2"/>
-                <p className="font-semibold text-sm text-gray-600">Mediciones:</p>
+                <p className="font-semibold text-sm text-gray-600">Mediciones y Riesgo:</p>
                 <p><strong>Tensión Arterial:</strong> {p.tensionSistolica}/{p.tensionDiastolica}</p>
                 <p><strong>Colesterol:</strong> {p.colesterol}</p>
                 <p><strong>IMC:</strong> {p.imc}</p>
@@ -86,8 +87,13 @@ const PacienteCard = React.memo(({ paciente: p, onDelete, onEdit }) => {
                 {p.genero === 'femenino' && (
                     <>
                         <hr className="my-2"/>
-                        <p className="font-semibold text-sm text-gray-600">Salud Femenina:</p>
+                        <p className="font-semibold text-sm text-gray-600">Salud Femenina y Mamaria:</p>
                         
+                        {/* Nuevos campos de salud mamaria */}
+                        <p><strong>Familiar Cáncer Mama:</strong> {p.familiarCancerMama}</p>
+                        <p><strong>Punción de Mama:</strong> {p.puncionMama}</p>
+                        <p><strong>Mama Densa:</strong> {p.mamaDensa}</p>
+
                         <div>
                             <strong>Tumores ginecológicos:</strong> {p.tumoresGinecologicos}{' '}
                             {(p.tumoresTipo && p.tumoresTipo.length > 0)
@@ -116,12 +122,18 @@ const PacienteCard = React.memo(({ paciente: p, onDelete, onEdit }) => {
             
             {/* Botones de Acción */}
             <div className="mt-6 flex gap-3">
-                {/* <button 
+                <button 
                     onClick={() => onEdit(p.id)} 
                     className="flex-1 flex items-center justify-center gap-1 px-4 py-2 text-sm font-medium bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
                 >
                     <EditIcon /> Editar
-                </button> */}
+                </button>
+                <button 
+                    onClick={() => onCopy(p)} 
+                    className="flex-1 flex items-center justify-center gap-1 px-4 py-2 text-sm font-medium bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition"
+                >
+                    <CopyIcon /> Copiar Data
+                </button>
                 <button 
                     onClick={() => onDelete(p.id)} 
                     className="flex-1 flex items-center justify-center gap-1 px-4 py-2 text-sm font-medium bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
@@ -138,8 +150,9 @@ function Estadisticas() {
   const [pacientes, setPacientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mostrarGraficos, setMostrarGraficos] = useState(false);
+  const [mostrarFiltros, setMostrarFiltros] = useState(true); // Nuevo estado para los filtros
 
-  // --- ESTADOS AÑADIDOS PARA EL MODAL DE CONFIRMACIÓN DE ELIMINACIÓN ---
+  // --- ESTADOS AÑADIDOS PARA EL MODAL DE CONFIRMACIÓN Y NOTIFICACIONES ---
   const [mostrarModalConfirmacion, setMostrarModalConfirmacion] = useState(false);
   const [pacienteAEliminar, setPacienteAEliminar] = useState(null); // ID del paciente a eliminar
   const [mensajeNotificacion, setMensajeNotificacion] = useState(null); // { tipo: 'success' | 'error', texto: string }
@@ -148,7 +161,7 @@ function Estadisticas() {
   const [filtros, setFiltros] = useState({
     edad: '',
     imc: '',
-    conoceColesterol: '',
+    // conoceColesterol: '', // Este filtro ya no parece relevante si se filtra por nivelColesterol
     nivelColesterol: '',
     tensionSistolica: '',
     fumador: '',
@@ -163,13 +176,44 @@ function Estadisticas() {
     ciclosMenstruales: '',
     histerectomia: '',
     menopausia: '',
+    // --- NUEVOS FILTROS DE SALUD MAMARIA ---
+    familiarCancerMama: '', 
+    puncionMama: '',
+    mamaDensa: '',
+    // -------------------------------------
   });
 
-  // --- FUNCIÓN PARA MOSTRAR LA CONFIRMACIÓN EN LUGAR DE confirm() ---
+  // --- FUNCIÓN PARA MOSTRAR EL MODAL DE CONFIRMACIÓN DE ELIMINACIÓN ---
   const handleDelete = (id) => {
-    // ¡CORRECCIÓN! Reemplaza confirm() (Línea 230 original) con la lógica del modal
     setPacienteAEliminar(id);
     setMostrarModalConfirmacion(true);
+  };
+  
+  // --- FUNCIÓN PARA NAVEGAR A EDICIÓN (Placeholder) ---
+  const handleEdit = (id) => {
+    // Aquí iría la lógica de navegación real a la ruta de edición
+    setMensajeNotificacion({ tipo: 'info', texto: `Navegando a edición del paciente: ${id}` });
+    setTimeout(() => setMensajeNotificacion(null), 4000);
+  };
+  
+  // --- FUNCIÓN PARA COPIAR DATOS DEL PACIENTE ---
+  const handleCopy = (paciente) => {
+    // Crear un string legible para copiar
+    const dataToCopy = Object.entries(paciente)
+        .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
+        .join('\n');
+
+    navigator.clipboard.writeText(dataToCopy)
+        .then(() => {
+            setMensajeNotificacion({ tipo: 'success', texto: `Datos del paciente ID ${paciente.id} copiados al portapapeles.` });
+        })
+        .catch(err => {
+            console.error('Error al copiar:', err);
+            setMensajeNotificacion({ tipo: 'error', texto: 'Error al copiar datos. Revisa la consola.' });
+        })
+        .finally(() => {
+            setTimeout(() => setMensajeNotificacion(null), 4000);
+        });
   };
 
   // --- FUNCIÓN PARA CONFIRMAR Y EJECUTAR LA ELIMINACIÓN ---
@@ -220,25 +264,7 @@ function Estadisticas() {
   };
 
   const limpiarFiltros = () => {
-    setFiltros({
-      edad: '',
-      imc: '',
-      conoceColesterol: '',
-      nivelColesterol: '',
-      tensionSistolica: '',
-      fumador: '',
-      tomaMedicacion: '',
-      nivelRiesgo: '',
-      actividadFisica: '',
-      horasSueno: '',
-      estresCronico: '',
-      tumoresGinecologicos: '',
-      enfermedadesAutoinmunes: '',
-      tuvoHijos: '',
-      ciclosMenstruales: '',
-      histerectomia: '',
-      menopausia: '',
-    });
+    setFiltros(Object.fromEntries(Object.keys(filtros).map(key => [key, ''])));
   };
 
   // Lógica de filtrado
@@ -247,28 +273,27 @@ function Estadisticas() {
 
     // Helper para comparar valores de texto
     const normalizar = (value) => String(value).toLowerCase().trim();
+    const isNumberFilter = (key) => ['edad', 'tensionSistolica', 'nivelColesterol'].includes(key);
 
     // Función de filtrado genérica
     const aplicarFiltro = (paciente, key, filtroValue) => {
         if (!filtroValue) return true;
+        const normalizedFilter = normalizar(filtroValue);
         
-        // Manejo especial para IMC (que tiene valor y clasificación, e.g., "25.1 (Sobrepeso)")
-        if (key === 'imc') {
-            return normalizar(paciente.imc).includes(normalizar(filtroValue));
+        // Filtrado por número (mínimo, mayor o igual)
+        if (isNumberFilter(key)) {
+            const numFiltro = parseFloat(filtroValue);
+            const numPaciente = parseFloat(paciente[key] || 0); // Usamos 0 si es null/undefined
+            return !isNaN(numFiltro) ? numPaciente >= numFiltro : true;
         }
 
-        // Manejo especial para Tensión Sistólica (filtrar por el valor numérico)
-        if (key === 'tensionSistolica') {
-            const numFiltro = parseFloat(filtroValue);
-            const numPaciente = parseFloat(paciente.tensionSistolica);
-            // Permite filtrar por valores mayores o iguales, o por la cadena completa
-            if (!isNaN(numFiltro)) {
-                return numPaciente >= numFiltro;
-            }
+        // Manejo especial para IMC (que tiene valor y clasificación, e.g., "25.1 (Sobrepeso)")
+        if (key === 'imc') {
+            return normalizar(paciente.imc || '').includes(normalizedFilter);
         }
-        
+
         // Filtrado general por coincidencia de texto
-        return normalizar(paciente[key] || '').includes(normalizar(filtroValue));
+        return normalizar(paciente[key] || '').includes(normalizedFilter);
     };
 
     Object.keys(filtros).forEach(key => {
@@ -285,109 +310,133 @@ function Estadisticas() {
     return <div className="p-8 text-center text-xl text-blue-600">Cargando estadísticas...</div>;
   }
 
-  // NOTE: La navegación a edición se maneja con React Router, por eso el handler no está implementado aquí.
-  // const handleEdit = (id) => {
-  //   // navigate(`/editar-paciente/${id}`);
-  //   console.log("Editando paciente:", id);
-  // };
-
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <h1 className="text-3xl font-extrabold text-gray-900 mb-8">Estadísticas y Gestión de Pacientes</h1>
 
-      {/* --- SECCIÓN DE FILTROS --- */}
-      <div className="p-6 bg-white rounded-xl shadow-lg mb-8">
-        <h2 className="text-xl font-bold text-gray-700 mb-4">Filtros de Búsqueda</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          
-          {/* Edad */}
-          <input 
-            type="number" 
-            name="edad" 
-            placeholder="Edad Mínima" 
-            value={filtros.edad} 
-            onChange={handleFiltroChange}
-            className="p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-          />
-          {/* IMC */}
-          <input 
-            type="text" 
-            name="imc" 
-            placeholder="Clasificación IMC" 
-            value={filtros.imc} 
-            onChange={handleFiltroChange}
-            className="p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-          />
-          {/* Tensión Sistólica */}
-          <input 
-            type="number" 
-            name="tensionSistolica" 
-            placeholder="TAS Mínima" 
-            value={filtros.tensionSistolica} 
-            onChange={handleFiltroChange}
-            className="p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-          />
-          
-          {/* Nivel de Riesgo */}
-          <select
-            name="nivelRiesgo"
-            value={filtros.nivelRiesgo}
-            onChange={handleFiltroChange}
-            className="p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">Riesgo (Todos)</option>
-            <option value="Bajo">Bajo</option>
-            <option value="Moderado">Moderado</option>
-            <option value="Alto">Alto</option>
-            <option value="Muy Alto">Muy Alto</option>
-            <option value="Crítico">Crítico</option>
-          </select>
-
-          {/* Fumador */}
-          <select
-            name="fumador"
-            value={filtros.fumador}
-            onChange={handleFiltroChange}
-            className="p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">Fumador (Todos)</option>
-            <option value="Sí">Sí</option>
-            <option value="No">No</option>
-            <option value="Ex">Ex-Fumador</option>
-          </select>
-
-          {/* Hábitos de Vida y Salud Femenina */}
-          <select name="actividadFisica" value={filtros.actividadFisica} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Act. Física (Todos)</option><option value="Alta">Alta</option><option value="Media">Media</option><option value="Baja">Baja</option></select>
-          <select name="horasSueno" value={filtros.horasSueno} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Horas Sueño (Todos)</option><option value="Menos de 6">Menos de 6</option><option value="6-8">6-8</option><option value="Más de 8">Más de 8</option></select>
-          <select name="estresCronico" value={filtros.estresCronico} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Estrés Crónico (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
-          <select name="tumoresGinecologicos" value={filtros.tumoresGinecologicos} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Tumores Gin. (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
-          <select name="enfermedadesAutoinmunes" value={filtros.enfermedadesAutoinmunes} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Enf. Autoinmunes (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
-          <select name="menopausia" value={filtros.menopausia} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Menopausia (Todos)</option><option value="Sí">Sí</option><option value="No">No</option><option value="Pre-Menopausia">Pre-Menopausia</option></select>
-          
-        </div>
-        
-        {/* Botón de Limpiar */}
-        <div className="mt-4 flex justify-end">
-            <button
-                onClick={limpiarFiltros}
-                className="px-4 py-2 text-sm font-medium bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
-            >
-                Limpiar Filtros
-            </button>
-        </div>
-      </div>
-
-
-      {/* --- BOTONES DE VISUALIZACIÓN --- */}
-      <div className="flex justify-between items-center mb-6">
+      {/* --- BOTONES DE VISUALIZACIÓN Y CONTROL DE FILTROS --- */}
+      <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
           <h2 className="text-2xl font-bold text-gray-800">Resultados ({pacientesFiltrados.length} pacientes)</h2>
-          <button 
-              onClick={() => setMostrarGraficos(!mostrarGraficos)} 
-              className={`px-4 py-2 text-sm font-medium rounded-lg shadow-md transition ${mostrarGraficos ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-green-500 hover:bg-green-600 text-white'}`}
-          >
-              {mostrarGraficos ? 'Ocultar Gráficos' : 'Mostrar Gráficos'}
-          </button>
+          <div className="flex gap-4">
+            <button 
+                onClick={() => setMostrarFiltros(!mostrarFiltros)} 
+                className={`px-4 py-2 text-sm font-medium rounded-lg shadow-md transition ${mostrarFiltros ? 'bg-gray-500 hover:bg-gray-600 text-white' : 'bg-yellow-500 hover:bg-yellow-600 text-white'}`}
+            >
+                {mostrarFiltros ? 'Ocultar Filtros' : 'Mostrar Filtros'}
+            </button>
+            <button 
+                onClick={() => setMostrarGraficos(!mostrarGraficos)} 
+                className={`px-4 py-2 text-sm font-medium rounded-lg shadow-md transition ${mostrarGraficos ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-green-500 hover:bg-green-600 text-white'}`}
+            >
+                {mostrarGraficos ? 'Ocultar Gráficos' : 'Mostrar Gráficos'}
+            </button>
+          </div>
       </div>
+
+      {/* --- SECCIÓN DE FILTROS --- */}
+      {mostrarFiltros && (
+        <div className="p-6 bg-white rounded-xl shadow-lg mb-8 transition-all duration-300">
+          <h2 className="text-xl font-bold text-gray-700 mb-4">Filtros de Búsqueda</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            
+            {/* Edad */}
+            <input 
+              type="number" 
+              name="edad" 
+              placeholder="Edad Mínima" 
+              value={filtros.edad} 
+              onChange={handleFiltroChange}
+              className="p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+            />
+            {/* Tensión Sistólica */}
+            <input 
+              type="number" 
+              name="tensionSistolica" 
+              placeholder="TAS Mínima" 
+              value={filtros.tensionSistolica} 
+              onChange={handleFiltroChange}
+              className="p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+            />
+            {/* Nivel Colesterol (Mínimo) */}
+            <input 
+              type="number" 
+              name="nivelColesterol" 
+              placeholder="Colesterol Mínimo" 
+              value={filtros.nivelColesterol} 
+              onChange={handleFiltroChange}
+              className="p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+            />
+            {/* IMC */}
+            <input 
+              type="text" 
+              name="imc" 
+              placeholder="Clasificación IMC" 
+              value={filtros.imc} 
+              onChange={handleFiltroChange}
+              className="p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+            />
+            
+            {/* Nivel de Riesgo */}
+            <select
+              name="nivelRiesgo"
+              value={filtros.nivelRiesgo}
+              onChange={handleFiltroChange}
+              className="p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Riesgo (Todos)</option>
+              <option value="Bajo">Bajo</option>
+              <option value="Moderado">Moderado</option>
+              <option value="Alto">Alto</option>
+              <option value="Muy Alto">Muy Alto</option>
+              <option value="Crítico">Crítico</option>
+            </select>
+
+            {/* Fumador */}
+            <select
+              name="fumador"
+              value={filtros.fumador}
+              onChange={handleFiltroChange}
+              className="p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Fuma (Todos)</option>
+              <option value="Sí">Sí</option>
+              <option value="No">No</option>
+              {/* ASUMO que el valor "Ex" puede ser un valor posible para el campo fumaDiario, aunque en el Formulario solo hay 'Sí'/'No' */}
+              <option value="Ex">Ex-Fumador</option> 
+            </select>
+
+            {/* Hábitos de Vida */}
+            <select name="actividadFisica" value={filtros.actividadFisica} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Act. Física (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
+            <select name="horasSueno" value={filtros.horasSueno} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Sueño +7hs (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
+            <select name="estresCronico" value={filtros.estresCronico} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Estrés Crónico (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
+            
+            {/* Salud Mamaria (Nuevos Filtros) */}
+            <select name="familiarCancerMama" value={filtros.familiarCancerMama} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Familiar Cáncer Mama</option><option value="Sí">Sí</option><option value="No">No</option></select>
+            <select name="puncionMama" value={filtros.puncionMama} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Punción Mama</option><option value="Sí">Sí</option><option value="No">No</option></select>
+            <select name="mamaDensa" value={filtros.mamaDensa} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Mama Densa</option><option value="Sí">Sí</option><option value="No">No</option><option value="No recuerdo">No recuerdo</option><option value="No sé lo que es">No sé lo que es</option></select>
+
+
+            {/* Historial Ginecológico */}
+            <select name="tumoresGinecologicos" value={filtros.tumoresGinecologicos} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Tumores Gin. (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
+            <select name="enfermedadesAutoinmunes" value={filtros.enfermedadesAutoinmunes} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Enf. Autoinmunes (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
+            <select name="tuvoHijos" value={filtros.tuvoHijos} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Tuvo Hijos (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
+            <select name="ciclosMenstruales" value={filtros.ciclosMenstruales} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Ciclos Menstruales (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
+            <select name="histerectomia" value={filtros.histerectomia} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Histerectomía (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
+            <select name="menopausia" value={filtros.menopausia} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Menopausia (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
+            
+          </div>
+          
+          {/* Botón de Limpiar */}
+          <div className="mt-4 flex justify-end">
+              <button
+                  onClick={limpiarFiltros}
+                  className="px-4 py-2 text-sm font-medium bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+              >
+                  Limpiar Filtros
+              </button>
+          </div>
+        </div>
+      )}
 
       {/* --- SECCIÓN DE GRÁFICOS --- */}
       {mostrarGraficos && (
@@ -403,8 +452,9 @@ function Estadisticas() {
             <PacienteCard 
                 key={p.id} 
                 paciente={p} 
-                // onEdit={handleEdit} 
-                onDelete={handleDelete} // Usa la nueva función handleDelete
+                onEdit={handleEdit} 
+                onCopy={handleCopy} 
+                onDelete={handleDelete} 
             />
           ))
         ) : (
@@ -414,7 +464,7 @@ function Estadisticas() {
         )}
       </div>
 
-      {/* --- MODAL DE CONFIRMACIÓN DE ELIMINACIÓN (Reemplazo de confirm()) --- */}
+      {/* --- MODAL DE CONFIRMACIÓN DE ELIMINACIÓN --- */}
       {mostrarModalConfirmacion && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md transform transition-all duration-300 scale-100">
@@ -442,7 +492,7 @@ function Estadisticas() {
       {mensajeNotificacion && (
         <div 
             className={`fixed bottom-4 right-4 p-4 rounded-lg shadow-xl z-50 transition-opacity duration-300 
-                ${mensajeNotificacion.tipo === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white`}
+                ${mensajeNotificacion.tipo === 'success' ? 'bg-green-500' : mensajeNotificacion.tipo === 'error' ? 'bg-red-500' : 'bg-blue-500'} text-white`}
         >
             {mensajeNotificacion.texto}
         </div>
