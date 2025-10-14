@@ -150,7 +150,7 @@ function Estadisticas() {
   const [pacientes, setPacientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mostrarGraficos, setMostrarGraficos] = useState(false);
-  const [mostrarFiltros, setMostrarFiltros] = useState(true); // Nuevo estado para los filtros
+  // ELIMINAMOS: const [mostrarFiltros, setMostrarFiltros] = useState(true); 
 
   // --- ESTADOS AÑADIDOS PARA EL MODAL DE CONFIRMACIÓN Y NOTIFICACIONES ---
   const [mostrarModalConfirmacion, setMostrarModalConfirmacion] = useState(false);
@@ -161,7 +161,7 @@ function Estadisticas() {
   const [filtros, setFiltros] = useState({
     edad: '',
     imc: '',
-    // conoceColesterol: '', // Este filtro ya no parece relevante si se filtra por nivelColesterol
+    // conoceColesterol: '', 
     nivelColesterol: '',
     tensionSistolica: '',
     fumador: '',
@@ -314,27 +314,23 @@ function Estadisticas() {
     <div className="p-6 bg-gray-50 min-h-screen">
       <h1 className="text-3xl font-extrabold text-gray-900 mb-8">Estadísticas y Gestión de Pacientes</h1>
 
-      {/* --- BOTONES DE VISUALIZACIÓN Y CONTROL DE FILTROS --- */}
+      {/* --- BOTONES DE VISUALIZACIÓN --- */}
       <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
           <h2 className="text-2xl font-bold text-gray-800">Resultados ({pacientesFiltrados.length} pacientes)</h2>
           <div className="flex gap-4">
-            <button 
-                onClick={() => setMostrarFiltros(!mostrarFiltros)} 
-                className={`px-4 py-2 text-sm font-medium rounded-lg shadow-md transition ${mostrarFiltros ? 'bg-gray-500 hover:bg-gray-600 text-white' : 'bg-yellow-500 hover:bg-yellow-600 text-white'}`}
-            >
-                {mostrarFiltros ? 'Ocultar Filtros' : 'Mostrar Filtros'}
-            </button>
+            {/* Solo dejamos el botón de Gráficos. Al presionarlo, los filtros también se muestran. */}
             <button 
                 onClick={() => setMostrarGraficos(!mostrarGraficos)} 
                 className={`px-4 py-2 text-sm font-medium rounded-lg shadow-md transition ${mostrarGraficos ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-green-500 hover:bg-green-600 text-white'}`}
             >
-                {mostrarGraficos ? 'Ocultar Gráficos' : 'Mostrar Gráficos'}
+                {mostrarGraficos ? 'Ocultar Gráficos y Filtros' : 'Mostrar Gráficos y Filtros'}
             </button>
           </div>
       </div>
 
       {/* --- SECCIÓN DE FILTROS --- */}
-      {mostrarFiltros && (
+      {/* AHORA CONTROLADO POR mostrarGraficos */}
+      {mostrarGraficos && (
         <div className="p-6 bg-white rounded-xl shadow-lg mb-8 transition-all duration-300">
           <h2 className="text-xl font-bold text-gray-700 mb-4">Filtros de Búsqueda</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -401,13 +397,13 @@ function Estadisticas() {
               <option value="">Fuma (Todos)</option>
               <option value="Sí">Sí</option>
               <option value="No">No</option>
-              {/* ASUMO que el valor "Ex" puede ser un valor posible para el campo fumaDiario, aunque en el Formulario solo hay 'Sí'/'No' */}
+              {/* ASUMO que el valor "Ex" puede ser un valor posible para el campo fumaDiario */}
               <option value="Ex">Ex-Fumador</option> 
             </select>
 
             {/* Hábitos de Vida */}
-            <select name="actividadFisica" value={filtros.actividadFisica} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Act. Física (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
-            <select name="horasSueno" value={filtros.horasSueno} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Sueño +7hs (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
+            <select name="actividadFisica" value={filtros.actividadFisica} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Act. Física (Todos)</option><option value="Sedentario">Sedentario</option><option value="Moderado">Moderado</option><option value="Activo">Activo</option></select>
+            <select name="horasSueno" value={filtros.horasSueno} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Sueño (Todos)</option><option value="Menos de 6h">Menos de 6h</option><option value="6-8h">6-8h</option><option value="Más de 8h">Más de 8h</option></select>
             <select name="estresCronico" value={filtros.estresCronico} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Estrés Crónico (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
             
             {/* Salud Mamaria (Nuevos Filtros) */}
@@ -420,9 +416,9 @@ function Estadisticas() {
             <select name="tumoresGinecologicos" value={filtros.tumoresGinecologicos} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Tumores Gin. (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
             <select name="enfermedadesAutoinmunes" value={filtros.enfermedadesAutoinmunes} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Enf. Autoinmunes (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
             <select name="tuvoHijos" value={filtros.tuvoHijos} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Tuvo Hijos (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
-            <select name="ciclosMenstruales" value={filtros.ciclosMenstruales} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Ciclos Menstruales (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
+            <select name="ciclosMenstruales" value={filtros.ciclosMenstruales} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Ciclos Menstruales (Todos)</option><option value="Regulares">Regulares</option><option value="Irregulares">Irregulares</option><option value="Ausentes">Ausentes</option><option value="No aplica">No aplica</option></select>
             <select name="histerectomia" value={filtros.histerectomia} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Histerectomía (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
-            <select name="menopausia" value={filtros.menopausia} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Menopausia (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
+            <select name="menopausia" value={filtros.menopausia} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Menopausia (Todos)</option><option value="Sí">Sí</option><option value="No">No</option><option value="No aplica">No aplica</option></select>
             
           </div>
           
