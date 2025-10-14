@@ -150,18 +150,18 @@ function Estadisticas() {
   const [pacientes, setPacientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mostrarGraficos, setMostrarGraficos] = useState(false);
-  // ELIMINAMOS: const [mostrarFiltros, setMostrarFiltros] = useState(true); 
+  // VOLVEMOS A AÑADIR EL ESTADO INDEPENDIENTE PARA LOS FILTROS
+  const [mostrarFiltros, setMostrarFiltros] = useState(false); 
 
   // --- ESTADOS AÑADIDOS PARA EL MODAL DE CONFIRMACIÓN Y NOTIFICACIONES ---
   const [mostrarModalConfirmacion, setMostrarModalConfirmacion] = useState(false);
-  const [pacienteAEliminar, setPacienteAEliminar] = useState(null); // ID del paciente a eliminar
-  const [mensajeNotificacion, setMensajeNotificacion] = useState(null); // { tipo: 'success' | 'error', texto: string }
+  const [pacienteAEliminar, setPacienteAEliminar] = useState(null); 
+  const [mensajeNotificacion, setMensajeNotificacion] = useState(null); 
   // -----------------------------------------------------------------------
 
   const [filtros, setFiltros] = useState({
     edad: '',
     imc: '',
-    // conoceColesterol: '', 
     nivelColesterol: '',
     tensionSistolica: '',
     fumador: '',
@@ -176,11 +176,9 @@ function Estadisticas() {
     ciclosMenstruales: '',
     histerectomia: '',
     menopausia: '',
-    // --- NUEVOS FILTROS DE SALUD MAMARIA ---
     familiarCancerMama: '', 
     puncionMama: '',
     mamaDensa: '',
-    // -------------------------------------
   });
 
   // --- FUNCIÓN PARA MOSTRAR EL MODAL DE CONFIRMACIÓN DE ELIMINACIÓN ---
@@ -191,14 +189,12 @@ function Estadisticas() {
   
   // --- FUNCIÓN PARA NAVEGAR A EDICIÓN (Placeholder) ---
   const handleEdit = (id) => {
-    // Aquí iría la lógica de navegación real a la ruta de edición
     setMensajeNotificacion({ tipo: 'info', texto: `Navegando a edición del paciente: ${id}` });
     setTimeout(() => setMensajeNotificacion(null), 4000);
   };
   
   // --- FUNCIÓN PARA COPIAR DATOS DEL PACIENTE ---
   const handleCopy = (paciente) => {
-    // Crear un string legible para copiar
     const dataToCopy = Object.entries(paciente)
         .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
         .join('\n');
@@ -224,7 +220,6 @@ function Estadisticas() {
 
     try {
         await axiosInstance.delete(`${apiBaseURL}/${pacienteAEliminar}`);
-        // Actualizar la lista de pacientes
         setPacientes(prevPacientes => prevPacientes.filter(p => p.id !== pacienteAEliminar));
         setMensajeNotificacion({ tipo: 'success', texto: `Paciente ${pacienteAEliminar} eliminado con éxito.` });
     } catch (err) {
@@ -232,7 +227,7 @@ function Estadisticas() {
         setMensajeNotificacion({ tipo: 'error', texto: 'Error al eliminar paciente. Inténtalo de nuevo.' });
     } finally {
         setPacienteAEliminar(null);
-        setTimeout(() => setMensajeNotificacion(null), 4000); // Ocultar mensaje después de 4s
+        setTimeout(() => setMensajeNotificacion(null), 4000); 
     }
   };
 
@@ -271,28 +266,23 @@ function Estadisticas() {
   const pacientesFiltrados = useMemo(() => {
     let filtrados = pacientes;
 
-    // Helper para comparar valores de texto
     const normalizar = (value) => String(value).toLowerCase().trim();
     const isNumberFilter = (key) => ['edad', 'tensionSistolica', 'nivelColesterol'].includes(key);
 
-    // Función de filtrado genérica
     const aplicarFiltro = (paciente, key, filtroValue) => {
         if (!filtroValue) return true;
         const normalizedFilter = normalizar(filtroValue);
         
-        // Filtrado por número (mínimo, mayor o igual)
         if (isNumberFilter(key)) {
             const numFiltro = parseFloat(filtroValue);
-            const numPaciente = parseFloat(paciente[key] || 0); // Usamos 0 si es null/undefined
+            const numPaciente = parseFloat(paciente[key] || 0); 
             return !isNaN(numFiltro) ? numPaciente >= numFiltro : true;
         }
 
-        // Manejo especial para IMC (que tiene valor y clasificación, e.g., "25.1 (Sobrepeso)")
         if (key === 'imc') {
             return normalizar(paciente.imc || '').includes(normalizedFilter);
         }
 
-        // Filtrado general por coincidencia de texto
         return normalizar(paciente[key] || '').includes(normalizedFilter);
     };
 
@@ -318,19 +308,26 @@ function Estadisticas() {
       <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
           <h2 className="text-2xl font-bold text-gray-800">Resultados ({pacientesFiltrados.length} pacientes)</h2>
           <div className="flex gap-4">
-            {/* Solo dejamos el botón de Gráficos. Al presionarlo, los filtros también se muestran. */}
+            {/* BOTÓN 1: FILTROS */}
+            <button 
+                onClick={() => setMostrarFiltros(!mostrarFiltros)} 
+                className={`px-4 py-2 text-sm font-medium rounded-lg shadow-md transition ${mostrarFiltros ? 'bg-gray-500 hover:bg-gray-600 text-white' : 'bg-yellow-500 hover:bg-yellow-600 text-white'}`}
+            >
+                {mostrarFiltros ? 'Ocultar Filtros' : 'Mostrar Filtros'}
+            </button>
+            
+            {/* BOTÓN 2: GRÁFICOS */}
             <button 
                 onClick={() => setMostrarGraficos(!mostrarGraficos)} 
                 className={`px-4 py-2 text-sm font-medium rounded-lg shadow-md transition ${mostrarGraficos ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-green-500 hover:bg-green-600 text-white'}`}
             >
-                {mostrarGraficos ? 'Ocultar Gráficos y Filtros' : 'Mostrar Gráficos y Filtros'}
+                {mostrarGraficos ? 'Ocultar Gráficos' : 'Mostrar Gráficos'}
             </button>
           </div>
       </div>
 
-      {/* --- SECCIÓN DE FILTROS --- */}
-      {/* AHORA CONTROLADO POR mostrarGraficos */}
-      {mostrarGraficos && (
+      {/* --- SECCIÓN DE FILTROS (Controlado por mostrarFiltros) --- */}
+      {mostrarFiltros && (
         <div className="p-6 bg-white rounded-xl shadow-lg mb-8 transition-all duration-300">
           <h2 className="text-xl font-bold text-gray-700 mb-4">Filtros de Búsqueda</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -397,7 +394,6 @@ function Estadisticas() {
               <option value="">Fuma (Todos)</option>
               <option value="Sí">Sí</option>
               <option value="No">No</option>
-              {/* ASUMO que el valor "Ex" puede ser un valor posible para el campo fumaDiario */}
               <option value="Ex">Ex-Fumador</option> 
             </select>
 
@@ -406,7 +402,7 @@ function Estadisticas() {
             <select name="horasSueno" value={filtros.horasSueno} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Sueño (Todos)</option><option value="Menos de 6h">Menos de 6h</option><option value="6-8h">6-8h</option><option value="Más de 8h">Más de 8h</option></select>
             <select name="estresCronico" value={filtros.estresCronico} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Estrés Crónico (Todos)</option><option value="Sí">Sí</option><option value="No">No</option></select>
             
-            {/* Salud Mamaria (Nuevos Filtros) */}
+            {/* Salud Mamaria (Filtros) */}
             <select name="familiarCancerMama" value={filtros.familiarCancerMama} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Familiar Cáncer Mama</option><option value="Sí">Sí</option><option value="No">No</option></select>
             <select name="puncionMama" value={filtros.puncionMama} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Punción Mama</option><option value="Sí">Sí</option><option value="No">No</option></select>
             <select name="mamaDensa" value={filtros.mamaDensa} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Mama Densa</option><option value="Sí">Sí</option><option value="No">No</option><option value="No recuerdo">No recuerdo</option><option value="No sé lo que es">No sé lo que es</option></select>
@@ -434,7 +430,7 @@ function Estadisticas() {
         </div>
       )}
 
-      {/* --- SECCIÓN DE GRÁFICOS --- */}
+      {/* --- SECCIÓN DE GRÁFICOS (Controlado por mostrarGraficos) --- */}
       {mostrarGraficos && (
           <div className="mb-8 p-6 bg-white rounded-xl shadow-lg">
               <EstadisticasGraficos pacientes={pacientesFiltrados} />
