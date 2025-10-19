@@ -324,7 +324,7 @@ const transformarArraysAString = (obj, camposArray) => {
                     </div>
                     {datosMujer.tomaMedicacionDiario === 'Sí' && (
                         <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 space-y-2 rounded-r-lg">
-                            {['Diabetes', 'Hipertensión', 'Colesterol', 'Tiroides', 'Otras'].map(med => (
+                            {['Diabetes', 'Hipertensión', 'Colesterol', 'Tiroides','Corticoides','Medicación para dormir','Algún antidepresivo','Otras'].map(med => (
                                 <div key={med} className="flex items-center">
                                     <input type="checkbox" id={med} value={med} checked={datosMujer.medicacionCondiciones.includes(med)} onChange={() => handleCheckboxChange('medicacionCondiciones', med)} className="h-4 w-4 rounded"/>
                                     <label htmlFor={med} className="ml-3 text-sm">{med}</label>
@@ -393,7 +393,7 @@ const transformarArraysAString = (obj, camposArray) => {
                     </div>
                      {datosMujer.enfermedadesAutoinmunes === 'Sí' && (
                          <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 space-y-2 rounded-r-lg">
-                            {['Lupus', 'Artritis', 'Otras'].map(e => <div key={e}><input type="checkbox" id={e} value={e} checked={datosMujer.autoinmunesTipo.includes(e)} onChange={() => handleCheckboxChange('autoinmunesTipo', e)} /><label htmlFor={e} className="ml-2">{e}</label></div>)}
+                            {['Lupus', 'Artritis', 'Psoriasis', 'Fiebre reumática', 'Otras'].map(e => <div key={e}><input type="checkbox" id={e} value={e} checked={datosMujer.autoinmunesTipo.includes(e)} onChange={() => handleCheckboxChange('autoinmunesTipo', e)} /><label htmlFor={e} className="ml-2">{e}</label></div>)}
                         </div>
                     )}
                 </div>
@@ -413,7 +413,7 @@ const transformarArraysAString = (obj, camposArray) => {
                     )}
                     {datosMujer.tuvoHijos === 'No' && (
                         <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 space-y-2 rounded-r-lg">
-                             {['No quiso', 'No pudo', 'Tuvo pérdidas', 'No se dio'].map(m => <div key={m}><input type="radio" id={m} name="motivoNoHijos" value={m} checked={datosMujer.motivoNoHijos === m} onChange={handleChange} /><label htmlFor={m} className="ml-2">{m}</label></div>)}
+                             {['No quiso', 'No pudo', 'Otros'].map(m => <div key={m}><input type="radio" id={m} name="motivoNoHijos" value={m} checked={datosMujer.motivoNoHijos === m} onChange={handleChange} /><label htmlFor={m} className="ml-2">{m}</label></div>)}
                         </div>
                     )}
                 </div>
@@ -432,7 +432,7 @@ const transformarArraysAString = (obj, camposArray) => {
                      {datosMujer.ciclosMenstruales === 'No' && (
                          <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 space-y-4 rounded-r-lg">
                             <div className="flex flex-col"><label>¿Presenta histerectomía?</label><div className="flex space-x-2 mt-1">{['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('histerectomia', o)} className={`p-2 border rounded ${datosMujer.histerectomia === o ? 'bg-green-500 text-white' : ''}`}>{o}</button>)}</div></div>
-                            <div className="flex flex-col"><label>¿A qué edad presentó la menopausia?:</label><input type="number" name="edadMenopausia" value={datosMujer.edadMenopausia} onChange={handleChange} className="p-2 border rounded"/></div>
+                            <div className="flex flex-col"><label>¿A qué edad presentó sintomas?:</label><input type="number" name="edadMenopausia" value={datosMujer.edadMenopausia} onChange={handleChange} className="p-2 border rounded"/></div>
                         </div>
                      )}
                 </div>
