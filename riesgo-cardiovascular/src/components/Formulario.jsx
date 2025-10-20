@@ -235,7 +235,7 @@ const Formulario = () => {
     return (
         <div className="flex flex-col items-center p-6 max-w-2xl mx-auto">
             <form className="w-full space-y-6">
-                <h1 className="text-3xl font-bold mb-6">Formulario de Salud Femenina y Riesgo Cardiovascular</h1>
+                <h1 className="text-3xl font-bold mb-6">Formulario Área Corazón y Mujer</h1>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex flex-col">
