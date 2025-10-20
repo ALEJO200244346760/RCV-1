@@ -92,11 +92,7 @@ const PacienteCard = React.memo(({ paciente: p, onDelete, onEdit, onCopy }) => {
                 {p.genero === 'femenino' && (
                     <>
                         <hr className="my-2"/>
-                        <p className="font-semibold text-sm text-gray-600">Salud Femenina y Mamaria:</p>
                         
-                        <p><strong>Familiar Cáncer Mama:</strong> {p.familiarCancerMama}</p>
-                        <p><strong>Punción de Mama:</strong> {p.puncionMama}</p>
-                        <p><strong>Mama Densa:</strong> {p.mamaDensa}</p>
                         <p><strong>HIV o Hepatitis B/C:</strong> {p.hivHepatitis || 'No especificado'}</p>
                         <p><strong>Rep. Asistida:</strong> {p.reproduccionAsistida || 'No especificado'}</p>
 
@@ -187,9 +183,6 @@ function Estadisticas() {
     hivHepatitis: '', // CAMPO SOLICITADO
     tuvoHijos: '',
     reproduccionAsistida: '', // CAMPO AGREGADO
-    familiarCancerMama: '', 
-    puncionMama: '',
-    mamaDensa: '',
   });
 
   const handleDelete = (id) => {
@@ -327,8 +320,6 @@ function Estadisticas() {
             <select name="enfermedadRenal" value={filtros.enfermedadRenal} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Enf. Renal</option><option value="Sí">Sí</option><option value="No">No</option></select>
             <select name="hivHepatitis" value={filtros.hivHepatitis} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">HIV/Hepatitis</option><option value="Sí">Sí</option><option value="No">No</option></select>
             <select name="reproduccionAsistida" value={filtros.reproduccionAsistida} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Rep. Asistida</option><option value="Sí">Sí</option><option value="No">No</option></select>
-            <select name="familiarCancerMama" value={filtros.familiarCancerMama} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Fam. Cáncer Mama</option><option value="Sí">Sí</option><option value="No">No</option></select>
-            <select name="mamaDensa" value={filtros.mamaDensa} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Mama Densa</option><option value="Sí">Sí</option><option value="No">No</option></select>
             <select name="tuvoHijos" value={filtros.tuvoHijos} onChange={handleFiltroChange} className="p-2 border rounded-lg"><option value="">Tuvo Hijos</option><option value="Sí">Sí</option><option value="No">No</option></select>
           </div>
           <div className="mt-4 flex justify-end"><button onClick={limpiarFiltros} className="px-4 py-2 text-sm font-medium bg-gray-500 text-white rounded-lg hover:bg-gray-600">Limpiar Filtros</button></div>

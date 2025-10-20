@@ -51,12 +51,6 @@ public class Paciente {
 
     // --- Antecedentes de Salud ---
     @Column
-    private String familiarCancerMama;
-    @Column
-    private String puncionMama;
-    @Column
-    private String mamaDensa;
-    @Column
     private String infarto;
     @Column
     private String acv;
