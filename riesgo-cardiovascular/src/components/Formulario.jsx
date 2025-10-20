@@ -433,7 +433,7 @@ const Formulario = () => {
                      {datosMujer.ciclosMenstruales === 'No' && (
                          <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 space-y-4 rounded-r-lg">
                             <div className="flex flex-col"><label>¿Presenta histerectomía?</label><div className="flex space-x-2 mt-1">{['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('histerectomia', o)} className={`p-2 border rounded ${datosMujer.histerectomia === o ? 'bg-green-500 text-white' : ''}`}>{o}</button>)}</div></div>
-                            <div className="flex flex-col"><label>¿A qué edad presentó sintomas?:</label><input type="number" name="edadMenopausia" value={datosMujer.edadMenopausia} onChange={handleChange} className="p-2 border rounded"/></div>
+                            <div className="flex flex-col"><label>¿A qué edad presentó sintió sintomas relacionados a menopausia?:</label><input type="number" name="edadMenopausia" value={datosMujer.edadMenopausia} onChange={handleChange} className="p-2 border rounded"/></div>
                         </div>
                      )}
                 </div>
