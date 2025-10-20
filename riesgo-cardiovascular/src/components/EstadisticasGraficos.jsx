@@ -7,16 +7,20 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Toolti
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 // Colores base para gráficos (adaptados a la paleta de Tailwind/Moderno)
+// Paleta Femenina de Colores para Gráficos
 const BASE_COLORS = [
-    '#60A5FA', // Azul (Bajo riesgo/general)
-    '#34D399', // Verde (Bueno)
-    '#FDE047', // Amarillo (Moderado)
-    '#F97316', // Naranja (Alto)
-    '#EF4444', // Rojo (Muy Alto/Negativo)
-    '#8B5CF6', // Púrpura (Salud Femenina)
-    '#EC4899', // Rosa (Salud Femenina)
-    '#B91C1C', // Rojo oscuro (Crítico)
+    '#F9A8D4', // Rosa claro
+    '#D8B4FE', // Lavanda
+    '#F472B6', // Rosa intenso
+    '#C084FC', // Violeta suave
+    '#E879F9', // Magenta
+    '#F0ABFC', // Rosa púrpura
+    '#FBCFE8', // Rosa pastel
+    '#E0E7FF', // Azul-violeta muy claro
+    '#D946EF', // Fucsia
+    '#A78BFA', // Violeta medio
 ];
+
 
 // Corregimos la destructuración para que pacientes tome [] si es undefined/null.
 function EstadisticasGraficos({ pacientes: pacientesFiltrados = [] }) {
