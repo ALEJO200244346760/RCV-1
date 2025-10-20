@@ -70,7 +70,7 @@ const obtenerTextoRiesgo = (nivel) => {
 
 // ** AXIOS INSTANCE **
 const axiosInstance = axios.create({
-    baseURL: 'https://rcv-production.up.railway.app/api', 
+    baseURL: 'https://rcv-1-production.up.railway.app/api', 
 });
 
 
