@@ -257,29 +257,6 @@ const Formulario = () => {
                     <label className="text-sm font-medium text-gray-700">Género:</label>
                     <button type="button" className="p-2 border rounded bg-indigo-500 text-white w-full md:w-1/3 cursor-not-allowed">Femenino</button>
                 </div>
-                
-                <h2 className="text-xl font-semibold border-b pb-2 pt-4">Salud Mamaria</h2>
-                
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium">¿Tiene algún familiar con cáncer de mama?</label>
-                    <div className="flex space-x-2 mt-1">
-                        {['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('familiarCancerMama', o)} className={`p-2 border rounded ${datosMujer.familiarCancerMama === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>)}
-                    </div>
-                </div>
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium">¿Alguna vez le hicieron alguna punción de mama?</label>
-                    <div className="flex space-x-2 mt-1">
-                        {['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('puncionMama', o)} className={`p-2 border rounded ${datosMujer.puncionMama === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>)}
-                    </div>
-                </div>
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium">¿Le dijeron si tenía mama densa al ver su mamografía?</label>
-                    <div className="grid grid-cols-2 gap-2 mt-1">
-                        {['Sí', 'No', 'No recuerdo', 'No sé lo que es'].map(o => (
-                            <button key={o} type="button" onClick={() => handleButtonToggle('mamaDensa', o)} className={`p-2 border rounded ${datosMujer.mamaDensa === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>
-                        ))}
-                    </div>
-                </div>
 
                 <h2 className="text-xl font-semibold border-b pb-2 pt-4">Historial y Hábitos</h2>
 
