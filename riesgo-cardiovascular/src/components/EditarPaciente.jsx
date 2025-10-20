@@ -112,10 +112,7 @@ const initialState = {
     
     // --- Salud Femenina / Mamaria ---
     tumoresGinecologicos: null,
-    tumoresTipo: [],
-    familiarCancerMama: null, 
-    puncionMama: null,       
-    mamaDensa: null,         
+    tumoresTipo: [],     
     
     // --- Salud Reproductiva ---
     tuvoHijos: null,
@@ -452,7 +449,6 @@ function EditarPaciente() {
                     <label className="block text-sm font-medium text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">Género</label>
                     <select name="genero" value={datos.genero} onChange={manejarCambio} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                         <option value="femenino">Femenino</option>
-                        <option value="masculino">Masculino</option>
                     </select>
                 </div>
               </div>
@@ -554,12 +550,6 @@ function EditarPaciente() {
                     />
                 </div>
                 
-                <h3 className="text-lg font-semibold text-pink-700 mt-6 border-t pt-4">Antecedentes Mamarios</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <RadioGroup label="Familiar de 1er Grado con Cáncer de Mama" name="familiarCancerMama" options={['Sí', 'No', 'No recuerdo']} />
-                    <RadioGroup label="Punción de mama previa (Biopsia)" name="puncionMama" options={['Sí', 'No']} />
-                    <RadioGroup label="Mama Densa (según mamografía)" name="mamaDensa" options={['Sí', 'No', 'No sabe']} />
-                </div>
                 
                 <h3 className="text-lg font-semibold text-pink-700 mt-6 border-t pt-4">Antecedentes Reproductivos</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
