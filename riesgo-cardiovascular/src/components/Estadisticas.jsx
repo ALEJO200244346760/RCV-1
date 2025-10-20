@@ -211,8 +211,6 @@ function Estadisticas() {
       tomaMedicacionDiario: 'Toma Medicación Diaria', medicacionCondiciones: 'Condiciones Médicas', fumaDiario: 'Fuma Diario',
       infarto: 'Infarto Previo', acv: 'ACV Previo', enfermedadRenal: 'Enfermedad Renal Crónica',
       actividadFisica: 'Actividad Física', horasSueno: 'Horas de Sueño', estresCronico: 'Estrés Crónico', estresTipo: 'Tipo de Estrés',
-      // Salud Femenina
-      familiarCancerMama: 'Familiar con Cáncer de Mama', puncionMama: 'Punción de Mama', mamaDensa: 'Mama Densa',
       tumoresGinecologicos: 'Tumores Ginecológicos', tumoresTipo: 'Tipos de Tumores', 
       enfermedadesAutoinmunes: 'Enfermedades Autoinmunes', autoinmunesTipo: 'Tipos de Enf. Autoinmunes', 
       hivHepatitis: 'Presenta HIV o Hepatitis B/C',
@@ -230,7 +228,7 @@ function Estadisticas() {
                                 : Array.isArray(value) ? value.join(', ') : value;
             return `${label}: ${finalValue}`;
         })
-        .join('\n');
+        .join(' ');
 
     navigator.clipboard.writeText(dataToCopy)
         .then(() => setMensajeNotificacion({ tipo: 'success', texto: `Datos del paciente ID ${paciente.id} copiados.` }))

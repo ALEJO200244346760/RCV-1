@@ -472,11 +472,6 @@ const Formulario = () => {
                            <p><strong>Teléfono:</strong> {datosMujer.telefono}</p>
                            <p><strong>Edad:</strong> {datosMujer.edad}</p>
                            <hr className="my-2"/>
-                           <p className="font-semibold">Salud Mamaria:</p>
-                           <p><strong>Familiar con Cáncer de Mama:</strong> {datosMujer.familiarCancerMama}</p>
-                           <p><strong>Punción de Mama:</strong> {datosMujer.puncionMama}</p>
-                           <p><strong>Mama Densa:</strong> {datosMujer.mamaDensa}</p>
-                           <hr className="my-2"/>
                            <p className="font-semibold">Historial Cardiovascular:</p>
                            <p><strong>Infarto Previo:</strong> {datosMujer.infarto}</p>
                            <p><strong>ACV Previo:</strong> {datosMujer.acv}</p>
