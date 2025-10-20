@@ -10,23 +10,26 @@ const datosInicialesMujer = {
     fechaNacimiento: '', 
     telefono: '',        
     edad: '',
-    // --- NUEVOS CAMPOS ---
-    familiarCancerMama: null, // Nuevo
-    puncionMama: null,        // Nuevo
-    mamaDensa: null,          // Nuevo
-    // ---------------------
+    familiarCancerMama: null,
+    puncionMama: null,
+    mamaDensa: null,
+    infarto: null,
+    acv: null,
+    enfermedadRenal: null,
     tomaMedicacionDiario: null,
     medicacionCondiciones: [],
     fumaDiario: null,
     actividadFisica: null,
     horasSueno: null,
-    estresCronico: null, // Mantenemos el nombre del campo, cambiamos el label
+    estresCronico: null,
     estresTipo: '',
     tumoresGinecologicos: null,
     tumoresTipo: [],
-    enfermedadesAutoinmunes: null, // Cambiamos la pregunta, mantenemos el campo
+    enfermedadesAutoinmunes: null,
     autoinmunesTipo: [],
+    hivHepatitis: null, // NUEVO CAMPO
     tuvoHijos: null,
+    reproduccionAsistida: null,
     cantidadHijos: '',
     complicacionesEmbarazo: null,
     motivoNoHijos: '',
@@ -54,9 +57,7 @@ const Formulario = () => {
     const [mostrarModal, setMostrarModal] = useState(false);
     const [modalAdvertencia, setModalAdvertencia] = useState(null);
 
-    // --- EFFECT para CALCULAR EDAD e IMC ---
     useEffect(() => {
-        // 1. Cálculo de IMC
         const peso = parseFloat(datosMujer.peso);
         const tallaCm = parseFloat(datosMujer.talla);
         if (peso > 0 && tallaCm > 0) {
@@ -75,7 +76,6 @@ const Formulario = () => {
             setImc({ valor: '', clasificacion: '' });
         }
         
-        // 2. Cálculo de Edad a partir de Fecha de Nacimiento
         if (datosMujer.fechaNacimiento) {
             const dob = new Date(datosMujer.fechaNacimiento);
             const today = new Date();
@@ -84,13 +84,8 @@ const Formulario = () => {
             if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
                 age--;
             }
-            // Actualizar la edad en el estado si la fecha es válida
-            setDatosMujer(prev => ({ ...prev, edad: age.toString() }));
-        } else if (datosMujer.edad !== '') {
-            // Limpiar edad si se limpia la fecha
-            setDatosMujer(prev => ({ ...prev, edad: '' }));
+            setDatosMujer(prev => ({ ...prev, edad: age >= 0 ? age.toString() : '' }));
         }
-
     }, [datosMujer.peso, datosMujer.talla, datosMujer.fechaNacimiento]);
 
     const handleChange = (e) => {
@@ -112,17 +107,15 @@ const Formulario = () => {
         });
     };
     
-    // --- LÓGICA DE CÁLCULO Y GUARDADO ---
-
     const validarCampos = () => {
-        if (!datosMujer.dni || !datosMujer.edad || !datosMujer.tensionSistolica) {
-            setModalAdvertencia('Por favor, complete DNI, Edad y Tensión Sistólica para calcular el riesgo.');
+        if (!datosMujer.dni || !datosMujer.fechaNacimiento || !datosMujer.tensionSistolica) {
+            setModalAdvertencia('Por favor, complete DNI, Fecha de Nacimiento y Tensión Sistólica para calcular el riesgo.');
             setMostrarModal(true);
             return false;
         }
         const edadNum = parseInt(datosMujer.edad, 10);
         if (isNaN(edadNum) || edadNum < 18 || edadNum > 100) {
-             setModalAdvertencia('La edad debe ser un número válido (entre 18 y 100 años).');
+             setModalAdvertencia('La edad debe ser válida (entre 18 y 100 años). Verifique la fecha de nacimiento.');
              setMostrarModal(true);
             return false;
         }
@@ -147,23 +140,21 @@ const Formulario = () => {
         if (!validarCampos()) {
             return;
         }
-
+        if (datosMujer.infarto === 'Sí' || datosMujer.acv === 'Sí' || datosMujer.enfermedadRenal === 'Sí') {
+            setNivelRiesgo('>30% <40% Muy Alto');
+            setModalAdvertencia(null);
+            setMostrarModal(true);
+            return;
+        }
         const edadAjustada = ajustarEdad(parseInt(datosMujer.edad, 10));
         const presionArterial = ajustarPresionArterial(parseInt(datosMujer.tensionSistolica, 10));
-        // Se asume que Diabetes es la única que impacta en el cálculo de riesgo, y se toma de las condiciones médicas
         const diabetes = datosMujer.medicacionCondiciones.includes('Diabetes') ? 'si' : 'no'; 
         const fuma = datosMujer.fumaDiario === 'Sí' ? 'si' : 'no';
         const colesterolParaCalculo = nivelColesterolConocido && datosMujer.colesterol !== 'No' ? parseInt(datosMujer.colesterol, 10) : "No";
 
         const riesgoCalculado = calcularRiesgoCardiovascular(
-            edadAjustada,
-            'femenino',
-            diabetes,
-            fuma,
-            presionArterial,
-            colesterolParaCalculo
+            edadAjustada, 'femenino', diabetes, fuma, presionArterial, colesterolParaCalculo
         );
-
         setNivelRiesgo(riesgoCalculado);
         setModalAdvertencia(null);
         setMostrarModal(true);
@@ -171,40 +162,38 @@ const Formulario = () => {
     
     const guardarPaciente = async () => {
         try {
-            // 1. Clonar los datos del formulario
             let datosParaEnviar = { ...datosMujer };
 
-            // 2. Lógica para menopausia (Si no tiene ciclos y puso edad de menopausia)
+            // CORRECCIÓN: Se agrega la fecha de registro al momento de guardar
+            const hoy = new Date();
+            datosParaEnviar.fechaRegistro = hoy.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+
             if (datosParaEnviar.ciclosMenstruales === 'No' && datosParaEnviar.edadMenopausia) {
                 datosParaEnviar.menopausia = 'Sí';
-            } else if (datosParaEnviar.ciclosMenstruales === 'Sí') {
-                datosParaEnviar.menopausia = 'No';
             } else {
-                datosParaEnviar.menopausia = datosParaEnviar.menopausia || 'No'; // Aseguramos un valor si no se contestó el bloque
+                datosParaEnviar.menopausia = 'No';
             }
 
-            // 3. Convertir null a string vacío
             Object.keys(datosParaEnviar).forEach(key => {
                 if (datosParaEnviar[key] === null) {
                     datosParaEnviar[key] = '';
                 }
             });
 
-            // 4. Convertir campos tipo array a string (si la API lo requiere)
             const camposArray = ['medicacionCondiciones', 'autoinmunesTipo', 'tumoresTipo'];
-            datosParaEnviar = transformarArraysAString(datosParaEnviar, camposArray);
+            camposArray.forEach(campo => {
+                if (Array.isArray(datosParaEnviar[campo])) {
+                    datosParaEnviar[campo] = datosParaEnviar[campo].join(', ');
+                }
+            });
 
-            // 5. Armar payload final
             const payload = {
                 ...datosParaEnviar,
                 imc: `${imc.valor} (${imc.clasificacion})`,
                 nivelRiesgo: nivelRiesgo,
             };
 
-            // 6. Enviar POST
             await axiosInstance.post('/api/pacientes', payload);
-
-            // 7. Feedback y recarga
             setMensajeExito('Paciente guardado con éxito');
             setMostrarModal(false);
             setTimeout(() => setMensajeExito(''), 3000);
@@ -222,18 +211,6 @@ const Formulario = () => {
         }
     };
 
-// Función auxiliar para arrays
-const transformarArraysAString = (obj, camposArray) => {
-    const nuevo = { ...obj };
-    camposArray.forEach(campo => {
-        if (Array.isArray(nuevo[campo])) {
-            nuevo[campo] = nuevo[campo].join(', ');
-        }
-    });
-    return nuevo;
-};
-
-
     const cerrarModal = () => {
         setMostrarModal(false);
         setModalAdvertencia(null);
@@ -245,7 +222,6 @@ const transformarArraysAString = (obj, camposArray) => {
             <div className="grid grid-cols-12 gap-2">
                 {riesgos.map((nivel) => (
                     <React.Fragment key={nivel}>
-                        {/* Asumo que obtenerColorRiesgo devuelve clases de Tailwind CSS */}
                         <div className={`col-span-4 ${obtenerColorRiesgo(nivel)}`}></div> 
                         <div className={`col-span-8 ${riesgo === nivel ? obtenerColorRiesgo(nivel) : 'bg-gray-300'} p-2`}>
                             <span className={`${riesgo === nivel ? 'text-white' : 'text-gray-600'}`}>{obtenerTextoRiesgo(nivel)}</span>
@@ -261,7 +237,6 @@ const transformarArraysAString = (obj, camposArray) => {
             <form className="w-full space-y-6">
                 <h1 className="text-3xl font-bold mb-6">Formulario de Salud Femenina y Riesgo Cardiovascular</h1>
                 
-                {/* --- DATOS PERSONALES --- */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex flex-col">
                         <label className="text-sm font-medium text-gray-700">DNI:</label>
@@ -271,7 +246,6 @@ const transformarArraysAString = (obj, camposArray) => {
                         <label className="text-sm font-medium text-gray-700">Fecha de Nacimiento:</label>
                         <input type="date" name="fechaNacimiento" value={datosMujer.fechaNacimiento} onChange={handleChange} className="mt-1 p-2 border rounded-md"/>
                     </div>
-                    {/* Campo de Edad de solo lectura y automático */}
                     <div className="flex flex-col">
                         <label className="text-sm font-medium text-gray-700">Edad (Automática):</label>
                         <input type="text" name="edad" value={datosMujer.edad} readOnly disabled className="mt-1 p-2 border rounded-md bg-gray-100 cursor-not-allowed"/>
@@ -287,30 +261,25 @@ const transformarArraysAString = (obj, camposArray) => {
                     <button type="button" className="p-2 border rounded bg-indigo-500 text-white w-full md:w-1/3 cursor-not-allowed">Femenino</button>
                 </div>
                 
-                {/* --- NUEVAS PREGUNTAS DE SALUD MAMARIA --- */}
                 <h2 className="text-xl font-semibold border-b pb-2 pt-4">Salud Mamaria</h2>
                 
                 <div className="flex flex-col">
                     <label className="text-sm font-medium">¿Tiene algún familiar con cáncer de mama?</label>
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-2 mt-1">
                         {['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('familiarCancerMama', o)} className={`p-2 border rounded ${datosMujer.familiarCancerMama === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>)}
                     </div>
                 </div>
-
                 <div className="flex flex-col">
                     <label className="text-sm font-medium">¿Alguna vez le hicieron alguna punción de mama?</label>
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-2 mt-1">
                         {['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('puncionMama', o)} className={`p-2 border rounded ${datosMujer.puncionMama === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>)}
                     </div>
                 </div>
-
                 <div className="flex flex-col">
                     <label className="text-sm font-medium">¿Le dijeron si tenía mama densa al ver su mamografía?</label>
                     <div className="grid grid-cols-2 gap-2 mt-1">
                         {['Sí', 'No', 'No recuerdo', 'No sé lo que es'].map(o => (
-                            <button key={o} type="button" onClick={() => handleButtonToggle('mamaDensa', o)} className={`p-2 border rounded ${datosMujer.mamaDensa === o ? 'bg-indigo-500 text-white' : ''}`}>
-                                {o}
-                            </button>
+                            <button key={o} type="button" onClick={() => handleButtonToggle('mamaDensa', o)} className={`p-2 border rounded ${datosMujer.mamaDensa === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>
                         ))}
                     </div>
                 </div>
@@ -318,13 +287,32 @@ const transformarArraysAString = (obj, camposArray) => {
                 <h2 className="text-xl font-semibold border-b pb-2 pt-4">Historial y Hábitos</h2>
 
                 <div className="flex flex-col">
+                    <label className="text-sm font-medium">¿Ha tenido un infarto?</label>
+                    <div className="flex space-x-2 mt-1">
+                        {['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('infarto', o)} className={`p-2 border rounded ${datosMujer.infarto === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>)}
+                    </div>
+                </div>
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium">¿Ha tenido un ACV?</label>
+                    <div className="flex space-x-2 mt-1">
+                        {['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('acv', o)} className={`p-2 border rounded ${datosMujer.acv === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>)}
+                    </div>
+                </div>
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium">¿Tiene enfermedad Renal Crónica?</label>
+                    <div className="flex space-x-2 mt-1">
+                        {['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('enfermedadRenal', o)} className={`p-2 border rounded ${datosMujer.enfermedadRenal === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>)}
+                    </div>
+                </div>
+
+                <div className="flex flex-col">
                     <label className="text-sm font-medium">¿Toma medicación a diario?</label>
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-2 mt-1">
                         {['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('tomaMedicacionDiario', o)} className={`p-2 border rounded ${datosMujer.tomaMedicacionDiario === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>)}
                     </div>
                     {datosMujer.tomaMedicacionDiario === 'Sí' && (
                         <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 space-y-2 rounded-r-lg">
-                            {['Diabetes', 'Hipertensión', 'Colesterol', 'Tiroides','Corticoides','Medicación para dormir','Algún antidepresivo','Otras'].map(med => (
+                            {['Diabetes', 'Hipertensión', 'Colesterol','Aspirina o anticuagulantes', 'Tiroides','Corticoides','Medicación para dormir','Algún antidepresivo','Otras'].map(med => (
                                 <div key={med} className="flex items-center">
                                     <input type="checkbox" id={med} value={med} checked={datosMujer.medicacionCondiciones.includes(med)} onChange={() => handleCheckboxChange('medicacionCondiciones', med)} className="h-4 w-4 rounded"/>
                                     <label htmlFor={med} className="ml-3 text-sm">{med}</label>
@@ -336,7 +324,7 @@ const transformarArraysAString = (obj, camposArray) => {
 
                 <div className="flex flex-col">
                     <label className="text-sm font-medium">¿Fuma a diario?</label>
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-2 mt-1">
                         {['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('fumaDiario', o)} className={`p-2 border rounded ${datosMujer.fumaDiario === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>)}
                     </div>
                 </div>
@@ -355,7 +343,6 @@ const transformarArraysAString = (obj, camposArray) => {
                     </div>
                 </div>
 
-                {/* --- PREGUNTA DE ESTRÉS MODIFICADA --- */}
                 <div className="flex flex-col">
                     <label className="text-sm font-medium">¿Siente que presenta estrés Crónico?</label>
                     <div className="flex space-x-2 mt-1">
@@ -385,7 +372,6 @@ const transformarArraysAString = (obj, camposArray) => {
                     )}
                 </div>
 
-                {/* --- PREGUNTA DE AUTOINMUNES MODIFICADA --- */}
                 <div className="flex flex-col">
                     <label className="text-sm font-medium">¿Le dijeron alguna vez que tiene alguna enfermedad autoinmune?</label>
                      <div className="flex space-x-2 mt-1">
@@ -397,6 +383,13 @@ const transformarArraysAString = (obj, camposArray) => {
                         </div>
                     )}
                 </div>
+
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium">¿Presenta HIV o Hepatitis B/C?</label>
+                    <div className="flex space-x-2 mt-1">
+                        {['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('hivHepatitis', o)} className={`p-2 border rounded ${datosMujer.hivHepatitis === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>)}
+                    </div>
+                </div>
                 
                 <h2 className="text-xl font-semibold border-b pb-2 pt-4">Historial Ginecológico</h2>
 
@@ -405,18 +398,26 @@ const transformarArraysAString = (obj, camposArray) => {
                      <div className="flex space-x-2 mt-1">
                          {['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('tuvoHijos', o)} className={`p-2 border rounded ${datosMujer.tuvoHijos === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>)}
                     </div>
-                     {datosMujer.tuvoHijos === 'Sí' && (
-                         <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 space-y-4 rounded-r-lg">
-                            <div className="flex flex-col"><label>¿Cuántos?:</label><input type="number" name="cantidadHijos" value={datosMujer.cantidadHijos} onChange={handleChange} className="p-2 border rounded"/></div>
-                            <div className="flex flex-col"><label>¿Tuvo hipertensión o diabetes gestacional?</label><div className="flex space-x-2 mt-1">{['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('complicacionesEmbarazo', o)} className={`p-2 border rounded ${datosMujer.complicacionesEmbarazo === o ? 'bg-green-500 text-white' : ''}`}>{o}</button>)}</div></div>
-                        </div>
-                    )}
-                    {datosMujer.tuvoHijos === 'No' && (
-                        <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 space-y-2 rounded-r-lg">
-                             {['No quiso', 'No pudo', 'Otros'].map(m => <div key={m}><input type="radio" id={m} name="motivoNoHijos" value={m} checked={datosMujer.motivoNoHijos === m} onChange={handleChange} /><label htmlFor={m} className="ml-2">{m}</label></div>)}
-                        </div>
-                    )}
                 </div>
+
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium">¿Utilizó reproducción asistida?</label>
+                    <div className="flex space-x-2 mt-1">
+                        {['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('reproduccionAsistida', o)} className={`p-2 border rounded ${datosMujer.reproduccionAsistida === o ? 'bg-indigo-500 text-white' : ''}`}>{o}</button>)}
+                    </div>
+                </div>
+
+                {datosMujer.tuvoHijos === 'Sí' && (
+                     <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 space-y-4 rounded-r-lg">
+                        <div className="flex flex-col"><label>¿Cuántos?:</label><input type="number" name="cantidadHijos" value={datosMujer.cantidadHijos} onChange={handleChange} className="p-2 border rounded"/></div>
+                        <div className="flex flex-col"><label>¿Tuvo hipertensión o diabetes gestacional?</label><div className="flex space-x-2 mt-1">{['Sí', 'No'].map(o => <button key={o} type="button" onClick={() => handleButtonToggle('complicacionesEmbarazo', o)} className={`p-2 border rounded ${datosMujer.complicacionesEmbarazo === o ? 'bg-green-500 text-white' : ''}`}>{o}</button>)}</div></div>
+                    </div>
+                )}
+                {datosMujer.tuvoHijos === 'No' && (
+                    <div className="p-4 mt-2 border-l-4 border-indigo-500 bg-indigo-50 space-y-2 rounded-r-lg">
+                         {['No quiso', 'No pudo', 'Otros'].map(m => <div key={m}><input type="radio" id={m} name="motivoNoHijos" value={m} checked={datosMujer.motivoNoHijos === m} onChange={handleChange} /><label htmlFor={m} className="ml-2">{m}</label></div>)}
+                    </div>
+                )}
 
                 <div className="flex flex-col">
                     <label className="text-sm font-medium">¿Presenta ciclos menstruales?</label>
@@ -486,7 +487,6 @@ const transformarArraysAString = (obj, camposArray) => {
                 </button>
             </form>
 
-            {/* --- MODAL DE RESULTADOS --- */}
             {mostrarModal && !modalAdvertencia && (
                 <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center p-4 z-50">
                     <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -497,28 +497,33 @@ const transformarArraysAString = (obj, camposArray) => {
                            <p><strong>Fecha de Nacimiento:</strong> {datosMujer.fechaNacimiento}</p>
                            <p><strong>Teléfono:</strong> {datosMujer.telefono}</p>
                            <p><strong>Edad:</strong> {datosMujer.edad}</p>
-                           <hr/>
-                           <p className="font-semibold">Datos de Salud Mamaria:</p>
+                           <hr className="my-2"/>
+                           <p className="font-semibold">Salud Mamaria:</p>
                            <p><strong>Familiar con Cáncer de Mama:</strong> {datosMujer.familiarCancerMama}</p>
                            <p><strong>Punción de Mama:</strong> {datosMujer.puncionMama}</p>
                            <p><strong>Mama Densa:</strong> {datosMujer.mamaDensa}</p>
-                           <hr/>
+                           <hr className="my-2"/>
+                           <p className="font-semibold">Historial Cardiovascular:</p>
+                           <p><strong>Infarto Previo:</strong> {datosMujer.infarto}</p>
+                           <p><strong>ACV Previo:</strong> {datosMujer.acv}</p>
+                           <p><strong>Enfermedad Renal Crónica:</strong> {datosMujer.enfermedadRenal}</p>
+                           <hr className="my-2"/>
                            <p><strong>Toma Medicación:</strong> {datosMujer.tomaMedicacionDiario} {datosMujer.tomaMedicacionDiario === 'Sí' ? `(${datosMujer.medicacionCondiciones.join(', ')})` : ''}</p>
                            <p><strong>Fuma:</strong> {datosMujer.fumaDiario}</p>
-                           <p><strong>Actividad Física (+150 min/sem):</strong> {datosMujer.actividadFisica}</p>
-                           <p><strong>Sueño (+7hs):</strong> {datosMujer.horasSueno}</p>
+                           <p><strong>Actividad Física:</strong> {datosMujer.actividadFisica}</p>
+                           <p><strong>Sueño:</strong> {datosMujer.horasSueno}</p>
                            <p><strong>Estrés Crónico:</strong> {datosMujer.estresCronico} {datosMujer.estresCronico === 'Sí' ? `(${datosMujer.estresTipo})` : ''}</p>
                            <p><strong>Tumores Ginecológicos:</strong> {datosMujer.tumoresGinecologicos} {datosMujer.tumoresGinecologicos === 'Sí' ? `(${datosMujer.tumoresTipo.join(', ')})` : ''}</p>
                            <p><strong>Enf. Autoinmunes:</strong> {datosMujer.enfermedadesAutoinmunes} {datosMujer.enfermedadesAutoinmunes === 'Sí' ? `(${datosMujer.autoinmunesTipo.join(', ')})` : ''}</p>
-                           <p><strong>Tuvo Hijos:</strong> {datosMujer.tuvoHijos} {datosMujer.tuvoHijos === 'Sí' ? `(Cantidad: ${datosMujer.cantidadHijos}, Complicaciones: ${datosMujer.complicacionesEmbarazo})` : `(${datosMujer.motivoNoHijos})`}</p>
+                           <p><strong>HIV o Hepatitis B/C:</strong> {datosMujer.hivHepatitis}</p>
+                           <p><strong>Tuvo Hijos:</strong> {datosMujer.tuvoHijos}</p>
+                           <p><strong>Utilizó Rep. Asistida:</strong> {datosMujer.reproduccionAsistida}</p>
                            <p><strong>Ciclos Menstruales:</strong> {datosMujer.ciclosMenstruales} {datosMujer.ciclosMenstruales === 'Sí' ? `(Anticonceptivo: ${datosMujer.metodoAnticonceptivo})` : `(Histerectomía: ${datosMujer.histerectomia}, Menopausia edad: ${datosMujer.edadMenopausia})`}</p>
-
-                           <hr/>
+                           <hr className="my-2"/>
                            <p><strong>Peso:</strong> {datosMujer.peso} kg | <strong>Talla:</strong> {datosMujer.talla} cm | <strong>Cintura:</strong> {datosMujer.cintura} cm</p>
                            <p><strong>IMC:</strong> {imc.valor} ({imc.clasificacion})</p>
                            <p><strong>Tensión Arterial:</strong> {datosMujer.tensionSistolica} / {datosMujer.tensionDiastolica} mmHg</p>
                            <p><strong>Colesterol Total:</strong> {datosMujer.colesterol === 'No' ? 'No conoce' : datosMujer.colesterol}</p>
-
                         </div>
 
                         <div className="mt-6">

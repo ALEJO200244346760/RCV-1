@@ -19,9 +19,9 @@ public class Paciente {
     @Column
     private String dni;
     @Column
-    private String telefono; 
+    private String telefono;
     @Column
-    private String fechaNacimiento; 
+    private String fechaNacimiento;
     @Column
     private String edad;
     @Column
@@ -31,7 +31,7 @@ public class Paciente {
     @Column
     private String nivelRiesgo;
     @Column(columnDefinition = "TEXT")
-    private String imc; // Almacena "valor (clasificación)"
+    private String imc;
 
     // --- Hábitos de Vida ---
     @Column
@@ -44,34 +44,40 @@ public class Paciente {
     private String actividadFisica;
     @Column
     private String horasSueno;
-    // --- ESTRES CAMBIADO EN FRONT, MANTENEMOS EL NOMBRE DE COLUMNA estresCronico ---
-    @Column 
-    private String estresCronico; 
+    @Column
+    private String estresCronico;
     @Column
     private String estresTipo;
 
-    // --- Antecedentes de Salud Femenina ---
-    // --- NUEVOS CAMPOS DE CÁNCER DE MAMA ---
+    // --- Antecedentes de Salud ---
     @Column
     private String familiarCancerMama;
     @Column
     private String puncionMama;
     @Column
     private String mamaDensa;
-    // ---------------------------------------
+    @Column
+    private String infarto;
+    @Column
+    private String acv;
+    @Column
+    private String enfermedadRenal;
     @Column
     private String tumoresGinecologicos;
     @Column(columnDefinition = "TEXT")
     private String tumoresTipo;
-    // --- PREGUNTA AUTOINMUNE CAMBIADA EN FRONT, MANTENEMOS EL NOMBRE DE COLUMNA ---
     @Column
     private String enfermedadesAutoinmunes;
     @Column(columnDefinition = "TEXT")
     private String autoinmunesTipo;
-    
+    @Column
+    private String hivHepatitis; // NUEVO CAMPO
+
     // --- Salud Reproductiva ---
     @Column
     private String tuvoHijos;
+    @Column
+    private String reproduccionAsistida;
     @Column
     private String cantidadHijos;
     @Column
@@ -85,7 +91,7 @@ public class Paciente {
     @Column
     private String histerectomia;
     @Column
-    private String menopausia; 
+    private String menopausia;
     @Column
     private String edadMenopausia;
 
@@ -97,7 +103,7 @@ public class Paciente {
     @Column
     private String cintura;
     @Column
-    private String tensionSistolica; 
+    private String tensionSistolica;
     @Column
     private String tensionDiastolica;
 }
