@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+
+// Componentes
 import Header from './components/Header';
 import Estadisticas from './components/Estadisticas';
 import Formulario from './components/Formulario';
@@ -10,6 +12,8 @@ import Register from './components/Register';
 import AdminPanel from './components/AdminPanel';
 import Rcv from './components/Rcv';
 import RoleProtectedRoute from './components/RoleProtectedRoute';
+
+// Contexto de autenticación
 import { useAuth } from './context/AuthContext';
 
 function App() {
@@ -22,18 +26,25 @@ function App() {
     <Router>
       <Header />
       <Routes>
+
+        {/* Página de inicio: Formulario (acceso libre, sin autenticación) */}
+        <Route path="/" element={<Formulario />} />
+
+        {/* Rutas públicas */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* Rutas protegidas (requieren autenticación) */}
         <Route 
-          path="/" 
-          element={
-            (token && (isCardiologo || isCardiologia)) 
-              ? <Formulario /> 
-              : <Navigate to="/" />
-          } 
+          path="/rcv" 
+          element={token ? <Rcv /> : <Navigate to="/login" />} 
         />
-        <Route path="/rcv" element={<Rcv />} />
-        <Route path="/tomarPresion" element={<TomarPresion />} />
-        
-        {/* Permitir acceso solo a CARDIOLOGO para Estadisticas */}
+        <Route 
+          path="/tomarPresion" 
+          element={token ? <TomarPresion /> : <Navigate to="/login" />} 
+        />
+
+        {/* Rutas protegidas por roles */}
         <Route 
           path="/estadisticas" 
           element={
@@ -43,7 +54,6 @@ function App() {
             />
           } 
         />
-
         <Route
           path="/editar-paciente/:id"
           element={
@@ -62,9 +72,10 @@ function App() {
             />
           }
         />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+
+        {/* Redirección por defecto a "/" */}
         <Route path="*" element={<Navigate to="/" />} />
+
       </Routes>
     </Router>
   );
