@@ -15,81 +15,107 @@ public class Paciente {
     @Column
     private String fechaRegistro;
     @Column
-    private String ubicacion;
-    @Column
     private String dni;
     @Column
-    private String telefono;
+    private String fechaNacimiento; // Nueva
     @Column
-    private String fechaNacimiento;
+    private String telefono; // Nuevo
+    @Column
+    private String mail; // Nuevo
     @Column
     private String edad;
     @Column
-    private String genero;
+    private String genero; // Será 'femenino'
     @Column
-    private String colesterol;
+    private String ubicacion; // <-- CAMPO AÑADIDO (Provincia)
     @Column
-    private String nivelRiesgo;
+    private String colesterol; // Se mantiene, por defecto 'No'
+    @Column
+    private String nivelRiesgo; // Calculado
     @Column(columnDefinition = "TEXT")
-    private String imc;
+    private String imc; // Valor y clasificación
 
-    // --- Hábitos de Vida ---
+    // --- 1. Historial y Hábitos ---
+    
+    // Infarto, ACV, Trombosis
+    @Column
+    private String infartoAcvTrombosis;
+    @Column(columnDefinition = "TEXT")
+    private String infartoAcvTrombosisTipo; 
+    
+    // Enfermedad Renal o Insuficiencia Cardíaca
+    @Column
+    private String enfermedadRenalInsuficiencia;
+    @Column(columnDefinition = "TEXT")
+    private String enfermedadRenalInsuficienciaTipo;
+    
+    // Medicación
     @Column
     private String tomaMedicacionDiario;
     @Column(columnDefinition = "TEXT")
-    private String medicacionCondiciones;
+    private String medicacionCondiciones; // Hipertensión arterial, Diabetes, Colesterol, Otras
+    
+    // Hábito de Fumar
     @Column
     private String fumaDiario;
+    @Column(columnDefinition = "TEXT")
+    private String fumaTipo; // tabaco, otros
+    
+    // Alcohol, Actividad Física y Sueño
+    @Column
+    private String consumoAlcoholRiesgo; // Nuevo
     @Column
     private String actividadFisica;
     @Column
     private String horasSueno;
-    @Column
-    private String estresCronico;
-    @Column
-    private String estresTipo;
-
-    // --- Antecedentes de Salud ---
-    @Column
-    private String infarto;
-    @Column
-    private String acv;
-    @Column
-    private String enfermedadRenal;
-    @Column
-    private String tumoresGinecologicos;
     @Column(columnDefinition = "TEXT")
-    private String tumoresTipo;
+    private String horasSuenoProblema; // Insomnio, otros
+    
+    // Estrés y Autoinmunes
     @Column
-    private String enfermedadesAutoinmunes;
+    private String estresAngustiaCronica; // Nuevo nombre para englobar más
     @Column(columnDefinition = "TEXT")
-    private String autoinmunesTipo;
+    private String estresTipo; // estrés, angustia, ansiedad, depresión
     @Column
-    private String hivHepatitis; // NUEVO CAMPO
+    private String enfermedadesAutoinmunes; 
+    @Column(columnDefinition = "TEXT")
+    private String autoinmunesTipo; // lupus, artritis, etc.
+    
+    // Infecciones
+    @Column
+    private String hivHepatitis; // Nuevo
 
-    // --- Salud Reproductiva ---
+    // --- 2. Historial Ginecológico ---
+    
+    // Mama (CAMPOS ELIMINADOS: puncionMama, puncionMamaMotivo, mamaDensa)
+    @Column
+    private String tumoresMama; // Antecedentes de tumores de mama
+    @Column(columnDefinition = "TEXT")
+    private String tumoresMamaTratamiento; // radioterapia, quimioterapia, cirugía
+    @Column
+    private String familiarCancerMama;
+    
+    // Embarazo y Reproducción
     @Column
     private String tuvoHijos;
+    @Column(columnDefinition = "TEXT")
+    private String complicacionesEmbarazo; // hipertensión arterial gestacional, etc.
     @Column
-    private String reproduccionAsistida;
+    private String reproduccionAsistida; // Nuevo
     @Column
-    private String cantidadHijos;
+    private String abortosSindromeAntifosfolipidico; // Nuevo
+    
+    // Menstruación y Menopausia
     @Column
-    private String complicacionesEmbarazo;
+    private String menstruacionEdadRiesgo; // Nuevo
     @Column
-    private String motivoNoHijos;
-    @Column
-    private String ciclosMenstruales;
-    @Column
-    private String metodoAnticonceptivo;
-    @Column
-    private String histerectomia;
-    @Column
-    private String menopausia;
-    @Column
-    private String edadMenopausia;
+    private String menstruacionUltima; // Última menstruación hace más de un año
+    @Column(columnDefinition = "TEXT")
+    private String menopausiaTipo; // histerectomía, menopausia, perimenopausia, ciclos normales, anticonceptivos
+    
+    // Problemas Funcionales (CAMPOS ELIMINADOS: incontinenciaOrgasmos, incontinenciaOrgasmosTipo)
 
-    // --- Datos Antropométricos y de Medición ---
+    // --- 3. Datos Antropométricos y Clínicos ---
     @Column
     private String peso;
     @Column
@@ -100,4 +126,7 @@ public class Paciente {
     private String tensionSistolica;
     @Column
     private String tensionDiastolica;
+
+    // Nota: Los campos obsoletos o eliminados por cambios en el formulario 
+    // han sido removidos de esta clase.
 }
