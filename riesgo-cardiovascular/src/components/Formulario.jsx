@@ -5,7 +5,7 @@ import { obtenerColorRiesgo, obtenerTextoRiesgo } from './ConstFormulario';
 import axiosInstance from '../axiosConfig';
 
 // *************************************************************************
-// ** MAPA DE DEVOLUCIONES (MODIFICADO) **
+// ** MAPA DE DEVOLUCIONES (Sin cambios) **
 // *************************************************************************
 
 const feedbackMessages = {
@@ -65,10 +65,12 @@ const feedbackMessages = {
         si: 'El cáncer de mama puede afectar el sistema cardiovascular debido a la cardiotoxicidad de tratamientos como quimioterapia y radioterapia. Estos tratamientos pueden causar daños en el corazón y los vasos sanguíneos, aumentando el riesgo de problemas cardíacos a largo plazo. Es crucial un seguimiento cardiológico para las sobrevivientes.',
         no: null,
     },
-    // --- CAMPOS ELIMINADOS ---
-    // puncionMama: { ... }
-    // mamaDensa: { ... }
-    // --- FIN CAMPOS ELIMINADOS ---
+    puncionMama: {
+        pregunta: '¿Alguna vez le hicieron alguna punción de mama?',
+    },
+    mamaDensa: {
+        pregunta: '¿Le dijeron si tenía mama densa al ver su mamografía?',
+    },
     tuvoHijos: {
         pregunta: '¿Tuvo hijos?',
         si: 'Los trastornos hipertensivos y diabetes gestacional inducen una *memoria inflamatoria* y daño endotelial persistente en la madre. Esto programa una mayor susceptibilidad a la hipertensión y aterosclerosis, elevando significativamente su riesgo cardiovascular futuro.',
@@ -93,7 +95,7 @@ const feedbackMessages = {
 };
 
 // *************************************************************************
-// ** COMPONENTE DE DEVOLUCIÓN (MODIFICADO) **
+// ** COMPONENTE DE DEVOLUCIÓN (MODIFICADO CON BOTONES DE ACCIÓN) **
 // *************************************************************************
 const ReporteDevolucion = ({ datos }) => {
     
@@ -147,9 +149,7 @@ const ReporteDevolucion = ({ datos }) => {
         else if (key === 'estresAngustiaCronica') subOpcionesRaw = datos.estresTipo;
         else if (key === 'enfermedadesAutoinmunes') subOpcionesRaw = datos.autoinmunesTipo;
         else if (key === 'tumoresMama') subOpcionesRaw = datos.tumoresMamaTratamiento;
-        // --- CAMPO ELIMINADO ---
-        // else if (key === 'puncionMama') subOpcionesRaw = datos.puncionMamaMotivo;
-        // --- FIN CAMPO ELIMINADO ---
+        else if (key === 'puncionMama') subOpcionesRaw = datos.puncionMamaMotivo;
         else if (key === 'fumaDiario') subOpcionesRaw = datos.fumaTipo;
         else if (key === 'infartoAcvTrombosis') subOpcionesRaw = datos.infartoAcvTrombosisTipo;
         else if (key === 'enfermedadRenalInsuficiencia') subOpcionesRaw = datos.enfermedadRenalInsuficienciaTipo;
@@ -190,7 +190,35 @@ const ReporteDevolucion = ({ datos }) => {
     return mensaje;
     };
 
-    // Render del Reporte (MODIFICADO PARA QUITAR CAMPOS Y AÑADIR UBICACIÓN)
+    // --- INICIO DE CÓDIGO AÑADIDO: MANEJADORES DE ACCIÓN ---
+    const handlePrint = () => {
+        window.print(); // Dispara la impresión del navegador (permite "Guardar como PDF")
+    };
+
+    const handleEmail = () => {
+        if (datos.mail) {
+            // Abre el cliente de email del usuario
+            window.location.href = `mailto:${datos.mail}?subject=Resultados de su Informe de Salud Cardiovascular`;
+        } else {
+            alert('El paciente no tiene un email cargado.');
+        }
+    };
+    
+    const handleWhatsApp = () => {
+         if (datos.telefono) {
+            // Elimina espacios o símbolos comunes y asume un prefijo de país si no está
+            // NOTA: Esto es básico. Un número de teléfono internacional real (ej: +549...) 
+            // es necesario para que wa.me funcione de forma fiable.
+            const telefonoLimpio = datos.telefono.replace(/[\s-()]/g, '');
+            window.open(`https://wa.me/${telefonoLimpio}`, '_blank');
+        } else {
+            alert('El paciente no tiene un teléfono cargado.');
+        }
+    };
+    // --- FIN DE CÓDIGO AÑADIDO ---
+
+
+    // Render del Reporte
     const navigate = useNavigate();
 
     return (
@@ -203,10 +231,8 @@ const ReporteDevolucion = ({ datos }) => {
                 <div className="grid grid-cols-2 gap-2 mt-2">
                     <p><strong>DNI:</strong> {datos.dni}</p>
                     <p><strong>Edad:</strong> {datos.edad} años</p>
-                    {/* --- CAMPO AÑADIDO --- */}
-                    <p><strong>Ubicación:</strong> {datos.ubicacion}</p>
-                    <p><strong>IMC:</strong> {datos.imc}</p>
                     <p><strong>Riesgo:</strong> <span className={`font-bold ${obtenerColorRiesgo(datos.nivelRiesgo)} p-1 rounded`}>{datos.nivelRiesgo}</span></p>
+                    <p><strong>IMC:</strong> {datos.imc}</p>
                 </div>
             </div>
 
@@ -224,14 +250,12 @@ const ReporteDevolucion = ({ datos }) => {
                 {obtenerFeedback('enfermedadesAutoinmunes')}
                 {obtenerFeedback('hivHepatitis')}
 
-                {/* Historial Ginecológico (MODIFICADO) */}
+                {/* Historial Ginecológico */}
                 <h3 className="text-lg font-semibold text-pink-800 pt-4">Historial Ginecológico</h3>
                 {obtenerFeedback('tumoresMama')}
                 {obtenerFeedback('familiarCancerMama')}
-                {/* --- CAMPOS ELIMINADOS --- */}
-                {/* {obtenerFeedback('puncionMama')} */}
-                {/* {obtenerFeedback('mamaDensa')} */}
-                {/* --- FIN CAMPOS ELIMINADOS --- */}
+                {obtenerFeedback('puncionMama')}
+                {obtenerFeedback('mamaDensa')}
                 {obtenerFeedback('tuvoHijos')}
                 {obtenerFeedback('reproduccionAsistida')}
                 {obtenerFeedback('menstruacionUltima')}
@@ -241,21 +265,33 @@ const ReporteDevolucion = ({ datos }) => {
                 {feedbackCintura()}
             </div>
 
-            <div className="mt-8 flex justify-end">
+            {/* --- SECCIÓN DE BOTONES MODIFICADA --- */}
+            <div className="mt-8 flex flex-wrap justify-end gap-3 print:hidden"> {/* Clase print:hidden para ocultar al imprimir */}
+                
+                {/* Botones Añadidos */}
+                <button
+                    onClick={handlePrint}
+                    className="px-6 py-3 rounded-md shadow-sm text-sm font-medium text-white bg-gray-600 hover:bg-gray-700"
+                >
+                    Imprimir / Guardar PDF
+                </button>
+                
+                {/* Botón original */}
                 <button
                     onClick={() => navigate('/final')}
                     className="px-6 py-3 rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-                    >
+                >
                     Terminar revisión
                 </button>
             </div>
+            {/* --- FIN DE SECCIÓN DE BOTONES --- */}
         </div>
     );
 };
 
 
 // *************************************************************************
-// ** ESTADO INICIAL (MODIFICADO) **
+// ** ESTADO INICIAL (MODIFICADO CON "aceptaCondiciones") **
 // *************************************************************************
 
 const datosInicialesMujer = {
@@ -266,7 +302,7 @@ const datosInicialesMujer = {
     edad: '',
     mail: '',
     genero: 'femenino',
-    ubicacion: '', // <-- CAMPO AÑADIDO
+    aceptaCondiciones: false, // <-- AÑADIDO
 
     // --- Historial y Hábitos ---
     infartoAcvTrombosis: null,
@@ -291,11 +327,9 @@ const datosInicialesMujer = {
     tumoresMama: null,
     tumoresMamaTratamiento: [],
     familiarCancerMama: null,
-    // --- CAMPOS ELIMINADOS ---
-    // puncionMama: null,
-    // puncionMamaMotivo: [],
-    // mamaDensa: null,
-    // --- FIN CAMPOS ELIMINADOS ---
+    puncionMama: null,
+    puncionMamaMotivo: [],
+    mamaDensa: null,
     tuvoHijos: null,
     complicacionesEmbarazo: [],
     reproduccionAsistida: null,
@@ -315,7 +349,7 @@ const datosInicialesMujer = {
 
 
 // *************************************************************************
-// ** COMPONENTES REUTILIZABLES (MODIFICADO) **
+// ** COMPONENTES REUTILIZABLES (Sin cambios) **
 // *************************************************************************
 
 const InputField = ({ label, name, type = 'text', placeholder, isRequired = false, min, max, value, onChange, readOnly = false, disabled = false }) => (
@@ -384,59 +418,6 @@ const CheckboxGroup = ({ label, fieldName, options, isRequired = false, values, 
     </div>
 );
 
-// --- COMPONENTE AÑADIDO ---
-const SelectField = ({ label, name, options, isRequired = false, value, onChange }) => (
-    <div>
-        <label htmlFor={name} className={`block text-sm font-medium text-gray-700 ${isRequired ? 'after:content-[\'*\'] after:ml-0.5 after:text-red-500' : ''}`}>{label}</label>
-        <select
-            name={name}
-            id={name}
-            value={value || ''}
-            onChange={onChange}
-            required={isRequired}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-        >
-            <option value="" disabled>Seleccione una opción...</option>
-            {options.map(opt => (
-                <option key={opt} value={opt}>{opt}</option>
-            ))}
-        </select>
-    </div>
-);
-// --- FIN COMPONENTE AÑADIDO ---
-
-
-// *************************************************************************
-// ** LISTA DE PROVINCIAS AÑADIDA **
-// *************************************************************************
-
-const provincias = [
-    'Buenos Aires',
-    'Catamarca',
-    'Chaco',
-    'Chubut',
-    'Ciudad Autónoma de Buenos Aires',
-    'Córdoba',
-    'Corrientes',
-    'Entre Ríos',
-    'Formosa',
-    'Jujuy',
-    'La Pampa',
-    'La Rioja',
-    'Mendoza',
-    'Misiones',
-    'Neuquén',
-    'Río Negro',
-    'Salta',
-    'San Juan',
-    'San Luis',
-    'Santa Cruz',
-    'Santa Fe',
-    'Santiago del Estero',
-    'Tierra del Fuego, Antártida e Islas del Atlántico Sur',
-    'Tucumán'
-];
-
 
 // *************************************************************************
 // ** COMPONENTE PRINCIPAL DEL FORMULARIO **
@@ -481,7 +462,7 @@ const Formulario = () => {
         return age >= 0 ? age.toString() : '';
     };
 
-    // --- Manejadores de Estado (MODIFICADO) ---
+    // --- Manejadores de Estado (MODIFICADO CON "handleSimpleCheckbox") ---
     const handleChange = (e) => {
         const { name, value } = e.target;
         if (name === 'fechaNacimiento') {
@@ -505,9 +486,7 @@ const Formulario = () => {
                     case 'estresAngustiaCronica': newState.estresTipo = []; break;
                     case 'enfermedadesAutoinmunes': newState.autoinmunesTipo = []; break;
                     case 'tumoresMama': newState.tumoresMamaTratamiento = []; break;
-                    // --- CAMPO ELIMINADO ---
-                    // case 'puncionMama': newState.puncionMamaMotivo = []; break;
-                    // --- FIN CAMPO ELIMINADO ---
+                    case 'puncionMama': newState.puncionMamaMotivo = []; break;
                     case 'tuvoHijos': newState.complicacionesEmbarazo = []; break;
                     case 'menstruacionUltima': newState.menopausiaTipo = []; break;
                     case 'horasSueno': newState.horasSuenoProblema = []; break;
@@ -526,16 +505,32 @@ const Formulario = () => {
         });
     };
 
-    // --- Lógica de Envío (MODIFICADA) ---
+    // --- INICIO DE CÓDIGO AÑADIDO: Manejador para el checkbox simple ---
+    const handleSimpleCheckbox = (e) => {
+        const { name, checked } = e.target;
+        setDatosMujer(prev => ({ ...prev, [name]: checked }));
+    };
+    // --- FIN DE CÓDIGO AÑADIDO ---
+
+
+    // --- Lógica de Envío (MODIFICADA CON VALIDACIÓN DE "aceptaCondiciones") ---
     const validarCampos = () => {
-        // --- VALIDACIÓN MODIFICADA ---
-        if (!datosMujer.dni || !datosMujer.fechaNacimiento || !datosMujer.tensionSistolica || !datosMujer.peso || !datosMujer.talla || !datosMujer.ubicacion) {
+        if (!datosMujer.dni || !datosMujer.fechaNacimiento || !datosMujer.tensionSistolica || !datosMujer.peso || !datosMujer.talla) {
             setNivelRiesgo(null); // Limpiar riesgo si la validación falla
-            setModalAdvertencia('Por favor, complete DNI, Fecha de Nacimiento, Peso, Talla, Tensión Sistólica y Ubicación para calcular el riesgo.');
+            setModalAdvertencia('Por favor, complete DNI, Fecha de Nacimiento, Peso, Talla y Tensión Sistólica para calcular el riesgo.');
             setMostrarModal(true);
             return false;
         }
-        // --- FIN VALIDACIÓN MODIFICADA ---
+
+        // --- INICIO DE CÓDIGO AÑADIDO: Validación de condiciones ---
+        if (!datosMujer.aceptaCondiciones) {
+            setNivelRiesgo(null);
+            setModalAdvertencia('Debe aceptar las condiciones de uso de datos para poder continuar.');
+            setMostrarModal(true);
+            return false;
+        }
+        // --- FIN DE CÓDIGO AÑADIDO ---
+
         const edadNum = parseInt(datosMujer.edad, 10);
         if (isNaN(edadNum) || edadNum < 1) {
             setNivelRiesgo(null);
@@ -561,7 +556,7 @@ const Formulario = () => {
         return 180;
     };
 
-    // --- calcularRiesgo (Sin cambios, solo usa la validación actualizada) ---
+    // --- calcularRiesgo (MODIFICADO POR REGLA DE DIABETES) ---
     const calcularRiesgo = () => {
         if (!validarCampos()) return;
         
@@ -597,7 +592,7 @@ const Formulario = () => {
         setMostrarModal(true);
     };
     
-    // --- guardarPaciente (MODIFICADO) ---
+    // --- guardarPaciente (Sin cambios) ---
     const guardarPaciente = async () => {
         if (!validarCampos()) return;
         try {
@@ -608,7 +603,7 @@ const Formulario = () => {
             const camposArray = [
                 'infartoAcvTrombosisTipo', 'enfermedadRenalInsuficienciaTipo', 'medicacionCondiciones', 
                 'fumaTipo', 'horasSuenoProblema', 'estresTipo', 'autoinmunesTipo', 
-                'tumoresMamaTratamiento', /* 'puncionMamaMotivo', (ELIMINADO) */ 'complicacionesEmbarazo', 
+                'tumoresMamaTratamiento', 'puncionMamaMotivo', 'complicacionesEmbarazo', 
                 'menopausiaTipo' 
             ];
             camposArray.forEach(campo => {
@@ -628,6 +623,7 @@ const Formulario = () => {
                 nivelRiesgo: nivelRiesgo,
             };
             delete payload.colesterol; // No se envía 'colesterol'
+            delete payload.aceptaCondiciones; // No es necesario guardar esto en la BD (o sí, según tu lógica de negocio)
             
             await axiosInstance.post('/api/pacientes', payload);
 
@@ -647,7 +643,7 @@ const Formulario = () => {
         setModalAdvertencia(null);
     };
 
-    // --- RENDER PRINCIPAL (MODIFICADO) ---
+    // --- RENDER PRINCIPAL (MODIFICADO TEXTO DE ACTIVIDAD FÍSICA) ---
     return (
         <div className="flex flex-col items-center p-6 bg-gray-50 min-h-screen font-sans">
             
@@ -734,6 +730,7 @@ const Formulario = () => {
 
                                     <RadioGroup label="¿Toma más de 5 vasos de cerveza, o más de 3 copas de vino semanales?" name="consumoAlcoholRiesgo" value={datosMujer.consumoAlcoholRiesgo} onChange={handleRadioToggle}/>
                                     
+                                    {/* --- TEXTO CORREGIDO --- */}
                                     <RadioGroup label="¿Realiza actividad física 150 minutos semanales?" name="actividadFisica" value={datosMujer.actividadFisica} onChange={handleRadioToggle}/>
                                     
                                     <RadioGroup 
@@ -788,13 +785,13 @@ const Formulario = () => {
                                 </div>
                             </div>
 
-                            {/* --- SECCIÓN 2: HISTORIAL GINECOLÓGICO (MODIFICADO) --- */}
+                            {/* --- SECCIÓN 2: HISTORIAL GINECOLÓGICO --- */}
                             <div className="space-y-6 p-4 border border-pink-300 rounded-lg bg-pink-100">
                                 <h2 className="text-xl font-bold text-pink-800 border-b pb-1">2. Historial Ginecológico</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                                     <RadioGroup 
-                                        label="¿Antecedentes de tumores de mama?" 
+                                        label="¿Antecedentes de cancer de mama?" 
                                         name="tumoresMama" 
                                         value={datosMujer.tumoresMama}
                                         onChange={handleRadioToggle}
@@ -811,10 +808,29 @@ const Formulario = () => {
 
                                     <RadioGroup label="¿Tiene algún familiar con cáncer de mama?" name="familiarCancerMama" value={datosMujer.familiarCancerMama} onChange={handleRadioToggle} />
 
-                                    {/* --- CAMPOS ELIMINADOS --- */}
-                                    {/* RadioGroup para puncionMama */}
-                                    {/* RadioGroup para mamaDensa */}
-                                    {/* --- FIN CAMPOS ELIMINADOS --- */}
+                                    <RadioGroup 
+                                        label="¿Alguna vez le hicieron alguna punción de mama?" 
+                                        name="puncionMama" 
+                                        value={datosMujer.puncionMama}
+                                        onChange={handleRadioToggle}
+                                        conditionalContent={(respuesta) => respuesta === 'Sí' && (
+                                            <CheckboxGroup 
+                                                label="¿Cuál fue el resultado?" 
+                                                fieldName="puncionMamaMotivo" 
+                                                options={['Benigno', 'Maligno']} 
+                                                values={datosMujer.puncionMamaMotivo}
+                                                onChange={handleCheckboxChange}
+                                            />
+                                        )}
+                                    />
+
+                                    <RadioGroup 
+                                        label="¿Le dijeron si tenía mama densa al ver su mamografía?" 
+                                        name="mamaDensa" 
+                                        value={datosMujer.mamaDensa}
+                                        onChange={handleRadioToggle}
+                                        options={['Sí', 'No', 'No recuerdo', 'No sé lo que es']}
+                                    />
 
                                     <RadioGroup 
                                         label="¿Tuvo hijos?" 
@@ -931,28 +947,34 @@ const Formulario = () => {
                                 </div>
                             </div>
 
-                            {/* --- SECCIÓN 4: ENTREGA DE INFORME (MODIFICADO) --- */}
+                            {/* --- SECCIÓN 4: ENTREGA DE INFORME (MODIFICADA CON CHECKBOX DE CONDICIONES) --- */}
                             <div className="space-y-6 p-4 border border-gray-300 rounded-lg bg-gray-100">
                                 <h2 className="text-xl font-bold text-gray-800 border-b pb-1">4. Datos de Entrega de Informe</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <InputField label="DNI" name="dni" type="text" placeholder="Número de DNI" isRequired={true} value={datosMujer.dni} onChange={handleChange}/>
                                     <InputField label="Fecha de Nacimiento" name="fechaNacimiento" type="date" isRequired={true} value={datosMujer.fechaNacimiento} onChange={handleChange}/>
                                     <InputField label="Edad (Automática)" name="edad" type="text" isRequired={true} placeholder="Calculada automáticamente" value={datosMujer.edad} readOnly disabled />
-                                    
-                                    {/* --- CAMPO AÑADIDO --- */}
-                                    <SelectField 
-                                        label="Ubicación (Provincia)"
-                                        name="ubicacion"
-                                        options={provincias}
-                                        isRequired={true}
-                                        value={datosMujer.ubicacion}
-                                        onChange={handleChange}
-                                    />
-                                    {/* --- FIN CAMPO AÑADIDO --- */}
-
                                     <InputField label="TELÉFONO" name="telefono" type="tel" placeholder="Nro. de contacto" value={datosMujer.telefono} onChange={handleChange}/>
                                     <InputField label="MAIL" name="mail" type="email" placeholder="Correo electrónico" value={datosMujer.mail} onChange={handleChange}/>
                                 </div>
+
+                                {/* --- INICIO DE CÓDIGO AÑADIDO: Checkbox de Condiciones --- */}
+                                <div className="mt-4 p-3 border border-gray-300 bg-white rounded-md">
+                                    <label className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            name="aceptaCondiciones"
+                                            checked={datosMujer.aceptaCondiciones}
+                                            onChange={handleSimpleCheckbox}
+                                            className="form-checkbox h-5 w-5 text-indigo-600 rounded"
+                                        />
+                                        <span className="ml-3 text-sm text-gray-700">
+                                            Acepto las condiciones: que mis datos personales serán resguardados y sólo se utilizará la información con fines de estadística poblacional.
+                                        </span>
+                                    </label>
+                                </div>
+                                {/* --- FIN DE CÓDIGO AÑADIDO --- */}
+
                             </div>
 
                             {/* --- BOTONES DE ACCIÓN --- */}
@@ -964,7 +986,7 @@ const Formulario = () => {
                         </form>
                     </div>
                     
-                    {/* --- MODAL UNIFICADO (MODIFICADO) --- */}
+                    {/* --- MODAL UNIFICADO (Sin cambios) --- */}
                     {mostrarModal && (
                         <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4">
                             <div className="bg-white p-6 rounded-md shadow-2xl w-full max-w-lg">
@@ -993,10 +1015,8 @@ const Formulario = () => {
                                         <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                                             <p><strong>DNI:</strong> {datosMujer.dni}</p>
                                             <p><strong>Edad:</strong> {datosMujer.edad} años</p>
-                                            {/* --- CAMPO AÑADIDO --- */}
-                                            <p><strong>Ubicación:</strong> {datosMujer.ubicacion}</p>
                                             <p><strong>IMC:</strong> {imc.valor ? `${imc.valor} (${imc.clasificacion})` : 'No calculado'}</p>
-                                            <p className="col-span-2"><strong>Presión Arterial:</strong> {datosMujer.tensionSistolica}/{datosMujer.tensionDiastolica} mmHg</p>
+                                            <p><strong>Presión Arterial:</strong> {datosMujer.tensionSistolica}/{datosMujer.tensionDiastolica} mmHg</p>
                                             {datosMujer.infartoAcvTrombosis === 'Sí' && <p className="col-span-2 text-red-600"><strong>Antecedente Crítico:</strong> Infarto/ACV/Trombosis</p>}
                                             {datosMujer.enfermedadRenalInsuficiencia === 'Sí' && <p className="col-span-2 text-red-600"><strong>Antecedente Crítico:</strong> Enf. Renal / Insuf. Cardíaca</p>}
                                             <p><strong>Diabetes:</strong> {datosMujer.medicacionCondiciones.includes('Diabetes') ? 'Sí' : 'No'}</p>
